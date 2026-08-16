@@ -5,12 +5,12 @@ PWA mobile-first de la garde-robe de Trân, installable sur iPhone/Android, offl
 ## État actuel
 
 - **V0.1 Local Closet** ✅
-- **V0.2-A Canonical Airtable read sync** ✅ côté code, activation du secret Airtable requise une seule fois
-- **V0.2-B Secure write bridge** prochaine tranche
+- **V0.2-A Canonical Airtable read sync** ✅ actif
+- **V0.2-B Offline-first secure write bridge** ✅ côté code, activation du Worker requise
 
-La PWA conserve son stockage IndexedDB local. Les records Airtable sont importés via un snapshot versionné ; les favoris restent locaux. Les nouveaux articles créés depuis la PWA restent locaux jusqu'à V0.2-B.
+La PWA reste local-first : les ajouts, modifications et suppressions sont appliqués immédiatement dans IndexedDB, puis envoyés vers Airtable via une file de mutations dès que le réseau et le Worker sont disponibles. Les favoris restent locaux et ne génèrent aucune écriture Airtable.
 
-## Déploiement
+## Déploiement PWA
 
 Chaque push sur `main` déploie automatiquement :
 
@@ -18,7 +18,7 @@ Chaque push sur `main` déploie automatiquement :
 
 Sur iPhone : Safari → Partager → Ajouter à l'écran d'accueil.
 
-## Synchronisation Airtable V0.2-A
+## V0.2-A — Lecture Airtable canonique
 
 Le navigateur **ne contacte jamais Airtable avec un secret**. `.github/workflows/sync-airtable.yml` exécute `scripts/sync-airtable.mjs` côté GitHub Actions :
 
@@ -31,19 +31,44 @@ Le navigateur **ne contacte jamais Airtable avec un secret**. `.github/workflows
 
 Le workflow est exécutable à la demande et planifié toutes les 6 heures.
 
-### Configuration unique du secret
+Le secret GitHub `AIRTABLE_PAT` utilisé par ce workflow peut rester limité à `data.records:read` et à la base **Trân's Clothes**.
 
-Créer un Personal Access Token Airtable limité à la base **Trân's Clothes** avec le scope minimal `data.records:read`, puis :
+## V0.2-B — Écriture sécurisée et offline-first
 
-GitHub → `tran-closet-pwa` → Settings → Secrets and variables → Actions → New repository secret
+`worker/` contient le backend Cloudflare Worker. Le navigateur ne reçoit jamais le PAT Airtable.
 
-Nom : `AIRTABLE_PAT`
+Flux :
 
-Valeur : le token Airtable.
+`PWA / IndexedDB → file de mutations → Worker authentifié → Airtable`
 
-Ensuite : Actions → **Sync Airtable closet** → Run workflow.
+Le bridge prend en charge :
 
-> Ne jamais mettre le PAT dans `js/`, dans un commit, dans le manifest ou dans le navigateur.
+- création d'un article, avec photo ;
+- modification du nom, de la catégorie, des couleurs et des styles ;
+- suppression ;
+- retry automatique après retour du réseau ;
+- retry séparé de la photo si le record a été créé mais que l'upload de l'image a échoué ;
+- tombstones de suppression pour empêcher un vieux snapshot de ressusciter un article ;
+- protection des écritures récentes contre un snapshot plus ancien ;
+- création idempotente grâce au champ Airtable technique `Sync Mutation ID`, donc un retry réseau ne crée pas de doublon.
+
+Le remplacement de la photo d'un article existant est volontairement reporté à une tranche dédiée afin de conserver des sémantiques d'attachment sûres.
+
+### Secrets du Worker
+
+Le Worker doit recevoir :
+
+- `AIRTABLE_PAT` : PAT Airtable **avec droits d'écriture**, limité à la base **Trân's Clothes** ;
+- `CLOSET_SYNC_KEY` : secret privé partagé uniquement entre le Worker et l'appareil de Trân.
+
+Ces valeurs ne doivent jamais être commitées dans le repo.
+
+Une fois le Worker déployé, saisir une seule fois dans **Hồ sơ → Airtable** :
+
+- l'URL du Worker ;
+- la même `CLOSET_SYNC_KEY`.
+
+La configuration est ensuite conservée localement sur l'appareil.
 
 ## Développement local
 
@@ -54,6 +79,8 @@ python3 -m http.server 4173
 ```
 
 Puis ouvrir `http://localhost:4173`.
+
+Le Worker se trouve dans `worker/` et utilise Wrangler.
 
 ## Roadmap
 
