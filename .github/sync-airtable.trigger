@@ -1,1 +1,1 @@
-2026-08-16 — verify V0.3-B outfit read snapshot
+2026-08-16T23:40:00+02:00 — canonical outfit sync after real PWA migration
