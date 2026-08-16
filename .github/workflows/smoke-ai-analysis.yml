@@ -1,6 +1,6 @@
 name: Smoke Workers AI wardrobe analysis
 
-# V0.4-A.1 diagnostic rerun: expose Worker AI error body before asserting HTTP 200
+# V0.4-A.2 rerun after LLaVA byte-array fix
 on:
   push:
     branches: [main]
