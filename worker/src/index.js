@@ -7,7 +7,7 @@ const VISION_MODEL='@cf/llava-hf/llava-1.5-7b-hf';
 const AI_MODEL='@cf/meta/llama-4-scout-17b-16e-instruct';
 
 const TAXONOMY={
-  categories:['Shirt','Pant','Skirt','Dress','Combo','Coat','Bag','Shoes','Accessorie','Belt','Swimware','Eye Lens','Socks','Jumpsuit'],
+  categories:['Shirt','Pant','Skirt','Dress','Combo','Coat','Bag','Shoes','Accessorie','Belt','Swimware','Eye Lens','Socks','Jumpsuit','Underwear','Headwear','Umbrella'],
   colors:['Blue','Pink','Yellow','Black','Green','Purple','White','Grey','Orange','Red'],
   styles:['Hip-Hop','Sport','Casual','Classy','Cartoon','Old']
 };
@@ -139,42 +139,77 @@ function cleanAiResult(value={}){
   return {recognized:Boolean(value.recognized)&&Boolean(category),category,colors,styles,confidence,reason};
 }
 
-async function describeWardrobePhoto(photo,env){
+function reliabilityFor(analysis,{retryUsed=false}={}){
+  if(!analysis?.recognized)return 'low';
+  if(analysis.confidence<0.78)return 'low';
+  if(retryUsed||analysis.confidence<0.9)return 'medium';
+  return 'high';
+}
+
+function needsRetry(analysis){
+  return !analysis?.recognized || !analysis.category || analysis.confidence<0.78 || analysis.colors.length===0;
+}
+
+async function describeWardrobePhoto(photo,env,mode='primary'){
+  const modePrompt=mode==='crosscheck'
+    ? [
+        'Independently inspect the entire frame again. Do not trust any previous guess.',
+        'Wardrobe items include shoes or sneakers even when shown as a pair, underwear or boxer briefs, hats/caps/beanies, umbrellas, bags, belts, glasses, socks, neck pillows and normal clothing.',
+        'A pair of shoes counts as one wardrobe item. An unusual position or partial framing does not make an item invalid.',
+        'State the most likely object type, then only the dominant colors on that object itself.'
+      ]
+    : mode==='rescue'
+      ? [
+          'This is a rescue inspection because earlier passes were uncertain.',
+          'Search the full image carefully from top to bottom and side to side for ANY closet item or wearable accessory.',
+          'Explicitly consider: shoes/sneakers/boots/sandals, underwear/boxers/bras, hats/caps/beanies, umbrellas, bags, belts, eyewear, socks, swimsuits, jumpsuits, shirts, pants, skirts, dresses and coats.',
+          'Treat a matching pair, such as two shoes, as one wardrobe item.',
+          'Do not answer that there is no clothing merely because the object is an accessory.'
+        ]
+      : [
+          'Describe the single main wardrobe item visible in this image for another classifier.',
+          'A wardrobe item can be clothing OR a wearable/closet accessory such as shoes, underwear, headwear, umbrella, bag, belt, eyewear, socks or a neck pillow.',
+          'If two matching pieces form one item type, such as a pair of shoes, treat them as one wardrobe item.'
+        ];
+
   const vision=await env.AI.run(VISION_MODEL,{
     image:base64ToByteArray(photo.file),
     prompt:[
-      'Describe the single main wardrobe item visible in this image for another classifier.',
-      'Focus on what the object actually is, its shape, dominant colors, handles, straps, sleeves, legs, neckline or other visible identifying features.',
-      'A wardrobe item may also be a bag, shoes, belt, neck pillow or other accessory; do not assume it is clothing.',
-      'Ignore furniture, floor, hands, feet, hangers, packaging, text logos and background objects.',
-      'Do not invent unseen details. If no wardrobe item is clear, say that explicitly.'
+      ...modePrompt,
+      'Describe shape and identifying features such as handles, straps, sleeves, legs, waistband, brim, canopy, laces or neckline.',
+      'For colors, report ONLY dominant colors covering the main item. Ignore floor, furniture, walls, hangers, skin, shadows, reflections and tiny logos/trim.',
+      'Distinguish black or dark grey from dark green unless green is genuinely visible on the item.',
+      'Mention visible style cues only when clear: cartoon/character print, sports jersey/performance design, skate/streetwear cues, formal/elegant cues, or retro/vintage cues.',
+      'Ignore brand names and background text. Do not invent unseen details. If genuinely no wardrobe item is visible, say so explicitly.'
     ].join(' '),
-    max_tokens:220
+    max_tokens:260
   });
   const description=String(vision?.description??vision?.response??vision??'').trim();
   if(!description)throw new Error('Vision model returned no description');
-  return description.slice(0,1200);
+  return description.slice(0,1400);
 }
 
-async function analyzeItem(payload,env){
-  if(!env.AI)throw new Error('Workers AI binding is not configured');
-  const photo=parsePhoto(payload?.image,MAX_AI_IMAGE_BYTES);
-  if(!photo)throw new Error('Missing image');
-
-  const visionDescription=await describeWardrobePhoto(photo,env);
+async function classifyDescriptions(descriptions,env){
+  const numbered=descriptions.map((text,index)=>`VISION PASS ${index+1}:\n${text}`).join('\n\n');
   const prompt=[
-    'You classify a private wardrobe item using ONLY the visual description produced by a vision model below.',
-    'Do not add details that are absent from that description.',
+    'You classify ONE private wardrobe item using ONLY the independent visual descriptions below.',
+    'The descriptions may disagree. Prefer specific object evidence over a vague/no-item pass; lower confidence when there is a genuine conflict.',
     `Allowed category values: ${TAXONOMY.categories.join(', ')}.`,
-    'Use Accessorie for wardrobe accessories that do not fit a more specific allowed category, including neck pillows.',
-    `Allowed color values: ${TAXONOMY.colors.join(', ')}. Choose up to 3 dominant visible colors.`,
-    `Allowed style values: ${TAXONOMY.styles.join(', ')}. Choose up to 2 only when visually justified; an empty styles array is allowed.`,
-    'Set recognized=false when the description does not clearly identify a wardrobe item.',
-    'confidence is your confidence in the classification from 0 to 1.',
-    'reason must be one short Vietnamese sentence based only on the visual description.',
+    'Category rules:',
+    '- Underwear = boxer briefs, briefs, panties, bras, lingerie or similar undergarments. Do NOT map underwear to Pant.',
+    '- Headwear = caps, hats, beanies and similar headwear.',
+    '- Umbrella = umbrellas or parasols.',
+    '- Shoes = shoes, sneakers, boots, sandals or similar footwear; a pair still maps to Shoes.',
+    '- Accessorie = wardrobe accessories without a more specific category, including neck pillows or jewelry-like items.',
+    '- Pant is for trousers/shorts/pants, not underwear.',
+    `Allowed color values: ${TAXONOMY.colors.join(', ')}. Choose up to 3 DOMINANT colors of the item only. Ignore background, floor, furniture, hanger, skin, shadows and tiny accents.`,
+    `Allowed style values: ${TAXONOMY.styles.join(', ')}. Choose up to 2 only when visibly justified; an empty styles array is allowed.`,
+    'Style rules: Cartoon for visible cartoon/character/novelty prints; Sport for jerseys, athletic/performance wear or clearly athletic footwear; Hip-Hop for clear streetwear/skate/urban cues; Classy for formal/elegant design; Old only for genuinely vintage/retro cues; Casual for relaxed everyday design and it may be combined with Cartoon, Sport or Hip-Hop when both are justified.',
+    'Set recognized=false only when the descriptions genuinely fail to identify any wardrobe item.',
+    'confidence is confidence in the final classification from 0 to 1. Do not use 1.0 when the vision passes conflict materially.',
+    'reason must be one short Vietnamese sentence grounded only in the descriptions.',
     '',
-    'VISION DESCRIPTION:',
-    visionDescription
+    numbered
   ].join('\n');
 
   const result=await env.AI.run(AI_MODEL,{
@@ -183,11 +218,39 @@ async function analyzeItem(payload,env){
       {role:'user',content:prompt}
     ],
     guided_json:AI_SCHEMA,
-    max_tokens:240,
-    temperature:0.1
+    max_tokens:280,
+    temperature:0.05
   });
-  const parsed=parseAiResponse(result?.response??result);
-  return {analysis:cleanAiResult(parsed),visionDescription};
+  return cleanAiResult(parseAiResponse(result?.response??result));
+}
+
+async function analyzeItem(payload,env){
+  if(!env.AI)throw new Error('Workers AI binding is not configured');
+  const photo=parsePhoto(payload?.image,MAX_AI_IMAGE_BYTES);
+  if(!photo)throw new Error('Missing image');
+
+  const descriptions=await Promise.all([
+    describeWardrobePhoto(photo,env,'primary'),
+    describeWardrobePhoto(photo,env,'crosscheck')
+  ]);
+  let analysis=await classifyDescriptions(descriptions,env);
+  let retryUsed=false;
+
+  if(needsRetry(analysis)){
+    retryUsed=true;
+    descriptions.push(await describeWardrobePhoto(photo,env,'rescue'));
+    analysis=await classifyDescriptions(descriptions,env);
+  }
+
+  const reliability=reliabilityFor(analysis,{retryUsed});
+  return {
+    analysis,
+    descriptions,
+    visionDescription:descriptions.join('\n---\n'),
+    retryUsed,
+    attempts:descriptions.length,
+    reliability
+  };
 }
 
 async function applyMutation(mutation,env){
@@ -279,7 +342,16 @@ export default {
       let payload;try{payload=await request.json();}catch{return json({error:'Invalid JSON'},400,headers);}
       try{
         const result=await analyzeItem(payload,env);
-        return json({ok:true,analysis:result.analysis,model:AI_MODEL,visionModel:VISION_MODEL,visionSummary:result.visionDescription},200,headers);
+        return json({
+          ok:true,
+          analysis:result.analysis,
+          reliability:result.reliability,
+          retryUsed:result.retryUsed,
+          attempts:result.attempts,
+          model:AI_MODEL,
+          visionModel:VISION_MODEL,
+          visionSummary:result.visionDescription
+        },200,headers);
       }catch(error){return json({ok:false,error:String(error?.message||error)},502,headers);}
     }
     if(!env.AIRTABLE_PAT)return json({error:'Worker Airtable secret not configured'},503,headers);
