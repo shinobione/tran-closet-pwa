@@ -18,32 +18,37 @@ jobs:
       - name: Checkout main
         uses: actions/checkout@v6
 
-      - name: Analyze canonical Neck Poca photo
+      - name: Analyze three canonical wardrobe photos
         env:
           WORKER_URL: https://tran-closet-sync.jerryquinet.workers.dev
           CLOSET_SYNC_KEY: ${{ secrets.CLOSET_SYNC_KEY }}
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          import base64, json
+
+          analyze_one() {
+            LABEL="$1"
+            FILE="$2"
+            python3 - "$FILE" <<'PY'
+          import base64, json, sys
           from pathlib import Path
-          image = Path('assets/items/recLjpxC6kj5pGEEj.jpg').read_bytes()
+          image = Path(sys.argv[1]).read_bytes()
           payload = {'image': 'data:image/jpeg;base64,' + base64.b64encode(image).decode('ascii')}
           Path('/tmp/ai-payload.json').write_text(json.dumps(payload), encoding='utf-8')
           PY
 
-          STATUS="$(curl --silent --show-error --output /tmp/ai-result.json --write-out '%{http_code}' \
-            -X POST \
-            -H "Authorization: Bearer $CLOSET_SYNC_KEY" \
-            -H 'Content-Type: application/json' \
-            --data-binary @/tmp/ai-payload.json \
-            "${WORKER_URL%/}/v1/analyze-item")"
-          echo "HTTP $STATUS"
-          test "$STATUS" = "200"
+            STATUS="$(curl --silent --show-error --output /tmp/ai-result.json --write-out '%{http_code}' \
+              -X POST \
+              -H "Authorization: Bearer $CLOSET_SYNC_KEY" \
+              -H 'Content-Type: application/json' \
+              --data-binary @/tmp/ai-payload.json \
+              "${WORKER_URL%/}/v1/analyze-item")"
+            echo "=== $LABEL · HTTP $STATUS ==="
+            test "$STATUS" = "200"
 
-          python3 - <<'PY'
-          import json
+            python3 - "$LABEL" <<'PY'
+          import json, sys
           from pathlib import Path
+          label = sys.argv[1]
           body = json.loads(Path('/tmp/ai-result.json').read_text(encoding='utf-8'))
           assert body.get('ok') is True, body
           a = body.get('analysis') or {}
@@ -60,5 +65,10 @@ jobs:
           confidence = a.get('confidence')
           assert isinstance(confidence, (int, float)) and 0 <= confidence <= 1, a
           assert isinstance(a.get('reason'), str) and len(a['reason']) <= 180, a
-          print(json.dumps({'ok': True, 'model': body.get('model'), 'analysis': a}, ensure_ascii=False, indent=2))
+          print(json.dumps({'item': label, 'model': body.get('model'), 'analysis': a}, ensure_ascii=False, indent=2))
           PY
+          }
+
+          analyze_one 'Neck Poca' 'assets/items/recLjpxC6kj5pGEEj.jpg'
+          analyze_one 'Melody Bag' 'assets/items/recrtzfBVgQOYfAQN.jpg'
+          analyze_one 'Tui Xach' 'assets/items/recZFFx4HaeVHOrTc.jpg'
