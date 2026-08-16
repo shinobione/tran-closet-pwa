@@ -40,8 +40,18 @@ jobs:
         run: |
           set -euo pipefail
           test -n "$WORKER_URL"
-          BODY="$(curl --fail --silent --show-error \
-            -H "Authorization: Bearer $CLOSET_SYNC_KEY" \
-            "${WORKER_URL%/}/health")"
-          echo "$BODY" | grep -q '"ok":true'
-          echo "Worker health verified at ${WORKER_URL%/}/health"
+          HEALTH_URL="${WORKER_URL%/}/health"
+          for attempt in $(seq 1 12); do
+            STATUS="$(curl --silent --show-error --output /tmp/worker-health.json --write-out '%{http_code}' \
+              -H "Authorization: Bearer $CLOSET_SYNC_KEY" \
+              "$HEALTH_URL" || true)"
+            if [ "$STATUS" = "200" ] && grep -q '"ok":true' /tmp/worker-health.json; then
+              echo "Worker health verified at $HEALTH_URL on attempt $attempt"
+              exit 0
+            fi
+            echo "Worker health not ready yet (HTTP $STATUS, attempt $attempt/12); retrying in 5s..."
+            sleep 5
+          done
+          echo "Worker health verification failed after 12 attempts."
+          cat /tmp/worker-health.json || true
+          exit 1
