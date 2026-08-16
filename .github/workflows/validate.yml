@@ -44,6 +44,7 @@ jobs:
           test -f scripts/sync-airtable.mjs
           test -f worker/src/index.js
           test -f worker/wrangler.toml
+          test -f .github/workflows/deploy-worker.yml
           test -f icons/apple-touch-icon.png
           test -f icons/icon-192.png
           test -f icons/icon-512.png
@@ -54,13 +55,17 @@ jobs:
           grep -q 'CLOSET_SYNC_KEY' worker/src/index.js
           grep -q 'AIRTABLE_PAT' worker/src/index.js
           grep -q 'AIRTABLE_PAT' .github/workflows/sync-airtable.yml
+          grep -q 'CLOUDFLARE_API_TOKEN' .github/workflows/deploy-worker.yml
+          grep -q 'CLOUDFLARE_ACCOUNT_ID' .github/workflows/deploy-worker.yml
+          grep -q 'AIRTABLE_PAT_WRITE' .github/workflows/deploy-worker.yml
+          grep -q 'CLOSET_SYNC_KEY' .github/workflows/deploy-worker.yml
       - name: Guard against committed secrets
         run: |
-          if grep -R --exclude='sync-airtable.yml' --exclude='index.js' --exclude-dir='.git' -E 'pat[A-Za-z0-9._-]{20,}' .; then
+          if grep -R --exclude='sync-airtable.yml' --exclude='deploy-worker.yml' --exclude='index.js' --exclude-dir='.git' -E 'pat[A-Za-z0-9._-]{20,}' .; then
             echo 'Potential Airtable PAT found in committed files.'
             exit 1
           fi
-          if grep -R --exclude-dir='.git' -E 'CLOSET_SYNC_KEY[[:space:]]*=[[:space:]]*[A-Za-z0-9_-]{16,}' .; then
+          if grep -R --exclude='deploy-worker.yml' --exclude-dir='.git' -E 'CLOSET_SYNC_KEY[[:space:]]*=[[:space:]]*[A-Za-z0-9_-]{16,}' .; then
             echo 'Potential hard-coded closet sync key found.'
             exit 1
           fi

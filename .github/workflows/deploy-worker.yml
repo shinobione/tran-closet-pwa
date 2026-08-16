@@ -1,0 +1,47 @@
+name: Deploy Airtable write Worker
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/worker-deploy.trigger'
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v6
+
+      - name: Deploy Worker and Worker secrets
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: worker
+          command: deploy
+          secrets: |
+            AIRTABLE_PAT
+            CLOSET_SYNC_KEY
+        env:
+          AIRTABLE_PAT: ${{ secrets.AIRTABLE_PAT_WRITE }}
+          CLOSET_SYNC_KEY: ${{ secrets.CLOSET_SYNC_KEY }}
+
+      - name: Verify authenticated Worker health
+        env:
+          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
+          CLOSET_SYNC_KEY: ${{ secrets.CLOSET_SYNC_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$WORKER_URL"
+          BODY="$(curl --fail --silent --show-error \
+            -H "Authorization: Bearer $CLOSET_SYNC_KEY" \
+            "${WORKER_URL%/}/health")"
+          echo "$BODY" | grep -q '"ok":true'
+          echo "Worker health verified at ${WORKER_URL%/}/health"
