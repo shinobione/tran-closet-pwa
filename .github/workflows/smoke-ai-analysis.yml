@@ -1,6 +1,6 @@
 name: Smoke Workers AI wardrobe analysis
 
-# V0.4-A.1 rerun after explicit LLaVA vision stage
+# V0.4-A.1 diagnostic rerun: expose Worker AI error body before asserting HTTP 200
 on:
   push:
     branches: [main]
@@ -44,7 +44,19 @@ jobs:
               --data-binary @/tmp/ai-payload.json \
               "${WORKER_URL%/}/v1/analyze-item")"
             echo "=== $LABEL · HTTP $STATUS ==="
-            test "$STATUS" = "200"
+            if [ "$STATUS" != "200" ]; then
+              python3 - <<'PY'
+          import json
+          from pathlib import Path
+          raw = Path('/tmp/ai-result.json').read_text(encoding='utf-8', errors='replace')
+          try:
+              body = json.loads(raw)
+              print(json.dumps(body, ensure_ascii=False, indent=2))
+          except Exception:
+              print(raw[:2000])
+          PY
+              return 1
+            fi
 
             python3 - "$LABEL" <<'PY'
           import json, sys
