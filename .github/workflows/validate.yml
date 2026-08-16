@@ -26,6 +26,7 @@ jobs:
           node --check js/airtable-bridge.js
           node --check js/airtable-snapshot.js
           node --check js/sync-client.js
+          node --check js/sync-diagnostics.js
           node --check scripts/sync-airtable.mjs
           node --check worker/src/index.js
           node --check sw.js
@@ -37,10 +38,12 @@ jobs:
         run: |
           test -f index.html
           test -f css/app.css
+          test -f css/outfits.css
           test -f js/bootstrap.js
           test -f js/airtable-bridge.js
           test -f js/airtable-snapshot.js
           test -f js/sync-client.js
+          test -f js/sync-diagnostics.js
           test -f scripts/sync-airtable.mjs
           test -f worker/src/index.js
           test -f worker/wrangler.toml
@@ -49,9 +52,13 @@ jobs:
           test -f icons/icon-192.png
           test -f icons/icon-512.png
           grep -q 'manifest.webmanifest' index.html
-          grep -q 'bootstrap.js' index.html
+          grep -q 'bootstrap.js?v=0.3.0' index.html
+          grep -q 'outfits.css?v=0.3.0' index.html
           grep -q 'serviceWorker' js/app.js
           grep -q 'queueMutation' js/app.js
+          grep -q 'getAllOutfits' js/app.js
+          grep -q "STORE_OUTFITS='outfits'" js/db.js
+          grep -q 'tran-closet-v0.3.0' sw.js
           grep -q 'CLOSET_SYNC_KEY' worker/src/index.js
           grep -q 'AIRTABLE_PAT' worker/src/index.js
           grep -q 'AIRTABLE_PAT' .github/workflows/sync-airtable.yml
