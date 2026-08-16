@@ -7,16 +7,15 @@ Dernière mise à jour : 2026-08-16
 - PWA : `https://shinobione.github.io/tran-closet-pwa/`
 - Cloudflare Worker : `https://tran-closet-sync.jerryquinet.workers.dev`
 - branche canonique : `main`
-- version production vérifiée : `v0.3.1`
-- stockage local production : IndexedDB `tran-closet`, schema version 3
+- version production vérifiée : `v0.3.2`
+- stockage local production : IndexedDB `tran-closet`, schema version 4
 
 ## Phase
 
 - **dernière phase close : V0.2 — Airtable Bridge**
 - **phase active : V0.3 — Outfits**
-- **dernière slice vérifiée : V0.3-A.1 — Scalable Outfit Picker**
-- **candidate active : V0.3-B — Canonical Outfit Persistence / v0.3.2**
-- prochaine tranche après vérification : **V0.3-C — Outfit Presentation**
+- **dernière slice vérifiée : V0.3-B — Canonical Outfit Persistence**
+- prochaine tranche : **V0.3-C — Outfit Presentation**
 
 ## V0.2 — État vérifié
 
@@ -66,9 +65,9 @@ Le sélecteur d'articles est conçu pour un catalogue large (100+ vêtements) :
 - grille filtrée à scroll interne
 - bouton de sauvegarde sticky dans le formulaire Outfit
 
-## V0.3-B — Candidate v0.3.2
+## V0.3-B — CLOSED / VERIFIED PROD
 
-Schéma canonique créé dans la même base Airtable :
+Schéma canonique dans la même base Airtable :
 
 - table `Trân's Outfits` : `tblhtL2UlsgCAh6E7`
 - `Name`
@@ -80,7 +79,7 @@ Schéma canonique créé dans la même base Airtable :
 - `Outfit ID` : UUID stable et clé d'idempotence
 - `Created At` / `Updated At` : timestamps ISO-8601
 
-Architecture candidate :
+Architecture vérifiée :
 
 - IndexedDB schema v4 avec queue `outfitMutations` séparée
 - `putOutfit()` / `deleteOutfit()` queue automatiquement les writes sans modifier l'UI
@@ -93,14 +92,19 @@ Architecture candidate :
 - diagnostic v0.3.2 expose séparément queues vêtements/outfits
 - le bridge vêtements existant reste isolé
 
-À vérifier avant clôture V0.3-B :
+Vérifications production réalisées le 16/08/2026 :
 
-1. CI PR verte
-2. Worker v0.3.2 déployé + smoke CREATE/UPDATE/DELETE Outfit
-3. snapshot Outfit GitHub Actions lisible avec le PAT read-only existant
-4. migration réelle de l'outfit local existant vers Airtable sans doublon
-5. reread snapshot → `synced`
-6. test update + delete Outfit depuis la PWA
+1. CI V0.3-B verte
+2. Worker v0.3.2 déployé avec health check authentifié
+3. smoke Worker Outfit CREATE → UPDATE → DELETE avec deux vrais linked records
+4. snapshot Outfit GitHub Actions lu avec le PAT read-only existant
+5. migration automatique du vrai outfit local `test` vers Airtable sans doublon
+6. reread snapshot du même UUID / record Airtable en état `synced`
+7. UPDATE réel depuis la PWA sur le même record sans duplication
+8. DELETE réel depuis la PWA → Airtable revenu à 0 outfit
+9. snapshot post-delete à `recordCount: 0`, aucune résurrection
+
+**V0.3-B est close et vérifiée en production.**
 
 ## Deferred / connus
 
