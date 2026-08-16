@@ -6,7 +6,8 @@ const FIELDS={
   category:'fldFgbepFfRYzQiSf',
   colors:'fld9c3S0zKQ1AaMWL',
   styles:'fldzFgTZ5iiakQBcy',
-  photo:'fldgISbij3vO9IvjM'
+  photo:'fldgISbij3vO9IvjM',
+  syncMutationId:'flduWxlbNrsksgjNa'
 };
 
 function cors(origin,env){
@@ -61,9 +62,15 @@ async function uploadPhoto(recordId,dataUrl,env){
 async function applyMutation(mutation,env){
   const operation=mutation?.operation;
   if(operation==='create'){
-    const body=await airtable('',env,{method:'POST',body:JSON.stringify({records:[{fields:fieldsFromPayload(mutation.payload)}],typecast:false})});
+    if(!mutation?.id)throw new Error('Missing mutation id for create');
+    const fields={...fieldsFromPayload(mutation.payload),[FIELDS.syncMutationId]:mutation.id};
+    const body=await airtable('',env,{method:'PATCH',body:JSON.stringify({
+      performUpsert:{fieldsToMergeOn:[FIELDS.syncMutationId]},
+      records:[{fields}],
+      typecast:false
+    })});
     const recordId=body?.records?.[0]?.id;
-    if(!recordId)throw new Error('Airtable create returned no record id');
+    if(!recordId)throw new Error('Airtable upsert returned no record id');
     if(mutation.payload?.photo){
       try{await uploadPhoto(recordId,mutation.payload.photo,env);}
       catch(error){return {mutationId:mutation.id,ok:false,partial:true,airtableRecordId:recordId,retryOperation:'photo',error:String(error?.message||error)};}
