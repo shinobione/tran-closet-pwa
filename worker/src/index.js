@@ -106,11 +106,11 @@ function parsePhoto(dataUrl,maxBytes=MAX_ATTACHMENT_BYTES){
   return {contentType,file,dataUrl,estimatedBytes,filename:`tran-closet-${Date.now()}.${contentType.includes('png')?'png':'jpg'}`};
 }
 
-function base64ToArrayBuffer(value){
+function base64ToByteArray(value){
   const binary=atob(value);
-  const bytes=new Uint8Array(binary.length);
+  const bytes=new Array(binary.length);
   for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
-  return bytes.buffer;
+  return bytes;
 }
 
 async function uploadPhoto(recordId,dataUrl,env){
@@ -141,7 +141,7 @@ function cleanAiResult(value={}){
 
 async function describeWardrobePhoto(photo,env){
   const vision=await env.AI.run(VISION_MODEL,{
-    image:base64ToArrayBuffer(photo.file),
+    image:base64ToByteArray(photo.file),
     prompt:[
       'Describe the single main wardrobe item visible in this image for another classifier.',
       'Focus on what the object actually is, its shape, dominant colors, handles, straps, sleeves, legs, neckline or other visible identifying features.',
