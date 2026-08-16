@@ -25,28 +25,42 @@ jobs:
           node --check js/bootstrap.js
           node --check js/airtable-bridge.js
           node --check js/airtable-snapshot.js
+          node --check js/sync-client.js
           node --check scripts/sync-airtable.mjs
+          node --check worker/src/index.js
           node --check sw.js
-      - name: Check manifest JSON
-        run: python -m json.tool manifest.webmanifest > /dev/null
-      - name: Check PWA shell files
+      - name: Check JSON and manifest
+        run: |
+          python -m json.tool manifest.webmanifest > /dev/null
+          python -m json.tool worker/package.json > /dev/null
+      - name: Check PWA and sync shell files
         run: |
           test -f index.html
           test -f css/app.css
           test -f js/bootstrap.js
           test -f js/airtable-bridge.js
           test -f js/airtable-snapshot.js
+          test -f js/sync-client.js
           test -f scripts/sync-airtable.mjs
+          test -f worker/src/index.js
+          test -f worker/wrangler.toml
           test -f icons/apple-touch-icon.png
           test -f icons/icon-192.png
           test -f icons/icon-512.png
           grep -q 'manifest.webmanifest' index.html
           grep -q 'bootstrap.js' index.html
           grep -q 'serviceWorker' js/app.js
+          grep -q 'queueMutation' js/app.js
+          grep -q 'CLOSET_SYNC_KEY' worker/src/index.js
+          grep -q 'AIRTABLE_PAT' worker/src/index.js
           grep -q 'AIRTABLE_PAT' .github/workflows/sync-airtable.yml
-      - name: Guard against committed Airtable PAT values
+      - name: Guard against committed secrets
         run: |
-          if grep -R --exclude='sync-airtable.yml' --exclude-dir='.git' -E 'pat[A-Za-z0-9._-]{20,}' .; then
+          if grep -R --exclude='sync-airtable.yml' --exclude='index.js' --exclude-dir='.git' -E 'pat[A-Za-z0-9._-]{20,}' .; then
             echo 'Potential Airtable PAT found in committed files.'
+            exit 1
+          fi
+          if grep -R --exclude-dir='.git' -E 'CLOSET_SYNC_KEY[[:space:]]*=[[:space:]]*[A-Za-z0-9_-]{16,}' .; then
+            echo 'Potential hard-coded closet sync key found.'
             exit 1
           fi

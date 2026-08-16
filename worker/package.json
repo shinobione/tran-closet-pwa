@@ -1,0 +1,8 @@
+{
+  "name": "tran-closet-sync-worker",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "wrangler": "^4.30.0"
+  }
+}
