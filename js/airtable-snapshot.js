@@ -1,10 +1,28 @@
 export const AIRTABLE_SNAPSHOT = {
-  "syncedAt": "2026-08-16T17:04:08.111Z",
+  "syncedAt": "2026-08-16T18:47:08.959Z",
   "source": "airtable",
   "baseId": "appw8WNvdDuXUgYvN",
   "tableId": "tblKdCi4MI4AH26y8",
-  "recordCount": 2,
+  "recordCount": 3,
   "items": [
+    {
+      "id": "airtable-recLjpxC6kj5pGEEj",
+      "airtableRecordId": "recLjpxC6kj5pGEEj",
+      "name": "Neck Poca",
+      "category": "Accessorie",
+      "colors": [
+        "Blue"
+      ],
+      "styles": [
+        "Casual"
+      ],
+      "photo": "./assets/items/recLjpxC6kj5pGEEj.jpg",
+      "favorite": false,
+      "source": "airtable",
+      "syncState": "synced",
+      "createdAt": "2026-08-16T18:42:42.000Z",
+      "updatedAt": "2026-08-16T18:42:42.000Z"
+    },
     {
       "id": "airtable-recZFFx4HaeVHOrTc",
       "airtableRecordId": "recZFFx4HaeVHOrTc",
