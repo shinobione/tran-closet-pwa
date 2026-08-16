@@ -118,7 +118,7 @@ function mount(){
     <button type="button" class="secondary-button ai-analyze" disabled>✦ Phân tích bằng AI</button>
     <div class="ai-output"></div>
     <p class="ai-applied" hidden></p>
-    <small class="ai-privacy">Ảnh chỉ được gửi au Worker sécurisé khi Trân appuie sur ce bouton.</small>`;
+    <small class="ai-privacy">Ảnh chỉ được gửi đến Worker bảo mật khi Trân chủ động bấm nút phân tích.</small>`;
 
   photoPreview.after(card);
   const analyze=card.querySelector('.ai-analyze');
