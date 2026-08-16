@@ -3,6 +3,7 @@ const CLOTHES_TABLE_ID='tblKdCi4MI4AH26y8';
 const OUTFITS_TABLE_ID='tblhtL2UlsgCAh6E7';
 const MAX_ATTACHMENT_BYTES=5_000_000;
 const MAX_AI_IMAGE_BYTES=2_500_000;
+const VISION_MODEL='@cf/llava-hf/llava-1.5-7b-hf';
 const AI_MODEL='@cf/meta/llama-4-scout-17b-16e-instruct';
 
 const TAXONOMY={
@@ -105,6 +106,13 @@ function parsePhoto(dataUrl,maxBytes=MAX_ATTACHMENT_BYTES){
   return {contentType,file,dataUrl,estimatedBytes,filename:`tran-closet-${Date.now()}.${contentType.includes('png')?'png':'jpg'}`};
 }
 
+function base64ToArrayBuffer(value){
+  const binary=atob(value);
+  const bytes=new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+  return bytes.buffer;
+}
+
 async function uploadPhoto(recordId,dataUrl,env){
   const photo=parsePhoto(dataUrl);if(!photo)return;
   const response=await fetch(`https://content.airtable.com/v0/${BASE_ID}/${recordId}/${FIELDS.photo}/uploadAttachment`,{
@@ -131,19 +139,42 @@ function cleanAiResult(value={}){
   return {recognized:Boolean(value.recognized)&&Boolean(category),category,colors,styles,confidence,reason};
 }
 
+async function describeWardrobePhoto(photo,env){
+  const vision=await env.AI.run(VISION_MODEL,{
+    image:base64ToArrayBuffer(photo.file),
+    prompt:[
+      'Describe the single main wardrobe item visible in this image for another classifier.',
+      'Focus on what the object actually is, its shape, dominant colors, handles, straps, sleeves, legs, neckline or other visible identifying features.',
+      'A wardrobe item may also be a bag, shoes, belt, neck pillow or other accessory; do not assume it is clothing.',
+      'Ignore furniture, floor, hands, feet, hangers, packaging, text logos and background objects.',
+      'Do not invent unseen details. If no wardrobe item is clear, say that explicitly.'
+    ].join(' '),
+    max_tokens:220
+  });
+  const description=String(vision?.description??vision?.response??vision??'').trim();
+  if(!description)throw new Error('Vision model returned no description');
+  return description.slice(0,1200);
+}
+
 async function analyzeItem(payload,env){
   if(!env.AI)throw new Error('Workers AI binding is not configured');
   const photo=parsePhoto(payload?.image,MAX_AI_IMAGE_BYTES);
   if(!photo)throw new Error('Missing image');
+
+  const visionDescription=await describeWardrobePhoto(photo,env);
   const prompt=[
-    'You are a visual wardrobe classifier for a private closet app.',
-    'Analyze only the main clothing item or accessory in the image. Ignore furniture, hands, feet, floor, hangers, packaging and background objects.',
+    'You classify a private wardrobe item using ONLY the visual description produced by a vision model below.',
+    'Do not add details that are absent from that description.',
     `Allowed category values: ${TAXONOMY.categories.join(', ')}.`,
+    'Use Accessorie for wardrobe accessories that do not fit a more specific allowed category, including neck pillows.',
     `Allowed color values: ${TAXONOMY.colors.join(', ')}. Choose up to 3 dominant visible colors.`,
-    `Allowed style values: ${TAXONOMY.styles.join(', ')}. Choose up to 2 only when visually justified.`,
-    'Set recognized=false when there is no clearly identifiable wardrobe item.',
-    'confidence is your overall visual confidence from 0 to 1.',
-    'reason must be one short Vietnamese sentence explaining the visible clues. Do not invent brand, material or unseen details.'
+    `Allowed style values: ${TAXONOMY.styles.join(', ')}. Choose up to 2 only when visually justified; an empty styles array is allowed.`,
+    'Set recognized=false when the description does not clearly identify a wardrobe item.',
+    'confidence is your confidence in the classification from 0 to 1.',
+    'reason must be one short Vietnamese sentence based only on the visual description.',
+    '',
+    'VISION DESCRIPTION:',
+    visionDescription
   ].join('\n');
 
   const result=await env.AI.run(AI_MODEL,{
@@ -151,13 +182,12 @@ async function analyzeItem(payload,env){
       {role:'system',content:'Return only the requested structured wardrobe classification.'},
       {role:'user',content:prompt}
     ],
-    image:photo.dataUrl,
     guided_json:AI_SCHEMA,
     max_tokens:240,
     temperature:0.1
   });
   const parsed=parseAiResponse(result?.response??result);
-  return cleanAiResult(parsed);
+  return {analysis:cleanAiResult(parsed),visionDescription};
 }
 
 async function applyMutation(mutation,env){
@@ -247,8 +277,10 @@ export default {
     }
     if(url.pathname==='/v1/analyze-item'&&request.method==='POST'){
       let payload;try{payload=await request.json();}catch{return json({error:'Invalid JSON'},400,headers);}
-      try{return json({ok:true,analysis:await analyzeItem(payload,env),model:AI_MODEL},200,headers);}
-      catch(error){return json({ok:false,error:String(error?.message||error)},502,headers);}
+      try{
+        const result=await analyzeItem(payload,env);
+        return json({ok:true,analysis:result.analysis,model:AI_MODEL,visionModel:VISION_MODEL,visionSummary:result.visionDescription},200,headers);
+      }catch(error){return json({ok:false,error:String(error?.message||error)},502,headers);}
     }
     if(!env.AIRTABLE_PAT)return json({error:'Worker Airtable secret not configured'},503,headers);
     if(request.method!=='POST'||!['/v1/mutations','/v1/outfit-mutations'].includes(url.pathname))return json({error:'Not found'},404,headers);
