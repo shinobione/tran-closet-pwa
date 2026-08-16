@@ -7,3 +7,4 @@ try{
 }
 
 await import('./app.js');
+await import('./sync-diagnostics.js');
