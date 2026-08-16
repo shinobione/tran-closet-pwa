@@ -1,5 +1,5 @@
-const CACHE = 'tran-closet-v0.3.3';
-const APP_SHELL = ['./','./index.html','./manifest.webmanifest','./css/app.css','./css/outfits.css?v=0.3.0','./css/outfit-picker.css?v=0.3.1','./css/outfit-presentation.css?v=0.3.3','./js/bootstrap.js?v=0.3.3','./js/airtable-bridge.js','./js/airtable-snapshot.js','./js/airtable-outfit-bridge.js','./js/airtable-outfit-snapshot.js','./js/app.js?v=0.3.3','./js/outfit-picker.js?v=0.3.3','./js/outfit-sync-client.js?v=0.3.3','./js/outfit-presentation.js?v=0.3.3','./js/db.js','./js/data.js','./js/sync-client.js?v=0.3.2','./js/sync-diagnostics.js?v=0.3.3','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'];
+const CACHE = 'tran-closet-v0.4.0';
+const APP_SHELL = ['./','./index.html','./manifest.webmanifest','./css/app.css','./css/outfits.css?v=0.4.0','./css/outfit-picker.css?v=0.4.0','./css/outfit-presentation.css?v=0.4.0','./css/item-ai-assistant.css?v=0.4.0','./js/bootstrap.js?v=0.4.0','./js/airtable-bridge.js','./js/airtable-snapshot.js','./js/airtable-outfit-bridge.js','./js/airtable-outfit-snapshot.js','./js/app.js?v=0.4.0','./js/outfit-picker.js?v=0.4.0','./js/outfit-sync-client.js?v=0.4.0','./js/outfit-presentation.js?v=0.4.0','./js/item-ai-assistant.js?v=0.4.0','./js/db.js','./js/data.js','./js/sync-client.js?v=0.4.0','./js/sync-diagnostics.js?v=0.4.0','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(APP_SHELL)));

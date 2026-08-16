@@ -8,6 +8,7 @@ Dernière mise à jour : 2026-08-17
 - Cloudflare Worker : `https://tran-closet-sync.jerryquinet.workers.dev`
 - branche canonique : `main`
 - version production vérifiée : `v0.3.3`
+- candidate active : `v0.4.0` sur `v0.4-a-ai-photo-analysis`
 - stockage local production : IndexedDB `tran-closet`, schema version 4
 
 ## Phase
@@ -15,7 +16,7 @@ Dernière mise à jour : 2026-08-17
 - **dernière phase close : V0.3 — Outfits**
 - **phase active : V0.4 — Smart Closet**
 - **dernière slice vérifiée : V0.3-C — Outfit Presentation**
-- prochaine tranche : **V0.4-A — analyse photo assistée**
+- **candidate active : V0.4-A — analyse photo assistée**
 
 ## V0.2 — État vérifié
 
@@ -132,16 +133,45 @@ Vérifications production :
 
 **V0.3 est désormais close.**
 
+## V0.4-A — CANDIDATE v0.4.0
+
+Objectif : assister la création d'un vêtement à partir de sa photo sans donner à l'IA le droit de modifier ou sauvegarder les données.
+
+Contrat candidat :
+
+- moteur : Cloudflare Workers AI via binding `env.AI`
+- modèle : `@cf/meta/llama-4-scout-17b-16e-instruct`
+- endpoint authentifié séparé : `POST /v1/analyze-item`
+- aucune nouvelle clé IA exposée au navigateur
+- l'image n'est envoyée à l'IA qu'après action explicite `Phân tích bằng AI`
+- une copie réduite à 1024 px / JPEG est utilisée pour l'analyse ; la photo originale du formulaire n'est pas remplacée
+- sortie guidée et revalidée strictement contre la taxonomie existante
+- proposition limitée à `category`, jusqu'à 3 `colors`, jusqu'à 2 `styles`, confiance et justification courte
+- aucun nom de marque, matériau ou détail non visible n'est accepté comme donnée canonique
+- l'analyse ne pré-remplit rien automatiquement
+- bouton séparé `Áp dụng gợi ý` pour appliquer la proposition au formulaire
+- après application, tous les champs restent éditables
+- aucune écriture IndexedDB/Airtable n'arrive avant le bouton normal `Lưu vào tủ đồ`
+- aucun changement du schéma IndexedDB, des queues, d'Airtable ou du CRUD historique
+
+Gates avant clôture :
+
+1. CI V0.4-A verte
+2. Worker avec binding Workers AI déployé et `/health` vert avec feature AI
+3. smoke réel `/v1/analyze-item` sur une photo canonique existante
+4. réponse contenue strictement dans `TAXONOMY`
+5. PWA v0.4.0 déployée
+6. test réel : photo → analyse → proposition → appliquer → correction éventuelle → sauvegarde normale
+7. vérification qu'aucune écriture n'a lieu au simple stade analyse/proposition
+
 ## V0.4 — Smart Closet
 
-Prochaine direction produit :
+Direction produit après V0.4-A :
 
-- analyse photo IA : catégorie, couleurs, styles
-- validation humaine avant sauvegarde
-- détection de doublons
-- suggestions de tags
+- V0.4-B : détection de doublons probable avant création
+- V0.4-C : suggestions de tags explicables et éditables
 
-Le principe canonique pour V0.4 reste : **l'IA propose, Trân valide avant toute écriture canonique**.
+Le principe canonique reste : **l'IA propose, Trân valide avant toute écriture canonique**.
 
 ## Deferred / connus
 
