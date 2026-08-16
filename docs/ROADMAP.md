@@ -61,6 +61,16 @@
 - fonctionnement offline-first
 - outfits explicitement local-only dans cette tranche
 
+### V0.3-A.1 — Scalable Outfit Picker ✅
+- recherche nom / catégorie / couleur / style
+- filtres catégories adaptés aux gros catalogues
+- filtres favoris et sélectionnés
+- compteur de résultats + compteur de sélection
+- ruban des vêtements déjà sélectionnés avec retrait rapide
+- grille filtrée à scroll interne
+- sauvegarde Outfit accessible pendant le browsing
+- conçu pour 100+ articles sans modifier le modèle Outfit
+
 ### V0.3-B — Canonical Outfit Persistence
 - définir le schéma canonique Outfit
 - décider Airtable table dédiée vs autre stockage canonique
