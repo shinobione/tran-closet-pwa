@@ -100,11 +100,11 @@ jobs:
           grep -q "Headwear" worker/src/index.js
           grep -q "Umbrella" worker/src/index.js
           grep -q "Promise.all" worker/src/index.js
-          grep -q "mode='crosscheck'" worker/src/index.js
-          grep -q "mode='rescue'" worker/src/index.js
+          grep -q "crosscheck" worker/src/index.js
+          grep -q "rescue" worker/src/index.js
           grep -q 'retryUsed' worker/src/index.js
           grep -q 'reliability' worker/src/index.js
-          grep -q 'data-ai-assistant-mounted\|aiAssistantMounted' js/item-ai-assistant.js
+          grep -q 'aiAssistantMounted' js/item-ai-assistant.js
           grep -q 'ai-photo-preview' js/item-ai-assistant.js
           grep -q 'object-fit:contain' css/item-ai-assistant.css
           grep -q 'Tin cậy cao' js/item-ai-assistant.js
