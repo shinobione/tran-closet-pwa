@@ -1,0 +1,29 @@
+name: Smoke test Airtable write Worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/smoke-worker.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify Worker update path without changing data
+        env:
+          CLOSET_SYNC_KEY: ${{ secrets.CLOSET_SYNC_KEY }}
+        run: |
+          set -euo pipefail
+          BODY="$(curl --fail --silent --show-error \
+            -H "Authorization: Bearer $CLOSET_SYNC_KEY" \
+            -H 'Content-Type: application/json' \
+            --data '{"mutations":[{"id":"smoke-update-tui-xach","operation":"update","localItemId":"smoke","airtableRecordId":"recZFFx4HaeVHOrTc","payload":{"name":"Tui Xach","category":"Bag","colors":["Red","White"],"styles":["Classy"],"photo":null}}]}' \
+            'https://tran-closet-sync.jerryquinet.workers.dev/v1/mutations')"
+          echo "$BODY"
+          node -e 'const x=JSON.parse(process.argv[1]); if(!x.ok || !x.results?.[0]?.ok){console.error(x); process.exit(1)}' "$BODY"
+          echo 'Worker -> Airtable write path verified'
