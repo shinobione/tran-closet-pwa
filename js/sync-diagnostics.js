@@ -1,12 +1,12 @@
 import {getSyncConfig,testSyncConnection,flushMutationQueue,pendingMutationCount} from './sync-client.js';
 import {getAllItems,getAllMutations} from './db.js';
 
-const VERSION='v0.2.5';
+const VERSION='v0.2.6';
 let running=false;
 
 function orphanCount(items,mutations){
   const queued=new Set(mutations.map(m=>m.localItemId));
-  return items.filter(i=>!i.airtableRecordId&&!queued.has(i.id)&&(i.source==='local'||i.syncState==='pending-create')).length;
+  return items.filter(i=>!i.airtableRecordId&&!queued.has(i.id)).length;
 }
 
 function safeResult(value){
@@ -36,7 +36,14 @@ async function snapshot(){
     itemCount:items.length,
     pendingMutations:mutations.length,
     orphanedLocalCreates:orphanCount(items,mutations),
-    mutationOps:mutations.map(m=>m.operation)
+    mutationOps:mutations.map(m=>m.operation),
+    itemStates:items.map(i=>({
+      name:i.name,
+      airtableRecordId:i.airtableRecordId||null,
+      source:i.source||null,
+      syncState:i.syncState||null,
+      cloudWriteAt:i.cloudWriteAt||null
+    }))
   };
 }
 
@@ -52,7 +59,7 @@ function mount(){
   box.innerHTML=`<summary style="cursor:pointer;font-weight:700">Chẩn đoán đồng bộ · ${VERSION}</summary>
     <p style="opacity:.72;font-size:.84rem;margin:10px 0">Không hiển thị khóa bí mật. Nút bên dưới chạy đúng client sync của ứng dụng và hiển thị lỗi thật.</p>
     <button type="button" id="runSyncDiagnostics" class="secondary-button">Chạy chẩn đoán + đồng bộ</button>
-    <pre id="syncDiagnosticsOutput" style="white-space:pre-wrap;word-break:break-word;font-size:.72rem;line-height:1.45;max-height:320px;overflow:auto;margin-top:10px;padding:10px;border-radius:10px;background:rgba(0,0,0,.24)">Sẵn sàng.</pre>`;
+    <pre id="syncDiagnosticsOutput" style="white-space:pre-wrap;word-break:break-word;font-size:.72rem;line-height:1.45;max-height:420px;overflow:auto;margin-top:10px;padding:10px;border-radius:10px;background:rgba(0,0,0,.24)">Sẵn sàng.</pre>`;
   card.appendChild(box);
   box.querySelector('#runSyncDiagnostics').onclick=async()=>{
     if(running)return;
