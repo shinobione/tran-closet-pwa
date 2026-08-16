@@ -61,15 +61,37 @@ export async function queueMutation(operation,item){
   return mutation;
 }
 
+async function repairOrphanedLocalCreates(){
+  const [items,mutations]=await Promise.all([getAllItems(),getAllMutations()]);
+  const queuedIds=new Set(mutations.map(m=>m.localItemId));
+  let repaired=0;
+  for(const item of items){
+    if(item.airtableRecordId||queuedIds.has(item.id))continue;
+    if(item.source!=='local'&&item.syncState!=='pending-create')continue;
+    await putMutation({
+      id:crypto.randomUUID(),
+      operation:'create',
+      localItemId:item.id,
+      airtableRecordId:null,
+      createdAt:new Date().toISOString(),
+      payload:payloadFromItem(item)
+    });
+    await putItem({...item,source:'local',syncState:'pending-create'});
+    repaired++;
+  }
+  return repaired;
+}
+
 export async function pendingMutationCount(){return (await getAllMutations()).length;}
 
 export async function flushMutationQueue(){
   if(flushing)return {ok:false,busy:true,pending:await pendingMutationCount()};
   if(!navigator.onLine)return {ok:false,offline:true,pending:await pendingMutationCount()};
   const {endpoint,token}=await getSyncConfig();
+  const repaired=await repairOrphanedLocalCreates();
   const mutations=(await getAllMutations()).sort((a,b)=>String(a.createdAt).localeCompare(String(b.createdAt)));
-  if(!mutations.length)return {ok:true,pending:0};
-  if(!endpoint||!token)return {ok:false,configured:false,pending:mutations.length};
+  if(!mutations.length)return {ok:true,pending:0,repaired};
+  if(!endpoint||!token)return {ok:false,configured:false,pending:mutations.length,repaired};
 
   flushing=true;
   try{
@@ -80,9 +102,9 @@ export async function flushMutationQueue(){
         headers:{'content-type':'application/json','authorization':`Bearer ${token}`},
         body:JSON.stringify({mutations})
       });
-    }catch(error){return {ok:false,networkError:true,error,pending:mutations.length};}
+    }catch(error){return {ok:false,networkError:true,error,pending:mutations.length,repaired};}
 
-    if(!response.ok)return {ok:false,status:response.status,pending:mutations.length};
+    if(!response.ok)return {ok:false,status:response.status,pending:mutations.length,repaired};
     const body=await response.json();
     const results=Array.isArray(body.results)?body.results:[];
     const items=await getAllItems();
@@ -128,7 +150,7 @@ export async function flushMutationQueue(){
     await setMeta(DELETE_TOMBSTONES_KEY,tombstones);
     await setMeta('airtable-last-write-sync',writeTime);
     const pending=await pendingMutationCount();
-    return {ok:results.every(r=>r.ok)&&pending===0,pending,results};
+    return {ok:results.every(r=>r.ok)&&pending===0,pending,results,repaired};
   }finally{flushing=false;}
 }
 
