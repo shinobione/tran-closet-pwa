@@ -166,7 +166,7 @@ function openOutfitForm(id=null){
     <form id="outfitForm" class="item-form outfit-form">${outfitFormFields(existing||{})}
       <button class="primary-button" type="submit">${existing?'Lưu thay đổi':'Lưu outfit'}</button>
     </form></div></div>`;
-  itemDialog.showModal();
+  if(!itemDialog.open)itemDialog.showModal();
   itemDialog.querySelector('[data-close]').onclick=()=>itemDialog.close();
   itemDialog.querySelector('#outfitForm').onsubmit=async e=>{
     e.preventDefault();
