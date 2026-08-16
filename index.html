@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#17131d" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Trân Closet" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png" />
+  <link rel="stylesheet" href="./css/app.css" />
+  <title>Tủ Đồ của Trân</title>
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <header class="topbar">
+      <div><p class="eyebrow">TỦ ĐỒ CỦA TRÂN</p><h1 id="pageTitle">Tủ đồ của tôi</h1></div>
+      <button id="installButton" class="icon-button install-button" aria-label="Cài ứng dụng" title="Cài ứng dụng">⌄</button>
+    </header>
+    <main id="mainContent" class="main-content" tabindex="-1"></main>
+    <nav class="bottom-nav" aria-label="Điều hướng chính">
+      <button class="nav-item active" data-route="closet"><span>▦</span><small>Tủ đồ</small></button>
+      <button class="nav-item" data-route="outfits"><span>◇</span><small>Phối đồ</small></button>
+      <button class="nav-item add-nav" data-route="add"><span>＋</span><small>Thêm</small></button>
+      <button class="nav-item" data-route="favorites"><span>♡</span><small>Yêu thích</small></button>
+      <button class="nav-item" data-route="profile"><span>○</span><small>Hồ sơ</small></button>
+    </nav>
+  </div>
+  <dialog id="itemDialog" class="sheet-dialog"></dialog>
+  <dialog id="installDialog" class="sheet-dialog"></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
