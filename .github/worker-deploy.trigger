@@ -1,1 +1,1 @@
-trigger: v0.3.2-canonical-outfits
+trigger: v0.4.0-ai-photo-analysis
