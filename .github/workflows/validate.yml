@@ -25,10 +25,14 @@ jobs:
           node --check js/bootstrap.js
           node --check js/airtable-bridge.js
           node --check js/airtable-snapshot.js
+          node --check js/airtable-outfit-bridge.js
+          node --check js/airtable-outfit-snapshot.js
           node --check js/sync-client.js
+          node --check js/outfit-sync-client.js
           node --check js/sync-diagnostics.js
           node --check js/outfit-picker.js
           node --check scripts/sync-airtable.mjs
+          node --check scripts/sync-outfits.mjs
           node --check worker/src/index.js
           node --check sw.js
       - name: Check JSON and manifest
@@ -44,10 +48,14 @@ jobs:
           test -f js/bootstrap.js
           test -f js/airtable-bridge.js
           test -f js/airtable-snapshot.js
+          test -f js/airtable-outfit-bridge.js
+          test -f js/airtable-outfit-snapshot.js
           test -f js/sync-client.js
+          test -f js/outfit-sync-client.js
           test -f js/sync-diagnostics.js
           test -f js/outfit-picker.js
           test -f scripts/sync-airtable.mjs
+          test -f scripts/sync-outfits.mjs
           test -f worker/src/index.js
           test -f worker/wrangler.toml
           test -f .github/workflows/deploy-worker.yml
@@ -55,18 +63,26 @@ jobs:
           test -f icons/icon-192.png
           test -f icons/icon-512.png
           grep -q 'manifest.webmanifest' index.html
-          grep -q 'bootstrap.js?v=0.3.1' index.html
+          grep -q 'bootstrap.js?v=0.3.2' index.html
           grep -q 'outfits.css?v=0.3.0' index.html
           grep -q 'outfit-picker.css?v=0.3.1' index.html
-          grep -q 'outfit-picker.js?v=0.3.1' js/bootstrap.js
+          grep -q 'outfit-picker.js?v=0.3.2' js/bootstrap.js
+          grep -q 'outfit-sync-client.js?v=0.3.2' js/bootstrap.js
+          grep -q 'syncOutfitSnapshotToLocalDB' js/bootstrap.js
           grep -q 'serviceWorker' js/app.js
           grep -q 'queueMutation' js/app.js
           grep -q 'getAllOutfits' js/app.js
           grep -q "STORE_OUTFITS='outfits'" js/db.js
-          grep -q 'tran-closet-v0.3.1' sw.js
+          grep -q "STORE_OUTFIT_MUTATIONS='outfitMutations'" js/db.js
+          grep -q 'DB_VERSION=4' js/db.js
+          grep -q 'tblhtL2UlsgCAh6E7' scripts/sync-outfits.mjs
+          grep -q '/v1/outfit-mutations' worker/src/index.js
+          grep -q 'fld0mNaoxnTIckVXI' worker/src/index.js
+          grep -q 'tran-closet-v0.3.2' sw.js
           grep -q 'CLOSET_SYNC_KEY' worker/src/index.js
           grep -q 'AIRTABLE_PAT' worker/src/index.js
           grep -q 'AIRTABLE_PAT' .github/workflows/sync-airtable.yml
+          grep -q 'sync-outfits.mjs' .github/workflows/sync-airtable.yml
           grep -q 'CLOUDFLARE_API_TOKEN' .github/workflows/deploy-worker.yml
           grep -q 'CLOUDFLARE_ACCOUNT_ID' .github/workflows/deploy-worker.yml
           grep -q 'AIRTABLE_PAT_WRITE' .github/workflows/deploy-worker.yml

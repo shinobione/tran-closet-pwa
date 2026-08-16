@@ -1,5 +1,5 @@
-const CACHE = 'tran-closet-v0.3.1';
-const APP_SHELL = ['./','./index.html','./manifest.webmanifest','./css/app.css','./css/outfits.css?v=0.3.0','./css/outfit-picker.css?v=0.3.1','./js/bootstrap.js?v=0.3.1','./js/airtable-bridge.js','./js/airtable-snapshot.js','./js/app.js?v=0.3.1','./js/outfit-picker.js?v=0.3.1','./js/db.js','./js/data.js','./js/sync-client.js?v=0.3.0','./js/sync-diagnostics.js?v=0.3.0','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'];
+const CACHE = 'tran-closet-v0.3.2';
+const APP_SHELL = ['./','./index.html','./manifest.webmanifest','./css/app.css','./css/outfits.css?v=0.3.0','./css/outfit-picker.css?v=0.3.1','./js/bootstrap.js?v=0.3.2','./js/airtable-bridge.js','./js/airtable-snapshot.js','./js/airtable-outfit-bridge.js','./js/airtable-outfit-snapshot.js','./js/app.js?v=0.3.2','./js/outfit-picker.js?v=0.3.2','./js/outfit-sync-client.js?v=0.3.2','./js/db.js','./js/data.js','./js/sync-client.js?v=0.3.2','./js/sync-diagnostics.js?v=0.3.2','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(APP_SHELL)));
@@ -51,6 +51,7 @@ self.addEventListener('fetch', e => {
     ['script','style'].includes(e.request.destination) ||
     url.pathname.endsWith('/manifest.webmanifest') ||
     url.pathname.endsWith('/js/airtable-snapshot.js') ||
+    url.pathname.endsWith('/js/airtable-outfit-snapshot.js') ||
     url.pathname.includes('/assets/items/');
 
   e.respondWith(appCode ? networkFirst(e.request) : cacheFirst(e.request));
