@@ -34,12 +34,17 @@ export async function queueMutation(operation,item){
   return mutation;
 }
 
+export async function dropMutationsForItem(localItemId){
+  const mutations=await getAllMutations();
+  for(const mutation of mutations.filter(m=>m.localItemId===localItemId))await deleteMutation(mutation.id);
+}
+
 export async function pendingMutationCount(){return (await getAllMutations()).length;}
 
 export async function flushMutationQueue(){
   if(!navigator.onLine)return {ok:false,offline:true,pending:await pendingMutationCount()};
   const {endpoint,token}=await getSyncConfig();
-  const mutations=await getAllMutations();
+  const mutations=(await getAllMutations()).sort((a,b)=>String(a.createdAt).localeCompare(String(b.createdAt)));
   if(!mutations.length)return {ok:true,pending:0};
   if(!endpoint||!token)return {ok:false,configured:false,pending:mutations.length};
 
@@ -64,9 +69,7 @@ export async function flushMutationQueue(){
     if(!mutation)continue;
     if(mutation.operation==='create'&&result.airtableRecordId){
       const item=byId.get(mutation.localItemId);
-      if(item){
-        await putItem({...item,airtableRecordId:result.airtableRecordId,source:'airtable',syncState:'synced'});
-      }
+      if(item)await putItem({...item,airtableRecordId:result.airtableRecordId,source:'airtable',syncState:'synced'});
     }else if(mutation.operation==='update'){
       const item=byId.get(mutation.localItemId);
       if(item)await putItem({...item,syncState:'synced'});
