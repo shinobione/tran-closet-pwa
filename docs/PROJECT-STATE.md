@@ -1,21 +1,21 @@
 # PROJECT STATE — Trân Closet PWA
 
-Dernière mise à jour : 2026-08-16
+Dernière mise à jour : 2026-08-17
 
 ## Production
 
 - PWA : `https://shinobione.github.io/tran-closet-pwa/`
 - Cloudflare Worker : `https://tran-closet-sync.jerryquinet.workers.dev`
 - branche canonique : `main`
-- version production vérifiée : `v0.3.2`
+- version production vérifiée : `v0.3.3`
 - stockage local production : IndexedDB `tran-closet`, schema version 4
 
 ## Phase
 
-- **dernière phase close : V0.2 — Airtable Bridge**
-- **phase active : V0.3 — Outfits**
-- **dernière slice vérifiée : V0.3-B — Canonical Outfit Persistence**
-- **candidate active : V0.3-C — Outfit Presentation / v0.3.3**
+- **dernière phase close : V0.3 — Outfits**
+- **phase active : V0.4 — Smart Closet**
+- **dernière slice vérifiée : V0.3-C — Outfit Presentation**
+- prochaine tranche : **V0.4-A — analyse photo assistée**
 
 ## V0.2 — État vérifié
 
@@ -106,34 +106,43 @@ Vérifications production réalisées le 16/08/2026 :
 
 **V0.3-B est close et vérifiée en production.**
 
-## V0.3-C — Candidate v0.3.3
+## V0.3-C — CLOSED / VERIFIED PROD
 
-Objectif : transformer le détail Outfit en vraie présentation partageable sans modifier le modèle de données ni la sync.
+Couche de présentation ajoutée sans modifier le modèle de données ni la sync :
 
-Architecture candidate :
-
-- module `outfit-presentation.js` totalement séparé du CRUD Outfit
-- vue Lookbook plein écran sur mobile avec safe-area iPhone
+- module `outfit-presentation.js` séparé du CRUD Outfit
+- vue Lookbook plein écran avec safe-area mobile/iPhone
 - composition visuelle premium et transitions avec respect de `prefers-reduced-motion`
 - génération locale d'une carte PNG 1080×1350 depuis les photos déjà présentes dans la PWA
-- pré-génération de la carte à l'ouverture afin de conserver le geste utilisateur requis par Safari/Web Share
-- partage natif via Web Share API quand les fichiers sont supportés
+- pré-génération de la carte à l'ouverture afin de conserver le geste utilisateur requis par Web Share
+- partage natif de fichier via Web Share API quand disponible
 - fallback sauvegarde PNG quand le partage de fichier n'est pas disponible
 - aucune URL publique d'outfit : le partage image ne publie pas la garde-robe
 - jusqu'à 4 pièces visibles sur la carte, avec compteur `+N` pour les outfits plus grands
 - aucune modification `app.js`, `db.js`, Worker ou Airtable
 
-À vérifier avant clôture V0.3-C :
+Vérifications production :
 
-1. CI PR verte
-2. déploiement Pages v0.3.3
-3. rendu plein écran réel sur téléphone
-4. bouton de partage prêt après ouverture d'un outfit
-5. ouverture correcte de la feuille de partage native iPhone ou fallback image
-6. image exportée lisible avec photos, titre et métadonnées
-7. navigation détail → vêtement / édition / favori / suppression toujours intacte
+1. CI PR #12 verte
+2. déploiement Pages v0.3.3 réussi sur le commit `1d9f7f8c793a30bccf655274d0e5cc6cc2eddd94`
+3. rendu Lookbook généré vérifié avec photos, titre, occasion/saison et branding
+4. fichier PNG `tran-closet-lookbook-test.png` généré et transmis à la feuille de partage système
+5. fallback image et logique Web Share intégrés sans toucher au CRUD/sync
+6. validation utilisateur finale : **VERIFIED PROD**
+
+**V0.3 est désormais close.**
+
+## V0.4 — Smart Closet
+
+Prochaine direction produit :
+
+- analyse photo IA : catégorie, couleurs, styles
+- validation humaine avant sauvegarde
+- détection de doublons
+- suggestions de tags
+
+Le principe canonique pour V0.4 reste : **l'IA propose, Trân valide avant toute écriture canonique**.
 
 ## Deferred / connus
 
 - remplacement de la photo d'un vêtement Airtable existant
-- analyse photo IA
