@@ -2,7 +2,7 @@ name: Validate PWA
 
 on:
   push:
-    branches: [main, agent/pwa-v0.1]
+    branches: [main]
   pull_request:
     branches: [main]
 
@@ -13,7 +13,7 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -22,6 +22,10 @@ jobs:
           node --check js/app.js
           node --check js/data.js
           node --check js/db.js
+          node --check js/bootstrap.js
+          node --check js/airtable-bridge.js
+          node --check js/airtable-snapshot.js
+          node --check scripts/sync-airtable.mjs
           node --check sw.js
       - name: Check manifest JSON
         run: python -m json.tool manifest.webmanifest > /dev/null
@@ -29,8 +33,20 @@ jobs:
         run: |
           test -f index.html
           test -f css/app.css
+          test -f js/bootstrap.js
+          test -f js/airtable-bridge.js
+          test -f js/airtable-snapshot.js
+          test -f scripts/sync-airtable.mjs
           test -f icons/apple-touch-icon.png
           test -f icons/icon-192.png
           test -f icons/icon-512.png
           grep -q 'manifest.webmanifest' index.html
+          grep -q 'bootstrap.js' index.html
           grep -q 'serviceWorker' js/app.js
+          grep -q 'AIRTABLE_PAT' .github/workflows/sync-airtable.yml
+      - name: Guard against committed Airtable PAT values
+        run: |
+          if grep -R --exclude='sync-airtable.yml' --exclude-dir='.git' -E 'pat[A-Za-z0-9._-]{20,}' .; then
+            echo 'Potential Airtable PAT found in committed files.'
+            exit 1
+          fi
