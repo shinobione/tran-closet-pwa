@@ -1,1 +1,1 @@
-trigger: v0.4.0-ai-llava-byte-array-fix
+trigger: v0.4.2-ai-reliability-pass
