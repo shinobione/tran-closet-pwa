@@ -45,7 +45,6 @@ jobs:
           test -f worker/src/index.js
           test -f worker/wrangler.toml
           test -f .github/workflows/deploy-worker.yml
-          test -f .github/worker-deploy.trigger
           test -f icons/apple-touch-icon.png
           test -f icons/icon-192.png
           test -f icons/icon-512.png
