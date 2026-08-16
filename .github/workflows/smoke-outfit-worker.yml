@@ -1,0 +1,67 @@
+name: Smoke Outfit Worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/smoke-outfit-worker.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify Outfit create update delete
+        env:
+          WORKER_URL: https://tran-closet-sync.jerryquinet.workers.dev
+          CLOSET_SYNC_KEY: ${{ secrets.CLOSET_SYNC_KEY }}
+        run: |
+          node <<'NODE'
+          const base=process.env.WORKER_URL.replace(/\/$/,'');
+          const token=process.env.CLOSET_SYNC_KEY;
+          const outfitId=`smoke-outfit-${process.env.GITHUB_RUN_ID}-${process.env.GITHUB_RUN_ATTEMPT}`;
+          const now=new Date().toISOString();
+          async function send(mutation){
+            const response=await fetch(`${base}/v1/outfit-mutations`,{
+              method:'POST',
+              headers:{'content-type':'application/json','authorization':`Bearer ${token}`},
+              body:JSON.stringify({mutations:[mutation]})
+            });
+            const text=await response.text();
+            let body; try{body=JSON.parse(text);}catch{throw new Error(`Non-JSON response ${response.status}: ${text}`);}
+            if(!response.ok)throw new Error(`HTTP ${response.status}: ${text}`);
+            const result=body?.results?.[0];
+            if(!result?.ok)throw new Error(`Mutation failed: ${text}`);
+            return result;
+          }
+          const create=await send({
+            id:`${outfitId}-create`,operation:'create',localOutfitId:outfitId,airtableRecordId:null,createdAt:now,
+            payload:{
+              outfitId,name:'__OUTFIT_SMOKE__',itemRecordIds:['recLjpxC6kj5pGEEj','recrtzfBVgQOYfAQN'],
+              occasion:'Everyday',season:'All',note:'smoke',favorite:false,createdAt:now,updatedAt:now
+            }
+          });
+          if(!create.airtableRecordId)throw new Error('Create returned no Airtable record id');
+          console.log(`CREATE OK ${create.airtableRecordId}`);
+          const updatedAt=new Date().toISOString();
+          const update=await send({
+            id:`${outfitId}-update`,operation:'update',localOutfitId:outfitId,airtableRecordId:create.airtableRecordId,createdAt:updatedAt,
+            payload:{
+              outfitId,name:'__OUTFIT_SMOKE_UPDATED__',itemRecordIds:['recLjpxC6kj5pGEEj','recrtzfBVgQOYfAQN'],
+              occasion:'Party',season:'Cool',note:'smoke-updated',favorite:true,createdAt:now,updatedAt
+            }
+          });
+          if(update.airtableRecordId!==create.airtableRecordId)throw new Error('Update changed Airtable record id');
+          console.log(`UPDATE OK ${update.airtableRecordId}`);
+          const del=await send({
+            id:`${outfitId}-delete`,operation:'delete',localOutfitId:outfitId,airtableRecordId:create.airtableRecordId,createdAt:new Date().toISOString(),payload:null
+          });
+          if(del.airtableRecordId!==create.airtableRecordId)throw new Error('Delete record id mismatch');
+          console.log(`DELETE OK ${del.airtableRecordId}`);
+          NODE
