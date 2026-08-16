@@ -18,14 +18,29 @@
 - sync GitHub Actions manuelle + planifiée toutes les 6 h
 - token Airtable uniquement dans GitHub Actions Secret
 - fusion snapshot → stockage local en préservant les favoris
+- redéploiement Pages après sync bot
 
-### V0.2-B — Secure write bridge
-- backend sécurisé
+### V0.2-B — Secure write bridge ✅ code / 🟡 activation Worker
+- backend Cloudflare Worker sécurisé
 - sync create/update/delete PWA → Airtable
-- uploads photos côté backend
-- stratégie de conflits simple
-- file offline de mutations et retry explicite
+- création avec upload photo côté Worker
+- file IndexedDB de mutations et retry au retour du réseau
 - état de sync visible par item
+- favoris local-only
+- compactage create/update/delete avant envoi
+- retry photo séparé après création partielle
+- tombstones de suppression
+- protection contre snapshots plus anciens que les writes locaux
+- création idempotente via Airtable `Sync Mutation ID`
+- remplacement de photo d'un article existant reporté à une tranche durcie
+
+### V0.2-C — Activation & verified write sync
+- déployer `worker/`
+- configurer le PAT Airtable write-only/scopé et `CLOSET_SYNC_KEY`
+- connecter l'iPhone de Trân au Worker
+- test réel create → photo → update → delete
+- reread Airtable + snapshot pour confirmer chaque write
+- fermer V0.2 quand le round-trip est vérifié
 
 ## V0.3 — Outfits
 - table Outfit
