@@ -1,1 +1,1 @@
-2026-08-16T19:02:00+02:00 — initial authenticated sync
+2026-08-16T20:46:00+02:00 — verify Neck Poca write and refresh canonical snapshot
