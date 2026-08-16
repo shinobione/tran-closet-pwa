@@ -1,11 +1,19 @@
 import {syncSnapshotToLocalDB} from './airtable-bridge.js';
+import {syncOutfitSnapshotToLocalDB} from './airtable-outfit-bridge.js';
 
 try{
   await syncSnapshotToLocalDB();
 }catch(error){
-  console.warn('Airtable snapshot hydration failed; continuing with local closet.',error);
+  console.warn('Airtable clothing snapshot hydration failed; continuing with local closet.',error);
 }
 
-await import('./app.js?v=0.3.1');
-await import('./outfit-picker.js?v=0.3.1');
-await import('./sync-diagnostics.js?v=0.3.0');
+try{
+  await syncOutfitSnapshotToLocalDB();
+}catch(error){
+  console.warn('Airtable outfit snapshot hydration failed; continuing with local outfits.',error);
+}
+
+await import('./app.js?v=0.3.2');
+await import('./outfit-picker.js?v=0.3.2');
+await import('./outfit-sync-client.js?v=0.3.2');
+await import('./sync-diagnostics.js?v=0.3.2');
