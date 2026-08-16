@@ -2,6 +2,28 @@ const BASE_ID='appw8WNvdDuXUgYvN';
 const CLOTHES_TABLE_ID='tblKdCi4MI4AH26y8';
 const OUTFITS_TABLE_ID='tblhtL2UlsgCAh6E7';
 const MAX_ATTACHMENT_BYTES=5_000_000;
+const MAX_AI_IMAGE_BYTES=2_500_000;
+const AI_MODEL='@cf/meta/llama-4-scout-17b-16e-instruct';
+
+const TAXONOMY={
+  categories:['Shirt','Pant','Skirt','Dress','Combo','Coat','Bag','Shoes','Accessorie','Belt','Swimware','Eye Lens','Socks','Jumpsuit'],
+  colors:['Blue','Pink','Yellow','Black','Green','Purple','White','Grey','Orange','Red'],
+  styles:['Hip-Hop','Sport','Casual','Classy','Cartoon','Old']
+};
+
+const AI_SCHEMA={
+  type:'object',
+  properties:{
+    recognized:{type:'boolean'},
+    category:{type:'string',enum:TAXONOMY.categories},
+    colors:{type:'array',items:{type:'string',enum:TAXONOMY.colors},maxItems:3},
+    styles:{type:'array',items:{type:'string',enum:TAXONOMY.styles},maxItems:2},
+    confidence:{type:'number',minimum:0,maximum:1},
+    reason:{type:'string',maxLength:180}
+  },
+  required:['recognized','category','colors','styles','confidence','reason'],
+  additionalProperties:false
+};
 
 const FIELDS={
   name:'fldaUBTQHssIqjYJ3',
@@ -73,14 +95,14 @@ async function airtable(tableId,path,env,options={}){
   return body;
 }
 
-function parsePhoto(dataUrl){
+function parsePhoto(dataUrl,maxBytes=MAX_ATTACHMENT_BYTES){
   if(!dataUrl||!dataUrl.startsWith('data:image/'))return null;
   const match=dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/s);
   if(!match)throw new Error('Invalid image data URL');
   const [,contentType,file]=match;
   const estimatedBytes=Math.floor(file.length*3/4);
-  if(estimatedBytes>MAX_ATTACHMENT_BYTES)throw new Error('Attachment exceeds Airtable 5 MB upload limit');
-  return {contentType,file,filename:`tran-closet-${Date.now()}.${contentType.includes('png')?'png':'jpg'}`};
+  if(estimatedBytes>maxBytes)throw new Error(`Image exceeds ${Math.round(maxBytes/1_000_000*10)/10} MB limit`);
+  return {contentType,file,dataUrl,estimatedBytes,filename:`tran-closet-${Date.now()}.${contentType.includes('png')?'png':'jpg'}`};
 }
 
 async function uploadPhoto(recordId,dataUrl,env){
@@ -88,10 +110,54 @@ async function uploadPhoto(recordId,dataUrl,env){
   const response=await fetch(`https://content.airtable.com/v0/${BASE_ID}/${recordId}/${FIELDS.photo}/uploadAttachment`,{
     method:'POST',
     headers:{'authorization':`Bearer ${env.AIRTABLE_PAT}`,'content-type':'application/json'},
-    body:JSON.stringify(photo)
+    body:JSON.stringify({contentType:photo.contentType,file:photo.file,filename:photo.filename})
   });
   const text=await response.text();
   if(!response.ok)throw new Error(`Airtable attachment ${response.status}: ${text}`);
+}
+
+function parseAiResponse(response){
+  if(response&&typeof response==='object'&&!Array.isArray(response))return response;
+  const text=String(response||'').trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'');
+  return JSON.parse(text);
+}
+
+function cleanAiResult(value={}){
+  const category=TAXONOMY.categories.includes(value.category)?value.category:null;
+  const colors=[...new Set(Array.isArray(value.colors)?value.colors:[])].filter(v=>TAXONOMY.colors.includes(v)).slice(0,3);
+  const styles=[...new Set(Array.isArray(value.styles)?value.styles:[])].filter(v=>TAXONOMY.styles.includes(v)).slice(0,2);
+  const confidence=Math.max(0,Math.min(1,Number(value.confidence)||0));
+  const reason=String(value.reason||'').trim().slice(0,180);
+  return {recognized:Boolean(value.recognized)&&Boolean(category),category,colors,styles,confidence,reason};
+}
+
+async function analyzeItem(payload,env){
+  if(!env.AI)throw new Error('Workers AI binding is not configured');
+  const photo=parsePhoto(payload?.image,MAX_AI_IMAGE_BYTES);
+  if(!photo)throw new Error('Missing image');
+  const prompt=[
+    'You are a visual wardrobe classifier for a private closet app.',
+    'Analyze only the main clothing item or accessory in the image. Ignore furniture, hands, feet, floor, hangers, packaging and background objects.',
+    `Allowed category values: ${TAXONOMY.categories.join(', ')}.`,
+    `Allowed color values: ${TAXONOMY.colors.join(', ')}. Choose up to 3 dominant visible colors.`,
+    `Allowed style values: ${TAXONOMY.styles.join(', ')}. Choose up to 2 only when visually justified.`,
+    'Set recognized=false when there is no clearly identifiable wardrobe item.',
+    'confidence is your overall visual confidence from 0 to 1.',
+    'reason must be one short Vietnamese sentence explaining the visible clues. Do not invent brand, material or unseen details.'
+  ].join('\n');
+
+  const result=await env.AI.run(AI_MODEL,{
+    messages:[
+      {role:'system',content:'Return only the requested structured wardrobe classification.'},
+      {role:'user',content:prompt}
+    ],
+    image:photo.dataUrl,
+    guided_json:AI_SCHEMA,
+    max_tokens:240,
+    temperature:0.1
+  });
+  const parsed=parseAiResponse(result?.response??result);
+  return cleanAiResult(parsed);
 }
 
 async function applyMutation(mutation,env){
@@ -173,9 +239,18 @@ export default {
     const headers=cors(origin,env);
     if(request.method==='OPTIONS')return new Response(null,{status:204,headers});
     const url=new URL(request.url);
-    if(!env.CLOSET_SYNC_KEY||!env.AIRTABLE_PAT)return json({error:'Worker secrets not configured'},503,headers);
+    if(!env.CLOSET_SYNC_KEY)return json({error:'Worker sync key not configured'},503,headers);
     if(bearer(request)!==env.CLOSET_SYNC_KEY)return json({error:'Unauthorized'},401,headers);
-    if(url.pathname==='/health'&&request.method==='GET')return json({ok:true,service:'tran-closet-sync'},200,headers);
+    if(url.pathname==='/health'&&request.method==='GET'){
+      if(!env.AIRTABLE_PAT)return json({error:'Worker Airtable secret not configured'},503,headers);
+      return json({ok:true,service:'tran-closet-sync',features:{ai:Boolean(env.AI)}},200,headers);
+    }
+    if(url.pathname==='/v1/analyze-item'&&request.method==='POST'){
+      let payload;try{payload=await request.json();}catch{return json({error:'Invalid JSON'},400,headers);}
+      try{return json({ok:true,analysis:await analyzeItem(payload,env),model:AI_MODEL},200,headers);}
+      catch(error){return json({ok:false,error:String(error?.message||error)},502,headers);}
+    }
+    if(!env.AIRTABLE_PAT)return json({error:'Worker Airtable secret not configured'},503,headers);
     if(request.method!=='POST'||!['/v1/mutations','/v1/outfit-mutations'].includes(url.pathname))return json({error:'Not found'},404,headers);
     let payload;try{payload=await request.json();}catch{return json({error:'Invalid JSON'},400,headers);}
     const mutations=Array.isArray(payload?.mutations)?payload.mutations.slice(0,25):[];
