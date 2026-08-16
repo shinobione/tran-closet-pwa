@@ -107,7 +107,8 @@ function mount(){
   const form=document.querySelector('#itemForm');
   const photoPreview=document.querySelector('#photoPreview');
   const photoInput=document.querySelector('#photoInput');
-  if(!form||!photoPreview||!photoInput||form.querySelector('.ai-assistant-card'))return;
+  if(!form||!photoPreview||!photoInput||form.dataset.aiAssistantMounted==='1')return;
+  form.dataset.aiAssistantMounted='1';
 
   const card=document.createElement('section');
   card.className='ai-assistant-card';
