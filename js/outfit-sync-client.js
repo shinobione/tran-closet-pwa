@@ -154,9 +154,22 @@ function schedule(delay=120){
   scheduled=setTimeout(()=>flushOutfitQueue().catch(error=>console.warn('Outfit sync failed',error)),delay);
 }
 
+function decorateCloudCopy(){
+  const hero=document.querySelector('.outfit-hero p:not(.hero-kicker)');
+  if(hero&&hero.textContent.includes('Lưu cục bộ'))hero.textContent=hero.textContent.replace('Lưu cục bộ và dùng được ngoại tuyến.','Đồng bộ Airtable và dùng được ngoại tuyến.');
+  const privacy=document.querySelector('.privacy-note');
+  if(privacy&&privacy.textContent.includes('Outfits hiện được lưu cục bộ trên thiết bị.')){
+    privacy.textContent=privacy.textContent.replace('Outfits hiện được lưu cục bộ trên thiết bị.','Outfits được đồng bộ an toàn qua Worker và lưu trong Airtable.');
+  }
+}
+
 if(typeof window!=='undefined'){
   window.addEventListener('tran:outfit-sync-needed',()=>schedule(80));
   window.addEventListener('online',()=>schedule(120));
+  document.addEventListener('click',event=>{if(event.target?.closest?.('#syncNow'))schedule(1800);},true);
+  const root=document.querySelector('#mainContent');
+  if(root)new MutationObserver(decorateCloudCopy).observe(root,{childList:true,subtree:true});
+  decorateCloudCopy();
   setInterval(()=>{if(navigator.onLine)flushOutfitQueue().catch(()=>{});},30000);
   schedule(1200);
 }
