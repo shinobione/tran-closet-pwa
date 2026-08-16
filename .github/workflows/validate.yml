@@ -60,7 +60,7 @@ jobs:
             echo 'Potential Airtable PAT found in committed files.'
             exit 1
           fi
-          if grep -R --exclude-dir='.git' -E 'CLOSET_SYNC_KEY\s*=\s*["'"'][^$]' .; then
+          if grep -R --exclude-dir='.git' -E 'CLOSET_SYNC_KEY[[:space:]]*=[[:space:]]*[A-Za-z0-9_-]{16,}' .; then
             echo 'Potential hard-coded closet sync key found.'
             exit 1
           fi
