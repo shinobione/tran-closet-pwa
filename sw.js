@@ -1,4 +1,4 @@
-const CACHE = 'tran-closet-v0.2.4';
+const CACHE = 'tran-closet-v0.2.6';
 const APP_SHELL = ['./','./index.html','./manifest.webmanifest','./css/app.css','./js/bootstrap.js','./js/airtable-bridge.js','./js/airtable-snapshot.js','./js/app.js','./js/db.js','./js/data.js','./js/sync-client.js','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
