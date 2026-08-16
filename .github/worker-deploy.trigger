@@ -1,1 +1,1 @@
-trigger: 2026-08-16T20:23:00+02:00
+trigger: v0.3.2-canonical-outfits
