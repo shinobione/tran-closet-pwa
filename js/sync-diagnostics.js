@@ -1,8 +1,8 @@
-import {getSyncConfig,testSyncConnection,flushMutationQueue,pendingMutationCount} from './sync-client.js?v=0.4.0';
-import {flushOutfitQueue,pendingOutfitMutationCount} from './outfit-sync-client.js?v=0.4.0';
+import {getSyncConfig,testSyncConnection,flushMutationQueue,pendingMutationCount} from './sync-client.js?v=0.4.2';
+import {flushOutfitQueue,pendingOutfitMutationCount} from './outfit-sync-client.js?v=0.4.2';
 import {getAllItems,getAllMutations,getAllOutfits,getAllOutfitMutations} from './db.js';
 
-const VERSION='v0.4.0';
+const VERSION='v0.4.2';
 let running=false;
 
 function orphanCount(items,mutations,idKey='localItemId'){
