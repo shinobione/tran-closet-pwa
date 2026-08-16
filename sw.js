@@ -1,5 +1,5 @@
-const CACHE = 'tran-closet-v0.2.6';
-const APP_SHELL = ['./','./index.html','./manifest.webmanifest','./css/app.css','./js/bootstrap.js','./js/airtable-bridge.js','./js/airtable-snapshot.js','./js/app.js','./js/db.js','./js/data.js','./js/sync-client.js','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'];
+const CACHE = 'tran-closet-v0.2.7';
+const APP_SHELL = ['./','./index.html','./manifest.webmanifest','./css/app.css','./js/bootstrap.js?v=0.2.7','./js/airtable-bridge.js','./js/airtable-snapshot.js','./js/app.js?v=0.2.7','./js/db.js','./js/data.js','./js/sync-client.js?v=0.2.7','./js/sync-diagnostics.js?v=0.2.7','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(APP_SHELL)));
@@ -13,7 +13,7 @@ self.addEventListener('activate', e => {
 
 async function networkFirst(request) {
   try {
-    const response = await fetch(request);
+    const response = await fetch(request,{cache:'no-store'});
     if (response && response.ok) {
       const copy = response.clone();
       caches.open(CACHE).then(cache => cache.put(request, copy));
