@@ -1,5 +1,6 @@
 import {getAllMutations,deleteMutation,putMutation,getMeta,setMeta,getAllItems,putItem} from './db.js';
 
+const DEFAULT_ENDPOINT='https://tran-closet-sync.jerryquinet.workers.dev';
 const ENDPOINT_KEY='sync-endpoint';
 const TOKEN_KEY='sync-device-key';
 const DELETE_TOMBSTONES_KEY='airtable-delete-tombstones';
@@ -7,13 +8,13 @@ let flushing=false;
 
 export async function getSyncConfig(){
   return {
-    endpoint:String(await getMeta(ENDPOINT_KEY)||'').replace(/\/+$/,''),
+    endpoint:String(await getMeta(ENDPOINT_KEY)||DEFAULT_ENDPOINT).replace(/\/+$/,''),
     token:String(await getMeta(TOKEN_KEY)||'')
   };
 }
 
 export async function saveSyncConfig(endpoint,token){
-  await setMeta(ENDPOINT_KEY,String(endpoint||'').trim().replace(/\/+$/,''));
+  await setMeta(ENDPOINT_KEY,String(endpoint||DEFAULT_ENDPOINT).trim().replace(/\/+$/,''));
   await setMeta(TOKEN_KEY,String(token||'').trim());
 }
 
