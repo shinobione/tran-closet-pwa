@@ -1,0 +1,45 @@
+name: Sync Airtable closet
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: airtable-closet-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Pull Airtable snapshot and copy photos
+        env:
+          AIRTABLE_PAT: ${{ secrets.AIRTABLE_PAT }}
+        run: node scripts/sync-airtable.mjs
+
+      - name: Commit canonical snapshot when changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add js/airtable-snapshot.js
+          if [ -d assets/items ]; then git add -A assets/items; fi
+          if git diff --cached --quiet; then
+            echo "No Airtable changes to commit."
+          else
+            git commit -m "Sync Airtable closet snapshot"
+            git push origin HEAD:main
+          fi
