@@ -1,0 +1,36 @@
+name: Validate PWA
+
+on:
+  push:
+    branches: [main, agent/pwa-v0.1]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          node --check js/app.js
+          node --check js/data.js
+          node --check js/db.js
+          node --check sw.js
+      - name: Check manifest JSON
+        run: python -m json.tool manifest.webmanifest > /dev/null
+      - name: Check PWA shell files
+        run: |
+          test -f index.html
+          test -f css/app.css
+          test -f icons/apple-touch-icon.png
+          test -f icons/icon-192.png
+          test -f icons/icon-512.png
+          grep -q 'manifest.webmanifest' index.html
+          grep -q 'serviceWorker' js/app.js
