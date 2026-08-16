@@ -9,14 +9,23 @@
 - recherche / filtres / favoris
 - sauvegarde JSON
 
-## V0.2 — Airtable Bridge
-- Cloudflare Worker sécurisé
-- import initial des records Airtable
-- sync create/update/delete
-- mapping `airtableRecordId`
-- stratégie de conflits simple `updatedAt`
+## V0.2 — Airtable Bridge 🟡
+
+### V0.2-A — Canonical read sync ✅
+- snapshot Airtable versionné dans GitHub
+- IDs Airtable conservés dans IndexedDB
+- copie durable des photos Airtable vers `assets/items/`
+- sync GitHub Actions manuelle + planifiée toutes les 6 h
+- token Airtable uniquement dans GitHub Actions Secret
+- fusion snapshot → stockage local en préservant les favoris
+
+### V0.2-B — Secure write bridge
+- backend sécurisé
+- sync create/update/delete PWA → Airtable
 - uploads photos côté backend
-- mode offline avec file de mutations
+- stratégie de conflits simple
+- file offline de mutations et retry explicite
+- état de sync visible par item
 
 ## V0.3 — Outfits
 - table Outfit
