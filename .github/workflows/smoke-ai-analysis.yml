@@ -1,5 +1,6 @@
 name: Smoke Workers AI wardrobe analysis
 
+# V0.4-A.1 rerun after explicit LLaVA vision stage
 on:
   push:
     branches: [main]
@@ -65,7 +66,13 @@ jobs:
           confidence = a.get('confidence')
           assert isinstance(confidence, (int, float)) and 0 <= confidence <= 1, a
           assert isinstance(a.get('reason'), str) and len(a['reason']) <= 180, a
-          print(json.dumps({'item': label, 'model': body.get('model'), 'analysis': a}, ensure_ascii=False, indent=2))
+          print(json.dumps({
+              'item': label,
+              'visionModel': body.get('visionModel'),
+              'visionSummary': body.get('visionSummary'),
+              'model': body.get('model'),
+              'analysis': a
+          }, ensure_ascii=False, indent=2))
           PY
           }
 
