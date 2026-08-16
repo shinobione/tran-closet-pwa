@@ -46,7 +46,7 @@
 - vérification anti-résurrection après delete
 - **V0.2 fermé le 16/08/2026**
 
-## V0.3 — Outfits 🟡 ACTIVE
+## V0.3 — Outfits ✅ CLOSED
 
 ### V0.3-A — Local Outfit Core ✅
 - store IndexedDB `outfits`
@@ -90,24 +90,38 @@
 - snapshot post-delete `recordCount: 0`, aucune résurrection
 - **V0.3-B fermée le 16/08/2026**
 
-### V0.3-C — Outfit Presentation 🟡 CANDIDATE v0.3.3
-- détail Outfit en vue Lookbook plein écran mobile
-- safe-area iPhone et fermeture toujours accessible
+### V0.3-C — Outfit Presentation ✅ VERIFIED PROD
+- détail Outfit en vue Lookbook plein écran
+- safe-area mobile/iPhone et fermeture toujours accessible
 - composition/couverture premium avec transitions respectant `prefers-reduced-motion`
 - génération locale d'une carte PNG 1080×1350
-- pré-génération de l'image avant interaction de partage pour Safari/iPhone
+- pré-génération de l'image avant interaction de partage
 - partage natif Web Share avec fichier quand disponible
 - fallback sauvegarde image
 - partage image choisi plutôt qu'un lien public afin de préserver le modèle privé/offline-first
 - jusqu'à 4 pièces visibles sur la carte + compteur pour les outfits plus grands
 - aucun changement du CRUD, IndexedDB, Worker ou Airtable
-- reste à valider sur téléphone réel avant ✅
+- rendu Lookbook et fichier PNG vérifiés en production
+- validation utilisateur finale **VERIFIED PROD**
+- **V0.3 fermée le 17/08/2026**
 
-## V0.4 — Smart Closet
+## V0.4 — Smart Closet 🟡 ACTIVE
+
+### V0.4-A — Analyse photo assistée
 - analyse photo IA : catégorie, couleurs, styles
-- validation humaine avant sauvegarde
-- détection de doublons
-- suggestions de tags
+- pré-remplissage du formulaire avant sauvegarde
+- validation humaine obligatoire avant écriture canonique
+- aucun changement automatique silencieux sur un vêtement existant
+
+### V0.4-B — Duplicate Guard
+- détection de doublons probables avant création
+- comparaison visuelle + métadonnées
+- décision finale laissée à l'utilisateur
+
+### V0.4-C — Smart Tags
+- suggestions de tags utiles à la recherche et aux outfits
+- tags explicables et éditables
+- préparation des signaux pour l'assistant V0.5
 
 ## V0.5 — Assistant
 - “Hôm nay mặc gì?”
