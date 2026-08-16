@@ -59,7 +59,6 @@
 - références outfit nettoyées lorsqu'un vêtement est supprimé
 - backup JSON V3 incluant vêtements + outfits
 - fonctionnement offline-first
-- outfits explicitement local-only dans cette tranche
 
 ### V0.3-A.1 — Scalable Outfit Picker ✅
 - recherche nom / catégorie / couleur / style
@@ -71,12 +70,20 @@
 - sauvegarde Outfit accessible pendant le browsing
 - conçu pour 100+ articles sans modifier le modèle Outfit
 
-### V0.3-B — Canonical Outfit Persistence
-- définir le schéma canonique Outfit
-- décider Airtable table dédiée vs autre stockage canonique
-- sync create/update/delete des outfits
-- stratégie idempotence / retry / conflits
-- conserver le bridge vêtements intact
+### V0.3-B — Canonical Outfit Persistence 🟡 CANDIDATE
+- table Airtable dédiée `Trân's Outfits`
+- linked records natifs vers `Trân's Clothes`
+- UUID stable `Outfit ID` comme clé d'idempotence
+- IndexedDB schema v4 + queue `outfitMutations` séparée
+- auto-queue create/update/delete via couche DB sans modifier `app.js`
+- endpoint Worker séparé `/v1/outfit-mutations`
+- CREATE via upsert sur `Outfit ID`
+- UPDATE / DELETE retry-safe
+- blocage propre si un vêtement lié n'est pas encore synchronisé
+- snapshot Airtable Outfit séparé + workflow 6 h/manual commun
+- bridge snapshot avec pending-write protection et tombstones anti-résurrection
+- diagnostic vêtements/outfits séparé
+- **reste à valider en production avant ✅**
 
 ### V0.3-C — Outfit Presentation
 - vue plein écran partageable
