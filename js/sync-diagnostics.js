@@ -1,7 +1,7 @@
-import {getSyncConfig,testSyncConnection,flushMutationQueue,pendingMutationCount} from './sync-client.js';
+import {getSyncConfig,testSyncConnection,flushMutationQueue,pendingMutationCount} from './sync-client.js?v=0.2.7';
 import {getAllItems,getAllMutations} from './db.js';
 
-const VERSION='v0.2.6';
+const VERSION='v0.2.7';
 let running=false;
 
 function orphanCount(items,mutations){
