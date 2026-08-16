@@ -67,7 +67,7 @@ Configurer une seule fois quatre **GitHub Actions repository secrets** :
 
 Le workflow transmet `AIRTABLE_PAT_WRITE` au Worker sous le nom runtime `AIRTABLE_PAT`. Aucun de ces secrets n'est commité dans le repo.
 
-Le workflow peut être lancé depuis GitHub Actions ou en touchant `.github/worker-deploy.trigger` sur `main` une fois les secrets configurés.
+Le workflow peut être lancé depuis GitHub Actions. Une fois les quatre secrets configurés, la création ou mise à jour de `.github/worker-deploy.trigger` sur `main` sert aussi de déclencheur distant contrôlé.
 
 Une fois le Worker déployé, saisir une seule fois dans **Hồ sơ → Airtable** :
 
