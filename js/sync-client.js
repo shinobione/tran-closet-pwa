@@ -66,8 +66,11 @@ async function repairOrphanedLocalCreates(){
   const queuedIds=new Set(mutations.map(m=>m.localItemId));
   let repaired=0;
   for(const item of items){
+    // Canonical rule: every local IndexedDB item without an Airtable record id
+    // and without an existing queued mutation must eventually be created remotely.
+    // This intentionally ignores legacy source/syncState flags so old pre-Worker
+    // items cannot become permanently stranded.
     if(item.airtableRecordId||queuedIds.has(item.id))continue;
-    if(item.source!=='local'&&item.syncState!=='pending-create')continue;
     await putMutation({
       id:crypto.randomUUID(),
       operation:'create',
