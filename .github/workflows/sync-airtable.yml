@@ -2,6 +2,10 @@ name: Sync Airtable closet
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/sync-airtable.trigger'
   schedule:
     - cron: '17 */6 * * *'
 
