@@ -70,7 +70,7 @@
 - sauvegarde Outfit accessible pendant le browsing
 - conçu pour 100+ articles sans modifier le modèle Outfit
 
-### V0.3-B — Canonical Outfit Persistence 🟡 CANDIDATE
+### V0.3-B — Canonical Outfit Persistence ✅ CLOSED
 - table Airtable dédiée `Trân's Outfits`
 - linked records natifs vers `Trân's Clothes`
 - UUID stable `Outfit ID` comme clé d'idempotence
@@ -83,7 +83,12 @@
 - snapshot Airtable Outfit séparé + workflow 6 h/manual commun
 - bridge snapshot avec pending-write protection et tombstones anti-résurrection
 - diagnostic vêtements/outfits séparé
-- **reste à valider en production avant ✅**
+- Worker smoke CREATE → UPDATE → DELETE vérifié en prod
+- migration du vrai outfit local vers Airtable sans doublon
+- UPDATE réel PWA sur le même record vérifié
+- DELETE réel PWA vérifié
+- snapshot post-delete `recordCount: 0`, aucune résurrection
+- **V0.3-B fermée le 16/08/2026**
 
 ### V0.3-C — Outfit Presentation
 - vue plein écran partageable
