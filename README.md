@@ -11,7 +11,8 @@ PWA mobile-first de la garde-robe de Trân, installable sur iPhone/Android, offl
 - **V0.3-A Local Outfits Core** ✅
 - **V0.3-A.1 Scalable Outfit Picker** ✅
 - **V0.3-B Canonical Outfit Persistence** ✅ vérifié en production
-- **V0.3-C Outfit Presentation** 🟡 candidate v0.3.3
+- **V0.3-C Outfit Presentation** ✅ VERIFIED PROD
+- **V0.4 Smart Closet** 🟡 active
 
 La PWA reste local-first : les ajouts, modifications et suppressions de vêtements **et d'outfits** sont appliqués immédiatement dans IndexedDB, puis envoyés vers Airtable via des files de mutations séparées dès que le réseau et le Worker sont disponibles. Les favoris des vêtements restent locaux ; les favoris outfits font partie du modèle Outfit canonique.
 
@@ -76,64 +77,49 @@ V0.2 est donc **clos côté produit et infrastructure**.
 
 Le remplacement de la photo d'un article existant reste volontairement reporté à une tranche dédiée afin de conserver des sémantiques d'attachment sûres.
 
-## V0.3 — Outfits
+## V0.3 — Outfits ✅ CLOSED
 
-L'onglet **Phối đồ** est fonctionnel et offline-first :
+L'onglet **Phối đồ** est fonctionnel, offline-first et synchronisé :
 
 - création d'un outfit à partir d'au moins deux vêtements ;
 - nom, occasion, saison et note ;
 - favoris outfits ;
 - modification et suppression ;
-- détail avec composition visuelle et accès aux vêtements associés ;
-- nettoyage des références si un vêtement est supprimé ;
-- persistance dans un store IndexedDB `outfits` ;
-- export/import JSON incluant les outfits ;
-- picker scalable avec recherche, filtres, sélectionnés/favoris et scroll interne pour les gros catalogues.
-
-### V0.3-B — Persistance canonique Outfit
-
-Les outfits sont maintenant synchronisés vers la table Airtable dédiée `Trân's Outfits` :
-
-- linked records natifs vers `Trân's Clothes` ;
-- `Outfit ID` UUID stable comme clé d'idempotence ;
-- queue IndexedDB `outfitMutations` distincte de la queue vêtements ;
-- endpoint Worker séparé `/v1/outfit-mutations` ;
-- CREATE par upsert Airtable sur `Outfit ID` ;
-- UPDATE / DELETE retry-safe ;
-- attente automatique si un vêtement sélectionné n'a pas encore son `airtableRecordId` ;
-- snapshot canonique séparé `js/airtable-outfit-snapshot.js` ;
-- protection des pending writes et tombstones anti-résurrection.
-
-### Vérification production Outfit
-
-Le 16 août 2026, V0.3-B a été vérifiée de bout en bout :
-
-- Worker v0.3.2 déployé + health check authentifié ;
-- smoke CREATE → UPDATE → DELETE avec deux vrais linked records ;
-- lecture snapshot avec le PAT read-only ;
-- migration automatique du vrai outfit local `test` vers Airtable sans doublon ;
-- reread canonique du même UUID / record ;
-- UPDATE réel depuis la PWA sur le même record ;
-- DELETE réel depuis la PWA ;
-- Airtable revenu à 0 outfit ;
-- snapshot post-delete à `recordCount: 0` et aucune résurrection.
-
-**V0.3-B est donc CLOSED / VERIFIED PROD.**
-
-### V0.3-C — Présentation Outfit (candidate v0.3.3)
-
-La candidate ajoute une couche de présentation sans modifier le CRUD ni la sync :
-
-- détail Outfit transformé en Lookbook plein écran sur mobile ;
-- safe-area iPhone et transitions respectant `prefers-reduced-motion` ;
+- picker scalable avec recherche, filtres, favoris/sélectionnés et scroll interne ;
+- linked records Airtable vers les vêtements ;
+- queue Outfit séparée, idempotence, pending-write protection et tombstones anti-résurrection ;
+- détail Lookbook plein écran ;
 - génération locale d'une carte PNG 1080×1350 ;
-- jusqu'à quatre pièces visibles sur la carte, avec compteur pour les outfits plus grands ;
-- pré-génération de l'image à l'ouverture pour préserver le geste utilisateur requis par Safari ;
-- partage natif via Web Share API avec fichier quand disponible ;
+- partage natif de fichier via Web Share quand disponible ;
 - fallback sauvegarde PNG ;
 - partage image retenu plutôt qu'un lien public afin de préserver le caractère privé/offline-first de la garde-robe.
 
-Cette tranche reste **candidate tant que le rendu et le partage n'ont pas été vérifiés sur téléphone réel**.
+### Vérification production Outfit
+
+V0.3-B a validé le CRUD/sync de bout en bout : migration locale, CREATE, UPDATE, DELETE, snapshot retour canonique, absence de doublon et absence de résurrection.
+
+V0.3-C a ensuite validé la couche présentation :
+
+- PR #12 et CI vertes ;
+- déploiement Pages v0.3.3 réussi ;
+- rendu Lookbook vérifié avec photos et métadonnées ;
+- fichier `tran-closet-lookbook-test.png` généré correctement ;
+- fichier transmis à la feuille de partage système ;
+- validation utilisateur finale **VERIFIED PROD**.
+
+**V0.3 est close.**
+
+## V0.4 — Smart Closet 🟡 ACTIVE
+
+La prochaine phase ajoute une couche d'assistance intelligente sans retirer le contrôle utilisateur :
+
+- analyse photo IA pour proposer catégorie, couleurs et styles ;
+- pré-remplissage du formulaire ;
+- validation humaine obligatoire avant sauvegarde ;
+- détection de doublons probables avant création ;
+- suggestions de tags éditables et explicables.
+
+Principe produit : **l'IA propose, Trân valide avant toute écriture canonique.**
 
 ### Déploiement Cloudflare via GitHub Actions
 
