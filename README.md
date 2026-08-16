@@ -54,14 +54,20 @@ Le bridge prend en charge :
 
 Le remplacement de la photo d'un article existant est volontairement reporté à une tranche dédiée afin de conserver des sémantiques d'attachment sûres.
 
-### Secrets du Worker
+### Déploiement Cloudflare via GitHub Actions
 
-Le Worker doit recevoir :
+`.github/workflows/deploy-worker.yml` déploie `worker/` avec Wrangler puis vérifie l'endpoint authentifié `/health`.
 
-- `AIRTABLE_PAT` : PAT Airtable **avec droits d'écriture**, limité à la base **Trân's Clothes** ;
-- `CLOSET_SYNC_KEY` : secret privé partagé uniquement entre le Worker et l'appareil de Trân.
+Configurer une seule fois quatre **GitHub Actions repository secrets** :
 
-Ces valeurs ne doivent jamais être commitées dans le repo.
+- `CLOUDFLARE_API_TOKEN` : token Cloudflare autorisé à déployer des Workers sur le compte cible ;
+- `CLOUDFLARE_ACCOUNT_ID` : identifiant du compte Cloudflare cible ;
+- `AIRTABLE_PAT_WRITE` : PAT Airtable avec droits d'écriture, limité à **Trân's Clothes** ;
+- `CLOSET_SYNC_KEY` : longue clé privée partagée uniquement entre le Worker et l'appareil de Trân.
+
+Le workflow transmet `AIRTABLE_PAT_WRITE` au Worker sous le nom runtime `AIRTABLE_PAT`. Aucun de ces secrets n'est commité dans le repo.
+
+Le workflow peut être lancé depuis GitHub Actions ou en touchant `.github/worker-deploy.trigger` sur `main` une fois les secrets configurés.
 
 Une fois le Worker déployé, saisir une seule fois dans **Hồ sơ → Airtable** :
 
