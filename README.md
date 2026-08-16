@@ -27,13 +27,20 @@ Puis ouvrir `http://localhost:4173`.
 
 ## Déploiement GitHub Pages
 
-1. Créer un repo, par exemple `tran-closet`.
-2. Mettre ce dossier à la racine du repo.
-3. GitHub → Settings → Pages → Deploy from a branch → `main` / `/ (root)`.
-4. Ouvrir l'URL Pages dans Safari sur l'iPhone de Trân.
-5. Partager → Ajouter à l'écran d'accueil.
+Le repo contient `.github/workflows/deploy-pages.yml` et déploie automatiquement chaque push sur `main` vers GitHub Pages.
 
-Le `start_url` et les chemins sont relatifs, donc le projet fonctionne également sous un sous-chemin GitHub Pages.
+Configuration unique du repository : GitHub → Settings → Pages → Build and deployment → Source → `GitHub Actions`.
+
+URL cible : `https://shinobione.github.io/tran-closet-pwa/`
+
+Sur l'iPhone de Trân :
+
+1. Ouvrir l'URL dans Safari.
+2. Partager.
+3. Ajouter à l'écran d'accueil.
+4. Activer « Ouvrir comme app » si iOS propose l'option.
+
+Le `start_url` et les chemins sont relatifs, donc la PWA fonctionne sous le sous-chemin GitHub Pages du repository.
 
 ## Sécurité Airtable
 
