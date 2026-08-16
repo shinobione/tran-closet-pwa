@@ -1,5 +1,5 @@
-const CACHE = 'tran-closet-v0.2.7';
-const APP_SHELL = ['./','./index.html','./manifest.webmanifest','./css/app.css','./js/bootstrap.js?v=0.2.7','./js/airtable-bridge.js','./js/airtable-snapshot.js','./js/app.js?v=0.2.7','./js/db.js','./js/data.js','./js/sync-client.js?v=0.2.7','./js/sync-diagnostics.js?v=0.2.7','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'];
+const CACHE = 'tran-closet-v0.3.0';
+const APP_SHELL = ['./','./index.html','./manifest.webmanifest','./css/app.css','./css/outfits.css?v=0.3.0','./js/bootstrap.js?v=0.3.0','./js/airtable-bridge.js','./js/airtable-snapshot.js','./js/app.js?v=0.3.0','./js/db.js','./js/data.js','./js/sync-client.js?v=0.3.0','./js/sync-diagnostics.js?v=0.3.0','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(APP_SHELL)));

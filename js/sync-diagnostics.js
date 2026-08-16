@@ -1,7 +1,7 @@
-import {getSyncConfig,testSyncConnection,flushMutationQueue,pendingMutationCount} from './sync-client.js?v=0.2.7';
-import {getAllItems,getAllMutations} from './db.js';
+import {getSyncConfig,testSyncConnection,flushMutationQueue,pendingMutationCount} from './sync-client.js?v=0.3.0';
+import {getAllItems,getAllMutations,getAllOutfits} from './db.js';
 
-const VERSION='v0.2.7';
+const VERSION='v0.3.0';
 let running=false;
 
 function orphanCount(items,mutations){
@@ -24,8 +24,8 @@ function safeResult(value){
 }
 
 async function snapshot(){
-  const [cfg,items,mutations,health]=await Promise.all([
-    getSyncConfig(),getAllItems(),getAllMutations(),testSyncConnection()
+  const [cfg,items,mutations,outfits,health]=await Promise.all([
+    getSyncConfig(),getAllItems(),getAllMutations(),getAllOutfits(),testSyncConnection()
   ]);
   return {
     version:VERSION,
@@ -34,6 +34,7 @@ async function snapshot(){
     syncKeyPresent:Boolean(cfg.token),
     health:safeResult(health),
     itemCount:items.length,
+    outfitCount:outfits.length,
     pendingMutations:mutations.length,
     orphanedLocalCreates:orphanCount(items,mutations),
     mutationOps:mutations.map(m=>m.operation),
