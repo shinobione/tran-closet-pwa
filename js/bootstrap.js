@@ -13,7 +13,8 @@ try{
   console.warn('Airtable outfit snapshot hydration failed; continuing with local outfits.',error);
 }
 
-await import('./app.js?v=0.3.2');
-await import('./outfit-picker.js?v=0.3.2');
-await import('./outfit-sync-client.js?v=0.3.2');
-await import('./sync-diagnostics.js?v=0.3.2');
+await import('./app.js?v=0.3.3');
+await import('./outfit-picker.js?v=0.3.3');
+await import('./outfit-sync-client.js?v=0.3.3');
+await import('./outfit-presentation.js?v=0.3.3');
+await import('./sync-diagnostics.js?v=0.3.3');

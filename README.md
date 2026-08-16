@@ -11,6 +11,7 @@ PWA mobile-first de la garde-robe de Trân, installable sur iPhone/Android, offl
 - **V0.3-A Local Outfits Core** ✅
 - **V0.3-A.1 Scalable Outfit Picker** ✅
 - **V0.3-B Canonical Outfit Persistence** ✅ vérifié en production
+- **V0.3-C Outfit Presentation** 🟡 candidate v0.3.3
 
 La PWA reste local-first : les ajouts, modifications et suppressions de vêtements **et d'outfits** sont appliqués immédiatement dans IndexedDB, puis envoyés vers Airtable via des files de mutations séparées dès que le réseau et le Worker sont disponibles. Les favoris des vêtements restent locaux ; les favoris outfits font partie du modèle Outfit canonique.
 
@@ -117,7 +118,22 @@ Le 16 août 2026, V0.3-B a été vérifiée de bout en bout :
 - Airtable revenu à 0 outfit ;
 - snapshot post-delete à `recordCount: 0` et aucune résurrection.
 
-**V0.3-B est donc CLOSED / VERIFIED PROD.** La prochaine tranche est **V0.3-C — Outfit Presentation**.
+**V0.3-B est donc CLOSED / VERIFIED PROD.**
+
+### V0.3-C — Présentation Outfit (candidate v0.3.3)
+
+La candidate ajoute une couche de présentation sans modifier le CRUD ni la sync :
+
+- détail Outfit transformé en Lookbook plein écran sur mobile ;
+- safe-area iPhone et transitions respectant `prefers-reduced-motion` ;
+- génération locale d'une carte PNG 1080×1350 ;
+- jusqu'à quatre pièces visibles sur la carte, avec compteur pour les outfits plus grands ;
+- pré-génération de l'image à l'ouverture pour préserver le geste utilisateur requis par Safari ;
+- partage natif via Web Share API avec fichier quand disponible ;
+- fallback sauvegarde PNG ;
+- partage image retenu plutôt qu'un lien public afin de préserver le caractère privé/offline-first de la garde-robe.
+
+Cette tranche reste **candidate tant que le rendu et le partage n'ont pas été vérifiés sur téléphone réel**.
 
 ### Déploiement Cloudflare via GitHub Actions
 

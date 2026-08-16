@@ -31,6 +31,7 @@ jobs:
           node --check js/outfit-sync-client.js
           node --check js/sync-diagnostics.js
           node --check js/outfit-picker.js
+          node --check js/outfit-presentation.js
           node --check scripts/sync-airtable.mjs
           node --check scripts/sync-outfits.mjs
           node --check worker/src/index.js
@@ -45,6 +46,7 @@ jobs:
           test -f css/app.css
           test -f css/outfits.css
           test -f css/outfit-picker.css
+          test -f css/outfit-presentation.css
           test -f js/bootstrap.js
           test -f js/airtable-bridge.js
           test -f js/airtable-snapshot.js
@@ -54,6 +56,7 @@ jobs:
           test -f js/outfit-sync-client.js
           test -f js/sync-diagnostics.js
           test -f js/outfit-picker.js
+          test -f js/outfit-presentation.js
           test -f scripts/sync-airtable.mjs
           test -f scripts/sync-outfits.mjs
           test -f worker/src/index.js
@@ -63,11 +66,14 @@ jobs:
           test -f icons/icon-192.png
           test -f icons/icon-512.png
           grep -q 'manifest.webmanifest' index.html
-          grep -q 'bootstrap.js?v=0.3.2' index.html
+          grep -q 'bootstrap.js?v=0.3.3' index.html
           grep -q 'outfits.css?v=0.3.0' index.html
           grep -q 'outfit-picker.css?v=0.3.1' index.html
-          grep -q 'outfit-picker.js?v=0.3.2' js/bootstrap.js
-          grep -q 'outfit-sync-client.js?v=0.3.2' js/bootstrap.js
+          grep -q 'outfit-presentation.css?v=0.3.3' index.html
+          grep -q 'outfit-picker.js?v=0.3.3' js/bootstrap.js
+          grep -q 'outfit-sync-client.js?v=0.3.3' js/bootstrap.js
+          grep -q 'outfit-presentation.js?v=0.3.3' js/bootstrap.js
+          grep -q 'sync-diagnostics.js?v=0.3.3' js/bootstrap.js
           grep -q 'syncOutfitSnapshotToLocalDB' js/bootstrap.js
           grep -q 'serviceWorker' js/app.js
           grep -q 'queueMutation' js/app.js
@@ -78,7 +84,14 @@ jobs:
           grep -q 'tblhtL2UlsgCAh6E7' scripts/sync-outfits.mjs
           grep -q '/v1/outfit-mutations' worker/src/index.js
           grep -q 'fld0mNaoxnTIckVXI' worker/src/index.js
-          grep -q 'tran-closet-v0.3.2' sw.js
+          grep -q 'tran-closet-v0.3.3' sw.js
+          grep -q 'outfit-presentation.css?v=0.3.3' sw.js
+          grep -q 'outfit-presentation.js?v=0.3.3' sw.js
+          grep -q "const VERSION='v0.3.3'" js/sync-diagnostics.js
+          grep -q 'navigator.share' js/outfit-presentation.js
+          grep -q 'navigator.canShare' js/outfit-presentation.js
+          grep -q '1080' js/outfit-presentation.js
+          grep -q '1350' js/outfit-presentation.js
           grep -q 'CLOSET_SYNC_KEY' worker/src/index.js
           grep -q 'AIRTABLE_PAT' worker/src/index.js
           grep -q 'AIRTABLE_PAT' .github/workflows/sync-airtable.yml

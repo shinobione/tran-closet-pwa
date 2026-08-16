@@ -90,11 +90,18 @@
 - snapshot post-delete `recordCount: 0`, aucune résurrection
 - **V0.3-B fermée le 16/08/2026**
 
-### V0.3-C — Outfit Presentation
-- vue plein écran partageable
-- composition/couverture plus premium
-- partage image ou lien selon architecture retenue
-- polish iPhone et transitions
+### V0.3-C — Outfit Presentation 🟡 CANDIDATE v0.3.3
+- détail Outfit en vue Lookbook plein écran mobile
+- safe-area iPhone et fermeture toujours accessible
+- composition/couverture premium avec transitions respectant `prefers-reduced-motion`
+- génération locale d'une carte PNG 1080×1350
+- pré-génération de l'image avant interaction de partage pour Safari/iPhone
+- partage natif Web Share avec fichier quand disponible
+- fallback sauvegarde image
+- partage image choisi plutôt qu'un lien public afin de préserver le modèle privé/offline-first
+- jusqu'à 4 pièces visibles sur la carte + compteur pour les outfits plus grands
+- aucun changement du CRUD, IndexedDB, Worker ou Airtable
+- reste à valider sur téléphone réel avant ✅
 
 ## V0.4 — Smart Closet
 - analyse photo IA : catégorie, couleurs, styles

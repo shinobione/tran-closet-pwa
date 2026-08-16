@@ -15,7 +15,7 @@ Dernière mise à jour : 2026-08-16
 - **dernière phase close : V0.2 — Airtable Bridge**
 - **phase active : V0.3 — Outfits**
 - **dernière slice vérifiée : V0.3-B — Canonical Outfit Persistence**
-- prochaine tranche : **V0.3-C — Outfit Presentation**
+- **candidate active : V0.3-C — Outfit Presentation / v0.3.3**
 
 ## V0.2 — État vérifié
 
@@ -106,9 +106,34 @@ Vérifications production réalisées le 16/08/2026 :
 
 **V0.3-B est close et vérifiée en production.**
 
+## V0.3-C — Candidate v0.3.3
+
+Objectif : transformer le détail Outfit en vraie présentation partageable sans modifier le modèle de données ni la sync.
+
+Architecture candidate :
+
+- module `outfit-presentation.js` totalement séparé du CRUD Outfit
+- vue Lookbook plein écran sur mobile avec safe-area iPhone
+- composition visuelle premium et transitions avec respect de `prefers-reduced-motion`
+- génération locale d'une carte PNG 1080×1350 depuis les photos déjà présentes dans la PWA
+- pré-génération de la carte à l'ouverture afin de conserver le geste utilisateur requis par Safari/Web Share
+- partage natif via Web Share API quand les fichiers sont supportés
+- fallback sauvegarde PNG quand le partage de fichier n'est pas disponible
+- aucune URL publique d'outfit : le partage image ne publie pas la garde-robe
+- jusqu'à 4 pièces visibles sur la carte, avec compteur `+N` pour les outfits plus grands
+- aucune modification `app.js`, `db.js`, Worker ou Airtable
+
+À vérifier avant clôture V0.3-C :
+
+1. CI PR verte
+2. déploiement Pages v0.3.3
+3. rendu plein écran réel sur téléphone
+4. bouton de partage prêt après ouverture d'un outfit
+5. ouverture correcte de la feuille de partage native iPhone ou fallback image
+6. image exportée lisible avec photos, titre et métadonnées
+7. navigation détail → vêtement / édition / favori / suppression toujours intacte
+
 ## Deferred / connus
 
 - remplacement de la photo d'un vêtement Airtable existant
-- vue outfit partageable plein écran
-- composition Outfit plus premium
 - analyse photo IA
