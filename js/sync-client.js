@@ -90,16 +90,30 @@ export async function flushMutationQueue(){
     const writeTime=new Date().toISOString();
 
     for(const result of results){
-      if(!result?.ok)continue;
-      const mutation=mutations.find(m=>m.id===result.mutationId);
+      const mutation=mutations.find(m=>m.id===result?.mutationId);
       if(!mutation)continue;
+
+      if(result.partial&&mutation.operation==='create'&&result.airtableRecordId){
+        const item=byId.get(mutation.localItemId);
+        if(item){
+          const updated={...item,airtableRecordId:result.airtableRecordId,source:'airtable',syncState:'pending-photo',cloudWriteAt:writeTime};
+          await putItem(updated);byId.set(updated.id,updated);
+        }
+        await deleteMutation(mutation.id);
+        if(mutation.payload?.photo){
+          await putMutation({id:crypto.randomUUID(),operation:'photo',localItemId:mutation.localItemId,airtableRecordId:result.airtableRecordId,createdAt:new Date().toISOString(),payload:{photo:mutation.payload.photo}});
+        }
+        continue;
+      }
+
+      if(!result?.ok)continue;
       if(mutation.operation==='create'&&result.airtableRecordId){
         const item=byId.get(mutation.localItemId);
         if(item){
           const updated={...item,airtableRecordId:result.airtableRecordId,source:'airtable',syncState:'awaiting-snapshot',cloudWriteAt:writeTime};
           await putItem(updated);byId.set(updated.id,updated);
         }
-      }else if(mutation.operation==='update'){
+      }else if(mutation.operation==='update'||mutation.operation==='photo'){
         const item=byId.get(mutation.localItemId);
         if(item){
           const updated={...item,syncState:'awaiting-snapshot',cloudWriteAt:writeTime};
@@ -112,7 +126,8 @@ export async function flushMutationQueue(){
     }
     await setMeta(DELETE_TOMBSTONES_KEY,tombstones);
     await setMeta('airtable-last-write-sync',writeTime);
-    return {ok:results.every(r=>r.ok),pending:await pendingMutationCount(),results};
+    const pending=await pendingMutationCount();
+    return {ok:results.every(r=>r.ok)&&pending===0,pending,results};
   }finally{flushing=false;}
 }
 
