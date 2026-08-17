@@ -1,0 +1,114 @@
+name: Smoke V0.4-C Smart Tags
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/smoke-smart-tags.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      WORKER_URL: https://tran-closet-sync.jerryquinet.workers.dev
+      AIRTABLE_BASE: appw8WNvdDuXUgYvN
+      AIRTABLE_TABLE: tblKdCi4MI4AH26y8
+      AIRTABLE_RECORD: recLjpxC6kj5pGEEj
+      TAG_FIELD: fld9hV9qirpfVfJmM
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify Worker → Airtable → snapshot Tags round-trip and restore
+        env:
+          CLOSET_SYNC_KEY: ${{ secrets.CLOSET_SYNC_KEY }}
+          AIRTABLE_PAT: ${{ secrets.AIRTABLE_PAT }}
+        run: |
+          set -euo pipefail
+
+          make_payload() {
+            python3 - "$1" <<'PY'
+          import json,sys,uuid,datetime
+          tags=[] if sys.argv[1]=='clear' else ['Cozy']
+          body={
+            'mutations':[{
+              'id':str(uuid.uuid4()),
+              'operation':'update',
+              'localItemId':'smart-tags-smoke',
+              'airtableRecordId':'recLjpxC6kj5pGEEj',
+              'createdAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+              'payload':{
+                'name':'Neck Poca',
+                'category':'Accessorie',
+                'colors':['Blue'],
+                'styles':['Casual'],
+                'tags':tags,
+                'photo':None
+              }
+            }]
+          }
+          open('/tmp/mutation.json','w',encoding='utf-8').write(json.dumps(body))
+          PY
+          }
+
+          call_worker() {
+            local mode="$1"
+            make_payload "$mode"
+            local status
+            status="$(curl --silent --show-error --output /tmp/worker-result.json --write-out '%{http_code}' \
+              -X POST \
+              -H "Authorization: Bearer $CLOSET_SYNC_KEY" \
+              -H 'Content-Type: application/json' \
+              --data-binary @/tmp/mutation.json \
+              "${WORKER_URL%/}/v1/mutations")"
+            echo "Worker $mode HTTP $status"
+            test "$status" = "200"
+            jq -e '.results[0].ok == true' /tmp/worker-result.json >/dev/null
+          }
+
+          restore_tags() {
+            set +e
+            call_worker clear >/tmp/restore.log 2>&1
+            set -e
+          }
+          trap restore_tags EXIT
+
+          call_worker set
+
+          curl --silent --show-error \
+            -H "Authorization: Bearer $AIRTABLE_PAT" \
+            "https://api.airtable.com/v0/$AIRTABLE_BASE/$AIRTABLE_TABLE/$AIRTABLE_RECORD?returnFieldsByFieldId=true" \
+            > /tmp/airtable-tagged.json
+          jq -e --arg field "$TAG_FIELD" '.fields[$field] == ["Cozy"]' /tmp/airtable-tagged.json >/dev/null
+          echo 'Airtable contains Cozy ✓'
+
+          AIRTABLE_PAT="$AIRTABLE_PAT" node scripts/sync-airtable.mjs
+          node --input-type=module <<'NODE'
+          const {AIRTABLE_SNAPSHOT}=await import(`./js/airtable-snapshot.js?smoke=${Date.now()}`);
+          const item=AIRTABLE_SNAPSHOT.items.find(item=>item.airtableRecordId==='recLjpxC6kj5pGEEj');
+          if(!item||!Array.isArray(item.tags)||!item.tags.includes('Cozy')){
+            console.error('Snapshot did not preserve Cozy tag',item);
+            process.exit(1);
+          }
+          console.log('Snapshot contains Cozy ✓');
+          NODE
+
+          call_worker clear
+          trap - EXIT
+
+          curl --silent --show-error \
+            -H "Authorization: Bearer $AIRTABLE_PAT" \
+            "https://api.airtable.com/v0/$AIRTABLE_BASE/$AIRTABLE_TABLE/$AIRTABLE_RECORD?returnFieldsByFieldId=true" \
+            > /tmp/airtable-restored.json
+          jq -e --arg field "$TAG_FIELD" '((.fields[$field] // []) | length) == 0' /tmp/airtable-restored.json >/dev/null
+          echo 'Airtable Tags restored to empty ✓'
