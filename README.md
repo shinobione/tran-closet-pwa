@@ -7,11 +7,9 @@ PWA mobile-first de la garde-robe de Trân, installable sur iPhone/Android, offl
 - **V0.1 Local Closet** ✅
 - **V0.2 Airtable Bridge** ✅ CLOSED / VERIFIED PROD
 - **V0.3 Outfits** ✅ CLOSED / VERIFIED PROD
-- **V0.4 Smart Closet** ✅ CLOSED / VERIFIED PROD
-- **V0.4-A Photo AI Assistant** ✅ CLOSED / VERIFIED PROD
-- **V0.4-B Duplicate Guard** ✅ CLOSED / VERIFIED PROD
-- **V0.4-C Smart Tags** ✅ CLOSED / VERIFIED PROD — `v0.4.6`
+- **V0.4 Smart Closet** ✅ CLOSED / VERIFIED PROD — `v0.4.6`
 - **V0.5 Assistant** 🟡 active
+- **V0.5-A `Hôm nay mặc gì?`** 🟡 candidate `v0.5.0`
 
 La PWA reste local-first : les ajouts, modifications et suppressions de vêtements et d'outfits sont appliqués immédiatement dans IndexedDB, puis envoyés vers Airtable via des files de mutations séparées lorsque le réseau et le Worker sont disponibles.
 
@@ -23,52 +21,47 @@ Chaque push sur `main` déploie automatiquement :
 
 Sur iPhone : Safari → Partager → Ajouter à l'écran d'accueil.
 
-## V0.2 — Sync vêtements ✅ VERIFIED PROD
+## V0.4 — Smart Closet ✅ VERIFIED PROD
 
-Flux canonique :
+Le dressing dispose maintenant d'une analyse photo assistée human-in-the-loop, d'un Duplicate Guard perceptuel et de Smart Tags canoniques. Les flows réels PWA → Worker → Airtable → snapshot ont été vérifiés en production.
 
-`PWA / IndexedDB → file de mutations → Worker authentifié → Airtable → snapshot GitHub → PWA`
+## V0.5-A — `Hôm nay mặc gì?` 🟡 CANDIDATE v0.5.0
 
-CREATE + photo, UPDATE, DELETE, retry offline, idempotence via `Sync Mutation ID`, tombstones anti-résurrection et snapshots canoniques sont vérifiés en production.
+Le premier assistant quotidien est une surcouche locale : aucun nouveau secret, aucun nouveau champ Airtable, aucune modification du CRUD vêtements.
 
-## V0.3 — Outfits ✅ VERIFIED PROD
+Fonctionnalités candidate :
+- CTA **`Hôm nay mặc gì?`** sur la home du dressing ;
+- météo actuelle, ressenti, max/min, pluie et vent via Open-Meteo ;
+- TP. Hồ Chí Minh comme localisation par défaut ;
+- recherche manuelle d'une ville via Open-Meteo Geocoding ;
+- géolocalisation navigateur uniquement après action explicite ;
+- cache météo local 30 minutes, lié aux coordonnées ;
+- recalcul par occasion : quotidien, travail, date, fête, voyage, sport, formel ;
+- ranking des outfits déjà enregistrés ;
+- création locale de propositions top + bottom ou pièce unique ;
+- ajout contextuel de chaussures, sac, couvre-chef et parapluie ;
+- signaux catégories, couleurs, styles, favoris et Smart Tags ;
+- explication courte de chaque suggestion ;
+- diversité entre les 3 meilleurs looks ;
+- fallback propre si le dressing n'a pas encore assez de pièces de base ;
+- **aucune sauvegarde automatique** : `Lưu thành outfit` reste une action explicite ;
+- minimum 2 pièces pour créer un outfit ;
+- pas de doublon si la même composition existe déjà dans `Phối đồ`.
 
-**Phối đồ** fournit création/édition/suppression, picker scalable 100+, persistance Airtable par linked records, queue offline séparée, Lookbook plein écran, PNG 1080×1350 et Web Share. CRUD, snapshot retour et anti-résurrection sont vérifiés.
+Le moteur est isolé dans `js/daily-assistant-core.mjs` avec tests unitaires ciblés. Le module UI est `js/daily-assistant.js`.
 
-## V0.4-A — Analyse photo assistée ✅ VERIFIED PROD
+## V0.5 — suite
 
-Principe : **l'IA propose, Trân valide avant toute écriture canonique.**
+### V0.5-B — Historique & rotation
+- historique des tenues portées ;
+- dernière utilisation ;
+- rareté / vêtements sous-utilisés ;
+- signal de rotation pour réduire les répétitions.
 
-Pipeline validé : LLaVA pour la vision, Llama 4 pour la classification structurée, plusieurs passes vision, retry client automatique, indicateurs de fiabilité, catégories `Underwear`, `Headwear`, `Umbrella`, couleur `Brown / Nâu`, preview full-frame. QA réel : chaussures DC, boxer, casquette et parapluie.
-
-## V0.4-B — Duplicate Guard ✅ VERIFIED PROD
-
-Le Duplicate Guard repère localement un article probablement déjà présent avant création : dHash perceptuel 64 bits, distance de Hamming, métadonnées, score explicable et jusqu'à 3 candidats proches.
-
-Le parcours réel a été vérifié : warning avant écriture, `Quay lại kiểm tra` sans création, bypass explicite `Vẫn lưu món này`, création d'un doublon volontaire distinct, suppression PWA du doublon, retour Airtable à 3 records et snapshot post-delete sans résurrection.
-
-Le guard n'effectue jamais de merge/delete automatique et n'a besoin d'aucun nouveau secret ni appel cloud.
-
-## V0.4-C — Smart Tags ✅ VERIFIED PROD
-
-La PR #23 est mergée sur `main` et le Worker v0.4.6 est déployé.
-
-Fonctionnalités :
-- champ Airtable canonique `Tags` ;
-- vocabulaire fixe de 22 tags avec labels vietnamiens ;
-- tags éditables dans création/édition et visibles dans le détail ;
-- recherche vêtements et Outfit Picker par tags ;
-- backup JSON v4 ;
-- sync PWA → Worker → Airtable et snapshot retour avec Tags ;
-- suggestions IA de 0–5 tags maximum, strictement dans la taxonomie, avec `tagReason` ;
-- `Áp dụng gợi ý` applique aussi les tags, toujours éditables avant sauvegarde ;
-- vieux clients protégés : un payload qui omet `tags` ne les efface pas.
-
-Validation production complète : Worker + health SUCCESS, round-trip réversible `Cozy` SUCCESS, contrat IA Smart Tags SUCCESS, puis QA réel depuis la PWA : `VietCap` sauvegardé avec `Graphic + Logo` et `Jerry's Panty` avec `Graphic + Text`. Le snapshot canonique post-QA relit 5 vêtements et conserve ces tags.
-
-## V0.5 — Assistant 🟡 ACTIVE
-
-Prochaine étape : **`Hôm nay mặc gì?`** — recommandations d'outfits à partir du vrai dressing, avec météo locale, occasion, saison, Smart Tags, couleurs/styles et rotation du dressing. Les recommandations restent explicables et aucune tenue n'est sauvegardée sans validation explicite de Trân.
+### V0.5-C — Assistant conversationnel
+- questions simples autour du dressing ;
+- préparation d'une tenue pour une occasion future ;
+- explications détaillées à la demande.
 
 ## Infrastructure
 
