@@ -57,6 +57,14 @@ function roleOf(category){
   return null;
 }
 
+export function isWearableLook(items=[]){
+  const roles=new Set(items
+    .filter(item=>item&&!EXCLUDED_CATEGORIES.has(item.category))
+    .map(item=>roleOf(item.category))
+    .filter(Boolean));
+  return roles.has('one')||(roles.has('top')&&roles.has('bottom'));
+}
+
 function occasionScore(item,occasion){
   const signal=OCCASION_SIGNALS[occasion]||OCCASION_SIGNALS.Other;
   const styles=new Set(arr(item.styles));
@@ -172,8 +180,14 @@ export function recommendLooks({items=[],outfits=[],weather={},occasion='Everyda
   const candidates=[];
 
   for(const outfit of outfits){
-    const outfitItems=arr(outfit.itemIds).map(id=>byId.get(String(id))).filter(Boolean);
-    if(outfitItems.length<2)continue;
+    const outfitItems=arr(outfit.itemIds)
+      .map(id=>byId.get(String(id)))
+      .filter(Boolean)
+      .filter(item=>!EXCLUDED_CATEGORIES.has(item.category));
+    // A saved collection is only a wearable recommendation when it contains
+    // either a one-piece garment or a top + bottom core. Accessories alone
+    // remain valid saved outfits in the closet, but are not "what to wear".
+    if(!isWearableLook(outfitItems))continue;
     let score=outfitItems.reduce((sum,item)=>sum+itemWeatherScore(item,profile,occasion),0)+colorHarmony(outfitItems);
     if(outfit.occasion===occasion)score+=38;
     else if(outfit.occasion==='Everyday')score+=8;
