@@ -37,6 +37,7 @@ jobs:
           node --check js/duplicate-guard.js
           node --check js/daily-assistant-core.mjs
           node --check js/daily-assistant.js
+          node --check js/i18n.js
           node --check scripts/sync-airtable.mjs
           node --check scripts/sync-outfits.mjs
           node --check scripts/test-duplicate-core.mjs
@@ -63,6 +64,7 @@ jobs:
           test -f css/item-ai-assistant.css
           test -f css/duplicate-guard.css
           test -f css/daily-assistant.css
+          test -f css/i18n.css
           test -f js/bootstrap.js
           test -f js/airtable-bridge.js
           test -f js/airtable-snapshot.js
@@ -78,6 +80,7 @@ jobs:
           test -f js/duplicate-guard.js
           test -f js/daily-assistant-core.mjs
           test -f js/daily-assistant.js
+          test -f js/i18n.js
           test -f scripts/test-duplicate-core.mjs
           test -f scripts/test-smart-tags.mjs
           test -f scripts/test-daily-assistant.mjs
@@ -85,16 +88,18 @@ jobs:
           test -f scripts/sync-outfits.mjs
           test -f worker/src/index.js
           test -f worker/wrangler.toml
-          grep -q 'bootstrap.js?v=0.5.0' index.html
-          grep -q 'item-ai-assistant.css?v=0.5.0' index.html
-          grep -q 'duplicate-guard.css?v=0.5.0' index.html
-          grep -q 'daily-assistant.css?v=0.5.0' index.html
-          grep -q 'app.js?v=0.5.0' js/bootstrap.js
-          grep -q 'outfit-picker.js?v=0.5.0' js/bootstrap.js
-          grep -q 'item-ai-assistant.js?v=0.5.0' js/bootstrap.js
-          grep -q 'duplicate-guard.js?v=0.5.0' js/bootstrap.js
-          grep -q 'daily-assistant.js?v=0.5.0' js/bootstrap.js
-          grep -q 'sync-diagnostics.js?v=0.5.0' js/bootstrap.js
+          grep -q 'bootstrap.js?v=0.5.1' index.html
+          grep -q 'item-ai-assistant.css?v=0.5.1' index.html
+          grep -q 'duplicate-guard.css?v=0.5.1' index.html
+          grep -q 'daily-assistant.css?v=0.5.1' index.html
+          grep -q 'i18n.css?v=0.5.1' index.html
+          grep -q 'app.js?v=0.5.1' js/bootstrap.js
+          grep -q 'outfit-picker.js?v=0.5.1' js/bootstrap.js
+          grep -q 'item-ai-assistant.js?v=0.5.1' js/bootstrap.js
+          grep -q 'duplicate-guard.js?v=0.5.1' js/bootstrap.js
+          grep -q 'daily-assistant.js?v=0.5.1' js/bootstrap.js
+          grep -q 'sync-diagnostics.js?v=0.5.1' js/bootstrap.js
+          grep -q 'i18n.js?v=0.5.1' js/bootstrap.js
           grep -q 'serviceWorker' js/app.js
           grep -q 'queueMutation' js/app.js
           grep -q "STORE_OUTFITS='outfits'" js/db.js
@@ -116,9 +121,10 @@ jobs:
           grep -q 'Vẫn lưu món này' js/duplicate-guard.js
           grep -q 'hammingDistance' js/duplicate-core.mjs
           grep -q 'duplicateAssessment' js/duplicate-core.mjs
-          grep -q 'tran-closet-v0.5.0' sw.js
-          grep -q 'daily-assistant-core.mjs?v=0.5.0' sw.js
-          grep -q "const VERSION='v0.5.0'" js/sync-diagnostics.js
+          grep -q 'tran-closet-v0.5.1' sw.js
+          grep -q 'daily-assistant-core.mjs?v=0.5.1' sw.js
+          grep -q 'i18n.js?v=0.5.1' sw.js
+          grep -q "const VERSION='v0.5.1'" js/sync-diagnostics.js
           grep -q 'navigator.share' js/outfit-presentation.js
           grep -q '1080' js/outfit-presentation.js
           grep -q '1350' js/outfit-presentation.js
@@ -164,6 +170,18 @@ jobs:
           grep -q "Rain-ready" js/daily-assistant-core.mjs
           grep -q 'sameItemSet' js/daily-assistant-core.mjs
           grep -q 'daily assistant core: PASS' scripts/test-daily-assistant.mjs
+      - name: Check V0.5.1 bilingual UI contract
+        run: |
+          grep -q "LANGUAGE_KEY='tran-closet-language'" js/i18n.js
+          grep -q "SUPPORTED=new Set(\['vi','fr'\])" js/i18n.js
+          grep -q "searchParams.get('lang')" js/i18n.js
+          grep -q "localStorage.setItem(LANGUAGE_KEY" js/i18n.js
+          grep -q "Qu’est-ce que je mets aujourd’hui ?" js/i18n.js
+          grep -q "VÉRIFICATION DES DOUBLONS" js/i18n.js
+          grep -q "Analyser avec l’IA" js/i18n.js
+          grep -q "Diagnostic de synchronisation" js/i18n.js
+          grep -q "window.confirm=message=>nativeConfirm(translateRaw(message))" js/i18n.js
+          grep -q 'language-switch' css/i18n.css
       - name: Guard against committed secrets
         run: |
           if grep -R --exclude='sync-airtable.yml' --exclude='deploy-worker.yml' --exclude='index.js' --exclude-dir='.git' -E 'pat[A-Za-z0-9._-]{20,}' .; then

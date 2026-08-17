@@ -48,7 +48,7 @@
 
 ## V0.5 — Assistant 🟡 ACTIVE
 
-### V0.5-A — “Hôm nay mặc gì?” 🟡 CANDIDATE v0.5.0
+### V0.5-A — “Hôm nay mặc gì?” 🟡 CANDIDATE v0.5.1
 - bouton Assistant directement sur la home du dressing
 - météo actuelle + max/min + risque de pluie + vent
 - Open-Meteo sans nouveau secret
@@ -67,13 +67,18 @@
 - déduplication d'une composition déjà existante
 - tests unitaires ciblés du moteur
 - aucun changement Worker/Airtable/DB/CRUD
+- **v0.5.1 : sélecteur persistant FR / VI pour QA compréhensible**
+- `?lang=fr` force le français sur l'appareil de test ; vietnamien conservé par défaut pour Trân
+- traduction client des écrans dressing, ajout, IA photo, Duplicate Guard, outfits, assistant météo, profil/sync et diagnostics
 
 QA requis avant fermeture :
-1. météo TP.HCM affichée ;
-2. changement de ville et/ou localisation actuelle ;
-3. changement d'occasion recalcule les suggestions ;
-4. dressing incomplet géré proprement ;
-5. avec assez de pièces, `Lưu thành outfit` crée un outfit puis sync via le pipeline existant.
+1. mode FR compréhensible sur toutes les surfaces de test ;
+2. retour VI intact ;
+3. météo TP.HCM affichée ;
+4. changement de ville et/ou localisation actuelle ;
+5. changement d'occasion recalcule les suggestions ;
+6. dressing incomplet géré proprement ;
+7. avec assez de pièces, sauvegarder comme tenue crée un outfit puis sync via le pipeline existant.
 
 ### V0.5-B — Historique & rotation — NEXT
 - historique des tenues portées
