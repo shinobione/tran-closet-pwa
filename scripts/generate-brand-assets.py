@@ -1,16 +1,29 @@
 from pathlib import Path
+import base64
+import hashlib
+import io
 
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageStat
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / 'branding' / 'logo-source-round.jpg'
 BRANDING = ROOT / 'branding'
 ICONS = ROOT / 'icons'
+SOURCE_PARTS = sorted(BRANDING.glob('logo-source-round.b64.part*'))
+EXPECTED_SOURCE_SHA256 = 'f600cd19c5ebe2a0e93f8be2c7b3d3dc5df267f10a5d1c577a85059c744920de'
 
 BRANDING.mkdir(parents=True, exist_ok=True)
 ICONS.mkdir(parents=True, exist_ok=True)
 
-source = Image.open(SOURCE).convert('RGB')
+if not SOURCE_PARTS:
+    raise RuntimeError('No canonical round logo source parts found.')
+
+encoded = ''.join(part.read_text(encoding='ascii').strip() for part in SOURCE_PARTS)
+source_bytes = base64.b64decode(encoded, validate=True)
+source_hash = hashlib.sha256(source_bytes).hexdigest()
+if source_hash != EXPECTED_SOURCE_SHA256:
+    raise RuntimeError(f'Canonical logo source checksum mismatch: {source_hash}')
+source = Image.open(io.BytesIO(source_bytes)).convert('RGB')
+
 # Source is the canonical compact crop from the selected round logo artwork.
 # Keep the mark crop proportional so a future higher-resolution replacement works unchanged.
 w, h = source.size
@@ -98,4 +111,4 @@ for text, font, y, fill in (
 
 quantized_save(splash, BRANDING / 'splash-1242x2688.png')
 
-print('Brand assets generated from', SOURCE.relative_to(ROOT), source.size)
+print('Brand assets generated from', len(SOURCE_PARTS), 'canonical source part(s)', source.size, source_hash)
