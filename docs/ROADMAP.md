@@ -26,92 +26,76 @@
 - création avec upload photo côté Worker
 - file IndexedDB de mutations et retry au retour du réseau
 - état de sync visible par item
-- favoris local-only
-- compactage create/update/delete avant envoi
-- retry photo séparé après création partielle
-- tombstones de suppression
+- création idempotente via `Sync Mutation ID`
+- tombstones anti-résurrection
 - protection contre snapshots plus anciens que les writes locaux
-- création idempotente via Airtable `Sync Mutation ID`
-- réparation des vieux items locaux orphelins
-- cache applicatif durci contre le JS de sync périmé
-- remplacement de photo d'un article existant reporté à une tranche dédiée
 
 ### V0.2-C — Activation & verified write sync ✅
 - Worker Cloudflare déployé
 - PAT Airtable write-only/scopé et `CLOSET_SYNC_KEY` configurés
-- PWA connectée au Worker
 - test réel create → photo → update → delete
-- reread Airtable + snapshot après les writes
-- vérification absence de doublon
-- vérification anti-résurrection après delete
-- **V0.2 fermé le 16/08/2026**
+- reread Airtable + snapshot après writes
+- absence de doublon / résurrection vérifiée
 
 ## V0.3 — Outfits ✅ CLOSED
 
 ### V0.3-A — Local Outfit Core ✅
 - store IndexedDB `outfits`
-- création multi-items (minimum 2)
-- modification / suppression
-- occasion / saison / note
-- favoris outfits
-- composition visuelle dans la liste et le détail
-- navigation depuis un outfit vers ses vêtements
-- références outfit nettoyées lorsqu'un vêtement est supprimé
-- backup JSON V3 incluant vêtements + outfits
-- fonctionnement offline-first
+- création multi-items, modification, suppression
+- occasion / saison / note / favoris
+- backup JSON vêtements + outfits
 
 ### V0.3-A.1 — Scalable Outfit Picker ✅
 - recherche nom / catégorie / couleur / style
-- filtres catégories adaptés aux gros catalogues
-- filtres favoris et sélectionnés
-- compteur de résultats + compteur de sélection
-- ruban des vêtements déjà sélectionnés avec retrait rapide
-- grille filtrée à scroll interne
-- sauvegarde Outfit accessible pendant le browsing
-- conçu pour 100+ articles sans modifier le modèle Outfit
+- filtres catégories, favoris et sélectionnés
+- ruban de sélection + scroll interne
+- conçu pour 100+ articles
 
-### V0.3-B — Canonical Outfit Persistence ✅ CLOSED
-- table Airtable dédiée `Trân's Outfits`
-- linked records natifs vers `Trân's Clothes`
-- UUID stable `Outfit ID` comme clé d'idempotence
-- IndexedDB schema v4 + queue `outfitMutations` séparée
-- auto-queue create/update/delete via couche DB sans modifier `app.js`
-- endpoint Worker séparé `/v1/outfit-mutations`
-- CREATE via upsert sur `Outfit ID`
-- UPDATE / DELETE retry-safe
-- blocage propre si un vêtement lié n'est pas encore synchronisé
-- snapshot Airtable Outfit séparé + workflow 6 h/manual commun
-- bridge snapshot avec pending-write protection et tombstones anti-résurrection
-- diagnostic vêtements/outfits séparé
-- Worker smoke CREATE → UPDATE → DELETE vérifié en prod
-- migration du vrai outfit local vers Airtable sans doublon
-- UPDATE réel PWA sur le même record vérifié
-- DELETE réel PWA vérifié
-- snapshot post-delete `recordCount: 0`, aucune résurrection
-- **V0.3-B fermée le 16/08/2026**
+### V0.3-B — Canonical Outfit Persistence ✅ VERIFIED PROD
+- table Airtable dédiée + linked records vêtements
+- `Outfit ID` idempotent
+- queue `outfitMutations` séparée
+- endpoint Worker séparé
+- snapshot/bridge Outfit
+- migration, CREATE, UPDATE, DELETE et anti-résurrection vérifiés
 
 ### V0.3-C — Outfit Presentation ✅ VERIFIED PROD
-- détail Outfit en vue Lookbook plein écran
-- safe-area mobile/iPhone et fermeture toujours accessible
-- composition/couverture premium avec transitions respectant `prefers-reduced-motion`
-- génération locale d'une carte PNG 1080×1350
-- pré-génération de l'image avant interaction de partage
-- partage natif Web Share avec fichier quand disponible
-- fallback sauvegarde image
-- partage image choisi plutôt qu'un lien public afin de préserver le modèle privé/offline-first
-- jusqu'à 4 pièces visibles sur la carte + compteur pour les outfits plus grands
-- aucun changement du CRUD, IndexedDB, Worker ou Airtable
-- rendu Lookbook et fichier PNG vérifiés en production
-- validation utilisateur finale **VERIFIED PROD**
-- **V0.3 fermée le 17/08/2026**
+- Lookbook plein écran
+- PNG 1080×1350
+- Web Share + fallback sauvegarde
+- validation utilisateur finale
 
 ## V0.4 — Smart Closet 🟡 ACTIVE
 
-### V0.4-A — Analyse photo assistée
-- analyse photo IA : catégorie, couleurs, styles
-- pré-remplissage du formulaire avant sauvegarde
-- validation humaine obligatoire avant écriture canonique
-- aucun changement automatique silencieux sur un vêtement existant
+### V0.4-A — Analyse photo assistée 🟡 QA CANDIDATE v0.4.3
+
+Fondations déjà en place :
+- endpoint Workers AI authentifié
+- analyse uniquement après action explicite utilisateur
+- proposition séparée du formulaire
+- `Áp dụng gợi ý` obligatoire avant tout pré-remplissage
+- sauvegarde normale obligatoire avant écriture canonique
+- preview image complète
+
+Reliability Pass V0.4-A.3 :
+- nouvelles catégories canoniques `Underwear`, `Headwear`, `Umbrella`
+- deux passes vision serveur + troisième rescue si nécessaire
+- règles spécifiques chaussures par paire, sous-vêtements, couvre-chefs et parapluies
+- couleurs centrées sur l'objet principal, pas le décor
+- styles multiples quand justifiés
+- indicateur de fiabilité explicite
+- **retry automatique client jusqu'à 3 analyses complètes sur un seul clic**
+- meilleur résultat conservé et arrêt anticipé si suffisamment fiable
+- sentinel anti-boucle DOM pour empêcher le crash `RESULT_CODE_HUNG`
+
+QA réel à valider avant fermeture :
+- DC shoes → `Giày` avec un seul clic utilisateur
+- boxer → `Đồ lót`
+- casquette → `Mũ / nón`
+- parapluie → `Ô / dù`
+- maillot Hazard → `Áo`, couleurs/styles cohérents
+
+**Ne pas marquer V0.4-A VERIFIED PROD avant ce QA.**
 
 ### V0.4-B — Duplicate Guard
 - détection de doublons probables avant création
