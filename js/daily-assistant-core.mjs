@@ -173,6 +173,16 @@ function sameItemSet(a,b){
   return aa.length===bb.length&&aa.every((value,index)=>value===bb[index]);
 }
 
+function bestItem(group,profile,occasion){
+  return [...group].sort((a,b)=>itemWeatherScore(b,profile,occasion)-itemWeatherScore(a,profile,occasion))[0]||null;
+}
+
+function partialReasons(groups){
+  if(groups.top.length&&!groups.bottom.length)return ['Tủ còn thiếu quần/váy để hoàn thiện bộ này.','Đây là các món hiện có phù hợp nhất với thời tiết và dịp đã chọn.'];
+  if(groups.bottom.length&&!groups.top.length)return ['Tủ còn thiếu áo để hoàn thiện bộ này.','Đây là các món hiện có phù hợp nhất với thời tiết và dịp đã chọn.'];
+  return ['Tủ chưa có đủ áo + quần/váy hoặc một món liền thân để dựng outfit hoàn chỉnh.','Đây là các món hiện có phù hợp nhất với thời tiết và dịp đã chọn.'];
+}
+
 export function recommendLooks({items=[],outfits=[],weather={},occasion='Everyday',limit=3}={}){
   const profile=weatherProfile(weather);
   const byId=new Map(items.map(item=>[String(item.id),item]));
@@ -218,15 +228,17 @@ export function recommendLooks({items=[],outfits=[],weather={},occasion='Everyda
   }
 
   if(!candidates.some(candidate=>candidate.source==='generated')){
-    const support=[...items]
-      .filter(item=>!EXCLUDED_CATEGORIES.has(item.category)&&roleOf(item.category)&&!['top','bottom','one'].includes(roleOf(item.category)))
-      .sort((a,b)=>itemWeatherScore(b,profile,occasion)-itemWeatherScore(a,profile,occasion))
-      .slice(0,Math.max(2,Math.min(4,items.length)));
+    const partialBase=[];
+    const top=bestItem(groups.top,profile,occasion);
+    const bottom=bestItem(groups.bottom,profile,occasion);
+    if(top&&!bottom)partialBase.push(top);
+    else if(bottom&&!top)partialBase.push(bottom);
+    const support=addOptional(partialBase,groups,profile,occasion).slice(0,4);
     if(support.length){
       candidates.push({
         id:'partial:closet',source:'partial',name:'Món hợp hôm nay',itemIds:support.map(i=>i.id),items:support,
         score:scoreGenerated(support,profile,occasion),complete:false,season:profile.season,
-        reasons:['Tủ chưa có đủ áo + quần/váy hoặc một món liền thân để dựng outfit hoàn chỉnh.','Đây là các món phụ kiện phù hợp nhất với thời tiết và dịp đã chọn.']
+        reasons:partialReasons(groups)
       });
     }
   }
