@@ -3,22 +3,43 @@
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+}
+
+.topbar-brand-badge {
+  width: 64px;
+  height: 64px;
+  flex: 0 0 64px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #fff8f4;
+  border: 1px solid rgba(255,255,255,.22);
+  box-shadow:
+    0 0 0 2px rgba(239,155,189,.16),
+    0 0 26px rgba(239,155,189,.22),
+    0 12px 28px rgba(0,0,0,.34);
 }
 
 .topbar-brand-mark {
-  width: 44px;
-  height: 44px;
-  flex: 0 0 44px;
+  width: 100%;
+  height: 100%;
   display: block;
   object-fit: cover;
-  border-radius: 15px;
-  border: 1px solid rgba(255,255,255,.12);
-  box-shadow: 0 8px 24px rgba(0,0,0,.22);
+  transform: scale(1.48);
+  transform-origin: center;
+  filter: contrast(1.08) saturate(1.05);
 }
 
 .topbar-brand-copy {
   min-width: 0;
+}
+
+.topbar-brand-copy .eyebrow {
+  color: #ff9fca;
+  text-shadow: 0 0 14px rgba(239,155,189,.24);
 }
 
 .topbar-brand-copy h1 {
@@ -27,24 +48,72 @@
   white-space: nowrap;
 }
 
+.hero-orb {
+  flex: 0 0 82px;
+  width: 82px;
+  height: 82px;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #fff8f4 url('../branding/logo-mark-256.png') center / 150% no-repeat;
+  color: rgba(40,24,43,.38);
+  font-size: 1.05rem;
+  border: 1px solid rgba(255,255,255,.22);
+  box-shadow:
+    0 0 0 2px rgba(239,155,189,.12),
+    0 0 30px rgba(239,155,189,.18),
+    0 14px 34px rgba(0,0,0,.28);
+}
+
+@media (max-width: 520px) {
+  .topbar-brand {
+    gap: 9px;
+  }
+
+  .topbar-brand-badge {
+    width: 54px;
+    height: 54px;
+    flex-basis: 54px;
+    border-radius: 17px;
+  }
+
+  .topbar-brand-mark {
+    transform: scale(1.5);
+  }
+
+  .hero-orb {
+    flex-basis: 70px;
+    width: 70px;
+    height: 70px;
+    border-radius: 21px;
+    background-size: 152%;
+  }
+}
+
 @media (max-width: 420px) {
   .topbar-brand {
     gap: 8px;
   }
 
-  .topbar-brand-mark {
-    width: 38px;
-    height: 38px;
-    flex-basis: 38px;
-    border-radius: 13px;
+  .topbar-brand-badge {
+    width: 50px;
+    height: 50px;
+    flex-basis: 50px;
+    border-radius: 16px;
   }
 
   .topbar-brand-copy .eyebrow {
-    font-size: .61rem;
-    letter-spacing: .14em;
+    font-size: .59rem;
+    letter-spacing: .13em;
   }
 
   .topbar-brand-copy h1 {
-    font-size: 1.3rem;
+    font-size: 1.22rem;
+  }
+
+  .hero-orb {
+    flex-basis: 66px;
+    width: 66px;
+    height: 66px;
+    border-radius: 20px;
   }
 }
