@@ -28,7 +28,7 @@ export function nameSimilarity(left='',right=''){
   if(a===b)return 1;
   if((a.length>=4&&b.includes(a))||(b.length>=4&&a.includes(b)))return .86;
   const overlap=jaccard(tokenSet(a),tokenSet(b));
-  const prefix=a.slice(0,4)===b.slice(0,4)?.slice?.(0,4)?1:0;
+  const prefix=a.slice(0,4)===b.slice(0,4)?1:0;
   return Math.min(1,overlap*.88+prefix*.12);
 }
 
