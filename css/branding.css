@@ -1,0 +1,50 @@
+.topbar-brand {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topbar-brand-mark {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  display: block;
+  object-fit: cover;
+  border-radius: 15px;
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 8px 24px rgba(0,0,0,.22);
+}
+
+.topbar-brand-copy {
+  min-width: 0;
+}
+
+.topbar-brand-copy h1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 420px) {
+  .topbar-brand {
+    gap: 8px;
+  }
+
+  .topbar-brand-mark {
+    width: 38px;
+    height: 38px;
+    flex-basis: 38px;
+    border-radius: 13px;
+  }
+
+  .topbar-brand-copy .eyebrow {
+    font-size: .61rem;
+    letter-spacing: .14em;
+  }
+
+  .topbar-brand-copy h1 {
+    font-size: 1.3rem;
+  }
+}
