@@ -1,4 +1,4 @@
-name: Diagnose V0.4-A.3 Moondream request
+name: Smoke restored V0.4-A.3 reliability backend
 
 on:
   push:
@@ -18,32 +18,41 @@ jobs:
       - name: Checkout main
         uses: actions/checkout@v6
 
-      - name: Print exact Worker response for Neck Poca
+      - name: Verify three canonical analyses return reliability contract
         env:
           WORKER_URL: https://tran-closet-sync.jerryquinet.workers.dev
           CLOSET_SYNC_KEY: ${{ secrets.CLOSET_SYNC_KEY }}
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          import base64, json
+          analyze_one() {
+            LABEL="$1"
+            FILE="$2"
+            python3 - "$FILE" <<'PY'
+          import base64,json,sys
           from pathlib import Path
-          image=Path('assets/items/recLjpxC6kj5pGEEj.jpg').read_bytes()
+          image=Path(sys.argv[1]).read_bytes()
           Path('/tmp/ai-payload.json').write_text(json.dumps({'image':'data:image/jpeg;base64,'+base64.b64encode(image).decode('ascii')}),encoding='utf-8')
           PY
-          STATUS="$(curl --silent --show-error --output /tmp/ai-result.json --write-out '%{http_code}' \
-            -X POST \
-            -H "Authorization: Bearer $CLOSET_SYNC_KEY" \
-            -H 'Content-Type: application/json' \
-            --data-binary @/tmp/ai-payload.json \
-            "${WORKER_URL%/}/v1/analyze-item")"
-          echo "=== HTTP $STATUS ==="
-          python3 - <<'PY'
-          import json
+            STATUS="$(curl --silent --show-error --output /tmp/ai-result.json --write-out '%{http_code}' \
+              -X POST -H "Authorization: Bearer $CLOSET_SYNC_KEY" -H 'Content-Type: application/json' \
+              --data-binary @/tmp/ai-payload.json "${WORKER_URL%/}/v1/analyze-item")"
+            echo "=== $LABEL · HTTP $STATUS ==="
+            test "$STATUS" = "200"
+            python3 - "$LABEL" <<'PY'
+          import json,sys
           from pathlib import Path
-          raw=Path('/tmp/ai-result.json').read_text(encoding='utf-8',errors='replace')
-          try:
-              print(json.dumps(json.loads(raw),ensure_ascii=False,indent=2))
-          except Exception:
-              print(raw[:4000])
+          label=sys.argv[1]
+          body=json.loads(Path('/tmp/ai-result.json').read_text(encoding='utf-8'))
+          assert body.get('ok') is True, body
+          a=body.get('analysis') or {}
+          assert isinstance(a.get('recognized'),bool),a
+          assert isinstance(a.get('confidence'),(int,float)) and 0 <= a['confidence'] <= 1,a
+          assert body.get('reliability') in {'high','medium','low'},body
+          assert isinstance(body.get('retryUsed'),bool),body
+          assert body.get('attempts') in {2,3},body
+          print(json.dumps({'item':label,'analysis':a,'reliability':body.get('reliability'),'retryUsed':body.get('retryUsed'),'attempts':body.get('attempts')},ensure_ascii=False,indent=2))
           PY
-          test "$STATUS" = "200"
+          }
+          analyze_one 'Neck Poca' 'assets/items/recLjpxC6kj5pGEEj.jpg'
+          analyze_one 'Melody Bag' 'assets/items/recrtzfBVgQOYfAQN.jpg'
+          analyze_one 'Tui Xach' 'assets/items/recZFFx4HaeVHOrTc.jpg'
