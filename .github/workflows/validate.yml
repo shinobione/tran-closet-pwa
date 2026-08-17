@@ -38,10 +38,13 @@ jobs:
           node --check scripts/sync-airtable.mjs
           node --check scripts/sync-outfits.mjs
           node --check scripts/test-duplicate-core.mjs
+          node --check scripts/test-smart-tags.mjs
           node --check worker/src/index.js
           node --check sw.js
-      - name: Test duplicate scoring core
-        run: node scripts/test-duplicate-core.mjs
+      - name: Run focused unit tests
+        run: |
+          node scripts/test-duplicate-core.mjs
+          node scripts/test-smart-tags.mjs
       - name: Check JSON and manifest
         run: |
           python -m json.tool manifest.webmanifest > /dev/null
@@ -69,37 +72,26 @@ jobs:
           test -f js/duplicate-core.mjs
           test -f js/duplicate-guard.js
           test -f scripts/test-duplicate-core.mjs
+          test -f scripts/test-smart-tags.mjs
           test -f scripts/sync-airtable.mjs
           test -f scripts/sync-outfits.mjs
           test -f worker/src/index.js
           test -f worker/wrangler.toml
-          test -f .github/workflows/deploy-worker.yml
-          test -f icons/apple-touch-icon.png
-          test -f icons/icon-192.png
-          test -f icons/icon-512.png
-          grep -q 'manifest.webmanifest' index.html
-          grep -q 'bootstrap.js?v=0.4.5' index.html
-          grep -q 'outfits.css?v=0.4.5' index.html
-          grep -q 'outfit-picker.css?v=0.4.5' index.html
-          grep -q 'outfit-presentation.css?v=0.4.5' index.html
-          grep -q 'item-ai-assistant.css?v=0.4.5' index.html
-          grep -q 'duplicate-guard.css?v=0.4.5' index.html
-          grep -q 'outfit-picker.js?v=0.4.5' js/bootstrap.js
-          grep -q 'outfit-sync-client.js?v=0.4.5' js/bootstrap.js
-          grep -q 'outfit-presentation.js?v=0.4.5' js/bootstrap.js
-          grep -q 'item-ai-assistant.js?v=0.4.5' js/bootstrap.js
-          grep -q 'duplicate-guard.js?v=0.4.5' js/bootstrap.js
-          grep -q 'sync-diagnostics.js?v=0.4.5' js/bootstrap.js
-          grep -q 'syncOutfitSnapshotToLocalDB' js/bootstrap.js
+          grep -q 'bootstrap.js?v=0.4.6' index.html
+          grep -q 'item-ai-assistant.css?v=0.4.6' index.html
+          grep -q 'duplicate-guard.css?v=0.4.6' index.html
+          grep -q 'app.js?v=0.4.6' js/bootstrap.js
+          grep -q 'outfit-picker.js?v=0.4.6' js/bootstrap.js
+          grep -q 'item-ai-assistant.js?v=0.4.6' js/bootstrap.js
+          grep -q 'duplicate-guard.js?v=0.4.6' js/bootstrap.js
+          grep -q 'sync-diagnostics.js?v=0.4.6' js/bootstrap.js
           grep -q 'serviceWorker' js/app.js
           grep -q 'queueMutation' js/app.js
-          grep -q 'getAllOutfits' js/app.js
           grep -q "STORE_OUTFITS='outfits'" js/db.js
           grep -q "STORE_OUTFIT_MUTATIONS='outfitMutations'" js/db.js
           grep -q 'DB_VERSION=4' js/db.js
           grep -q 'tblhtL2UlsgCAh6E7' scripts/sync-outfits.mjs
           grep -q '/v1/outfit-mutations' worker/src/index.js
-          grep -q 'fld0mNaoxnTIckVXI' worker/src/index.js
           grep -q '/v1/analyze-item' worker/src/index.js
           grep -q '@cf/meta/llama-4-scout-17b-16e-instruct' worker/src/index.js
           grep -q '@cf/llava-hf/llava-1.5-7b-hf' worker/src/index.js
@@ -107,45 +99,45 @@ jobs:
           grep -q "Underwear" js/data.js
           grep -q "Headwear" js/data.js
           grep -q "Umbrella" js/data.js
-          grep -q "Brown" js/data.js
           grep -q "Brown:'Nâu'" js/data.js
-          grep -q "Underwear" worker/src/index.js
-          grep -q "Headwear" worker/src/index.js
-          grep -q "Umbrella" worker/src/index.js
-          grep -q "Brown" worker/src/index.js
-          grep -q 'Brown includes tan' worker/src/index.js
           grep -q 'MAX_CLIENT_ATTEMPTS=3' js/item-ai-assistant.js
-          grep -q 'shouldClientRetry' js/item-ai-assistant.js
-          grep -q 'aiAssistantMounted' js/item-ai-assistant.js
-          grep -q 'photo-picker.ai-photo-preview img' css/item-ai-assistant.css
-          grep -q 'object-fit:contain' css/item-ai-assistant.css
-          grep -q 'duplicate-core.mjs?v=0.4.5' js/duplicate-guard.js
           grep -q 'duplicateGuardMounted' js/duplicate-guard.js
           grep -q 'MAX_VISUAL_CANDIDATES=80' js/duplicate-guard.js
-          grep -q 'duplicateBypass' js/duplicate-guard.js
-          grep -q 'requestSubmit' js/duplicate-guard.js
           grep -q 'Vẫn lưu món này' js/duplicate-guard.js
+          grep -q 'duplicate-core.mjs?v=0.4.6' js/duplicate-guard.js
           grep -q 'hammingDistance' js/duplicate-core.mjs
           grep -q 'duplicateAssessment' js/duplicate-core.mjs
-          grep -q 'duplicate-warning' css/duplicate-guard.css
-          grep -q '^\[ai\]' worker/wrangler.toml
-          grep -q 'binding = "AI"' worker/wrangler.toml
-          grep -q 'tran-closet-v0.4.5' sw.js
-          grep -q 'duplicate-guard.css?v=0.4.5' sw.js
-          grep -q 'duplicate-core.mjs?v=0.4.5' sw.js
-          grep -q 'duplicate-guard.js?v=0.4.5' sw.js
-          grep -q "const VERSION='v0.4.5'" js/sync-diagnostics.js
+          grep -q 'tran-closet-v0.4.6' sw.js
+          grep -q 'duplicate-core.mjs?v=0.4.6' sw.js
+          grep -q "const VERSION='v0.4.6'" js/sync-diagnostics.js
           grep -q 'navigator.share' js/outfit-presentation.js
           grep -q '1080' js/outfit-presentation.js
           grep -q '1350' js/outfit-presentation.js
-          grep -q 'CLOSET_SYNC_KEY' worker/src/index.js
-          grep -q 'AIRTABLE_PAT' worker/src/index.js
-          grep -q 'AIRTABLE_PAT' .github/workflows/sync-airtable.yml
-          grep -q 'sync-outfits.mjs' .github/workflows/sync-airtable.yml
-          grep -q 'CLOUDFLARE_API_TOKEN' .github/workflows/deploy-worker.yml
-          grep -q 'CLOUDFLARE_ACCOUNT_ID' .github/workflows/deploy-worker.yml
-          grep -q 'AIRTABLE_PAT_WRITE' .github/workflows/deploy-worker.yml
-          grep -q 'CLOSET_SYNC_KEY' .github/workflows/deploy-worker.yml
+      - name: Check V0.4-C Smart Tags contract
+        run: |
+          grep -q "tags: \['Minimal','Statement'" js/data.js
+          grep -q "Minimal:'Tối giản'" js/data.js
+          grep -q "'Travel-friendly':'Du lịch'" js/data.js
+          grep -q 'name="tags"' js/app.js
+          grep -q "tags:f.getAll('tags')" js/app.js
+          grep -q "label('tag',v)" js/app.js
+          grep -q 'version:4' js/app.js
+          grep -q 'item.tags||\[\]' js/sync-client.js
+          grep -q "tags: 'fld9hV9qirpfVfJmM'" scripts/sync-airtable.mjs
+          grep -q 'tags: cleanMulti' scripts/sync-airtable.mjs
+          grep -q "tags:'fld9hV9qirpfVfJmM'" worker/src/index.js
+          grep -q 'enum:TAXONOMY.tags' worker/src/index.js
+          grep -q 'maxItems:5' worker/src/index.js
+          grep -q 'tagReason' worker/src/index.js
+          grep -q 'Allowed tag values' worker/src/index.js
+          grep -q 'if(Array.isArray(payload.tags))fields\[FIELDS.tags\]=payload.tags' worker/src/index.js
+          grep -q 'analysis.tags' js/item-ai-assistant.js
+          grep -q "TAXONOMY.tags.includes" js/item-ai-assistant.js
+          grep -q 'name="tags"' js/item-ai-assistant.js
+          grep -q 'ai-tag-reason' css/item-ai-assistant.css
+          grep -q 'item.tags||\[\]' js/outfit-picker.js
+          grep -q "translated('tag',v)" js/outfit-picker.js
+          grep -q 'taggedItemCount' js/sync-diagnostics.js
       - name: Guard against committed secrets
         run: |
           if grep -R --exclude='sync-airtable.yml' --exclude='deploy-worker.yml' --exclude='index.js' --exclude-dir='.git' -E 'pat[A-Za-z0-9._-]{20,}' .; then

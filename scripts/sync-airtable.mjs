@@ -11,7 +11,8 @@ const FIELDS = {
   category: 'fldFgbepFfRYzQiSf',
   photos: 'fldgISbij3vO9IvjM',
   colors: 'fld9c3S0zKQ1AaMWL',
-  styles: 'fldzFgTZ5iiakQBcy'
+  styles: 'fldzFgTZ5iiakQBcy',
+  tags: 'fld9hV9qirpfVfJmM'
 };
 
 if (!TOKEN) {
@@ -84,6 +85,7 @@ for (const record of records) {
     category: cleanSelect(fields[FIELDS.category]) || 'Accessorie',
     colors: cleanMulti(fields[FIELDS.colors]),
     styles: cleanMulti(fields[FIELDS.styles]),
+    tags: cleanMulti(fields[FIELDS.tags]),
     photo,
     favorite: false,
     source: 'airtable',

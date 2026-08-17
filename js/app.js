@@ -5,7 +5,7 @@ import {queueMutation,flushMutationQueue,pendingMutationCount,getSyncConfig,save
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const main=$('#mainContent'),title=$('#pageTitle'),itemDialog=$('#itemDialog'),installDialog=$('#installDialog'),toast=$('#toast');
 const state={route:'closet',items:[],outfits:[],query:'',category:'All',installPrompt:null,pending:0,syncConfigured:false,syncing:false};
-const emoji={Shirt:'👚',Pant:'👖',Skirt:'👗',Dress:'👗',Combo:'🧥',Coat:'🧥',Bag:'👜',Shoes:'👠',Accessorie:'💍',Belt:'➰',Swimware:'👙','Eye Lens':'◉',Socks:'🧦',Jumpsuit:'🩱'};
+const emoji={Shirt:'👚',Pant:'👖',Skirt:'👗',Dress:'👗',Combo:'🧥',Coat:'🧥',Bag:'👜',Shoes:'👠',Accessorie:'💍',Belt:'➰',Swimware:'👙','Eye Lens':'◉',Socks:'🧦',Jumpsuit:'🩱',Underwear:'🩲',Headwear:'🧢',Umbrella:'☂️'};
 const OUTFIT_LABELS={
   occasion:{Everyday:'Hằng ngày',Work:'Đi làm',Date:'Hẹn hò',Party:'Tiệc',Travel:'Du lịch',Sport:'Thể thao',Formal:'Trang trọng',Other:'Khác'},
   season:{All:'Mọi mùa',Hot:'Nắng nóng',Rainy:'Mùa mưa',Cool:'Mát mẻ'}
@@ -45,7 +45,12 @@ function filtered(favs=false){
   return state.items.filter(i=>
     (!favs||i.favorite) &&
     (state.category==='All'||i.category===state.category) &&
-    (!q||[i.name,i.category,...(i.colors||[]),...(i.styles||[])].join(' ').toLowerCase().includes(q))
+    (!q||[
+      i.name,i.category,label('category',i.category),
+      ...(i.colors||[]),...(i.colors||[]).map(v=>label('color',v)),
+      ...(i.styles||[]),...(i.styles||[]).map(v=>label('style',v)),
+      ...(i.tags||[]),...(i.tags||[]).map(v=>label('tag',v))
+    ].join(' ').toLowerCase().includes(q))
   );
 }
 
@@ -76,7 +81,7 @@ function closet(favs=false){
     <h2>${favs?`${list.length} món yêu thích`:`${state.items.length} món trong tủ`}</h2>
     <p>${favs?'Những món đánh dấu để tìm lại thật nhanh.':state.pending?`${state.pending} thay đổi đang chờ đồng bộ. Tủ đồ vẫn dùng được ngoại tuyến.`:'Chọn nhanh, lọc theo loại và luôn mang tủ đồ theo bên mình.'}</p></div>
     <div class="hero-orb">${favs?'♥':state.pending?'↻':'✦'}</div></section>
-    ${favs?'':`<div class="search-wrap"><input id="searchInput" type="search" value="${esc(state.query)}" placeholder="Tìm túi, váy, màu sắc…"></div>
+    ${favs?'':`<div class="search-wrap"><input id="searchInput" type="search" value="${esc(state.query)}" placeholder="Tìm tên, loại, màu, phong cách, nhãn…"></div>
     <div class="filter-row">${['All',...TAXONOMY.categories].map(c=>`<button class="filter-chip ${state.category===c?'active':''}" data-cat="${esc(c)}">${c==='All'?'Tất cả':esc(label('category',c))}</button>`).join('')}</div>`}
     <div class="section-heading"><h2>${favs?'Danh sách':'Bộ sưu tập'}</h2><span>${list.length}</span></div>
     <section class="item-grid">${list.length?list.map(card).join(''):`<div class="empty-state"><strong>Chưa có gì ở đây</strong><p>Thêm một món mới để bắt đầu.</p></div>`}</section>`;
@@ -86,7 +91,8 @@ function itemFields(i={}){
   return `<label>Tên món đồ<input name="name" required maxlength="80" value="${esc(i.name||'')}" placeholder="Ví dụ: Túi Melody"></label>
     <label>Loại<select name="category">${TAXONOMY.categories.map(v=>`<option value="${v}" ${i.category===v?'selected':''}>${esc(label('category',v))}</option>`).join('')}</select></label>
     <fieldset><legend>Màu sắc</legend><div class="choice-grid">${TAXONOMY.colors.map(v=>`<label class="choice"><input type="checkbox" name="colors" value="${v}" ${(i.colors||[]).includes(v)?'checked':''}><span>${esc(label('color',v))}</span></label>`).join('')}</div></fieldset>
-    <fieldset><legend>Phong cách</legend><div class="choice-grid">${TAXONOMY.styles.map(v=>`<label class="choice"><input type="checkbox" name="styles" value="${v}" ${(i.styles||[]).includes(v)?'checked':''}><span>${esc(label('style',v))}</span></label>`).join('')}</div></fieldset>`;
+    <fieldset><legend>Phong cách</legend><div class="choice-grid">${TAXONOMY.styles.map(v=>`<label class="choice"><input type="checkbox" name="styles" value="${v}" ${(i.styles||[]).includes(v)?'checked':''}><span>${esc(label('style',v))}</span></label>`).join('')}</div></fieldset>
+    <fieldset class="smart-tags-fieldset"><legend>Nhãn thông minh <span class="legend-note">AI có thể gợi ý</span></legend><div class="choice-grid tag-choice-grid">${TAXONOMY.tags.map(v=>`<label class="choice"><input type="checkbox" name="tags" value="${v}" ${(i.tags||[]).includes(v)?'checked':''}><span>${esc(label('tag',v))}</span></label>`).join('')}</div></fieldset>`;
 }
 
 function addView(){
@@ -237,7 +243,7 @@ function profile(){
     <button id="importBackup"><span>⇧</span><div><strong>Khôi phục dữ liệu</strong><small>Nhập file JSON</small></div><b>›</b></button>
     <button id="resetDemo" class="danger-row"><span>↺</span><div><strong>Tải lại dữ liệu cục bộ</strong><small>Xóa bản cục bộ rồi nạp lại dữ liệu chuẩn</small></div><b>›</b></button>
     <input id="backupInput" type="file" accept="application/json" hidden></section>
-    <p class="privacy-note">Khóa Airtable không nằm trong PWA. Ứng dụng chỉ lưu khóa đồng bộ riêng của thiết bị và gửi thay đổi tới Worker bảo mật. Outfits hiện được lưu cục bộ trên thiết bị.</p>`;
+    <p class="privacy-note">Khóa Airtable không nằm trong PWA. Ứng dụng chỉ lưu khóa đồng bộ riêng của thiết bị và gửi thay đổi tới Worker bảo mật. Vêtements, nhãn và outfits đều đi qua luồng đồng bộ canonique.</p>`;
 }
 
 function render(){
@@ -304,7 +310,7 @@ function bind(){
 async function saveItem(e){
   e.preventDefault();
   const f=new FormData(e.currentTarget),now=new Date().toISOString();
-  const item={id:crypto.randomUUID(),airtableRecordId:null,name:String(f.get('name')||'').trim(),category:String(f.get('category')||'Accessorie'),colors:f.getAll('colors'),styles:f.getAll('styles'),photo:$('#photoInput')?.dataset.photo||null,favorite:false,source:'local',syncState:'pending-create',createdAt:now,updatedAt:now,cloudWriteAt:null};
+  const item={id:crypto.randomUUID(),airtableRecordId:null,name:String(f.get('name')||'').trim(),category:String(f.get('category')||'Accessorie'),colors:f.getAll('colors'),styles:f.getAll('styles'),tags:f.getAll('tags'),photo:$('#photoInput')?.dataset.photo||null,favorite:false,source:'local',syncState:'pending-create',createdAt:now,updatedAt:now,cloudWriteAt:null};
   await putItem(item);
   await queueMutation('create',item);
   await refresh();
@@ -336,7 +342,7 @@ function openItem(id){
   itemDialog.innerHTML=`<div class="sheet-content"><button class="sheet-close" data-close>×</button>
     ${i.photo?`<img class="detail-photo" src="${i.photo}" alt="${esc(i.name)}">`:`<div class="detail-placeholder">${emoji[i.category]||'◇'}</div>`}
     <div class="detail-body"><p class="eyebrow">${esc(label('category',i.category))}</p><h2>${esc(i.name)}</h2>
-    <div class="detail-chips">${[...(i.colors||[]).map(v=>label('color',v)),...(i.styles||[]).map(v=>label('style',v))].map(v=>`<span>${esc(v)}</span>`).join('')}</div>
+    <div class="detail-chips">${[...(i.colors||[]).map(v=>label('color',v)),...(i.styles||[]).map(v=>label('style',v)),...(i.tags||[]).map(v=>label('tag',v))].map(v=>`<span>${esc(v)}</span>`).join('')}</div>
     ${syncText(i)?`<p class="sync-detail">↻ ${esc(syncText(i))}</p>`:''}
     <div class="detail-actions three"><button id="detailFav" class="secondary-button">${i.favorite?'♥':'♡'}</button><button id="detailEdit" class="secondary-button">Sửa</button><button id="detailDelete" class="danger-button">Xóa</button></div></div></div>`;
   itemDialog.showModal();
@@ -366,7 +372,7 @@ function openEdit(id){
   itemDialog.querySelector('#editItemForm').onsubmit=async e=>{
     e.preventDefault();
     const f=new FormData(e.currentTarget),now=new Date().toISOString();
-    const updated={...i,name:String(f.get('name')||'').trim(),category:String(f.get('category')||'Accessorie'),colors:f.getAll('colors'),styles:f.getAll('styles'),syncState:i.airtableRecordId?'pending-update':'pending-create',updatedAt:now};
+    const updated={...i,name:String(f.get('name')||'').trim(),category:String(f.get('category')||'Accessorie'),colors:f.getAll('colors'),styles:f.getAll('styles'),tags:f.getAll('tags'),syncState:i.airtableRecordId?'pending-update':'pending-create',updatedAt:now};
     await putItem(updated);
     await queueMutation('update',updated);
     itemDialog.close();
@@ -402,7 +408,7 @@ function installHelp(){
 }
 
 function exportBackup(){
-  const blob=new Blob([JSON.stringify({version:3,exportedAt:new Date().toISOString(),items:state.items,outfits:state.outfits},null,2)],{type:'application/json'}),a=document.createElement('a');
+  const blob=new Blob([JSON.stringify({version:4,exportedAt:new Date().toISOString(),items:state.items,outfits:state.outfits},null,2)],{type:'application/json'}),a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
   a.download=`tran-closet-backup-${new Date().toISOString().slice(0,10)}.json`;
   a.click();

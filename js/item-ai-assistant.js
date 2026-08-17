@@ -1,5 +1,5 @@
 import {TAXONOMY,LABELS} from './data.js';
-import {getSyncConfig} from './sync-client.js?v=0.4.3';
+import {getSyncConfig} from './sync-client.js?v=0.4.6';
 
 const root=document.querySelector('#mainContent');
 const MAX_CLIENT_ATTEMPTS=3;
@@ -54,7 +54,7 @@ function reliabilityMeta(body,analysis){
   const value=reliabilityValue(body,analysis);
   const copy={
     high:{label:'Tin cậy cao',hint:'AI khá chắc chắn, nhưng Trân vẫn là người quyết định.'},
-    medium:{label:'Cần kiểm tra',hint:'AI có tín hiệu tốt nhưng nên kiểm tra loại và màu trước khi áp dụng.'},
+    medium:{label:'Cần kiểm tra',hint:'AI có tín hiệu tốt nhưng nên kiểm tra loại, màu và nhãn trước khi áp dụng.'},
     low:{label:'Tin cậy thấp',hint:'Kết quả còn yếu. Nên kiểm tra kỹ hoặc thử ảnh rõ hơn.'}
   }[value];
   return {
@@ -82,15 +82,17 @@ function resultMarkup(analysis,meta){
       <small class="ai-reliability ai-reliability-low">${esc(meta.hint)}</small>
     </div>`;
   }
+  const tags=Array.isArray(analysis.tags)?analysis.tags:[];
   return `<div class="ai-result">
     <div class="ai-result-head"><div><span>GỢI Ý AI</span><strong>${esc(label('category',analysis.category))}</strong></div><b>${confidence}%</b></div>
     <div class="ai-reliability ai-reliability-${meta.value}"><strong>${esc(meta.label)}</strong><span>${esc(meta.hint)}</span></div>
     ${checked}
     <div class="ai-result-group"><small>Màu sắc</small><div class="ai-result-chips">${(analysis.colors||[]).map(value=>`<span>${esc(label('color',value))}</span>`).join('')||'<span>—</span>'}</div></div>
     <div class="ai-result-group"><small>Phong cách</small><div class="ai-result-chips">${(analysis.styles||[]).map(value=>`<span>${esc(label('style',value))}</span>`).join('')||'<span>—</span>'}</div></div>
+    <div class="ai-result-group ai-tag-suggestions"><small>Nhãn thông minh</small><div class="ai-result-chips">${tags.map(value=>`<span>${esc(label('tag',value))}</span>`).join('')||'<span>—</span>'}</div>${analysis.tagReason?`<p class="ai-tag-reason">${esc(analysis.tagReason)}</p>`:''}</div>
     ${analysis.reason?`<p>${esc(analysis.reason)}</p>`:''}
     <button type="button" class="primary-button ai-apply">Áp dụng gợi ý</button>
-    <small class="ai-human-note">Trân vẫn có thể sửa mọi lựa chọn trước khi lưu.</small>
+    <small class="ai-human-note">Trân vẫn có thể sửa loại, màu, phong cách và mọi nhãn trước khi lưu.</small>
   </div>`;
 }
 
@@ -104,8 +106,11 @@ function applySuggestion(form,analysis,card){
   form.querySelectorAll('input[name="colors"]').forEach(input=>{input.checked=colors.has(input.value);});
   const styles=new Set((analysis.styles||[]).filter(value=>TAXONOMY.styles.includes(value)));
   form.querySelectorAll('input[name="styles"]').forEach(input=>{input.checked=styles.has(input.value);});
+  const tags=new Set((analysis.tags||[]).filter(value=>TAXONOMY.tags.includes(value)));
+  form.querySelectorAll('input[name="tags"]').forEach(input=>{input.checked=tags.has(input.value);});
+  form.dispatchEvent(new Event('change',{bubbles:true}));
   const note=card.querySelector('.ai-applied');
-  if(note){note.hidden=false;note.textContent='✓ Đã áp dụng. Hãy kiểm tra lại trước khi lưu vào tủ đồ.';}
+  if(note){note.hidden=false;note.textContent='✓ Đã áp dụng cả phân loại và nhãn. Hãy kiểm tra lại trước khi lưu vào tủ đồ.';}
 }
 
 async function fetchAnalysis(endpoint,token,prepared,controller){
@@ -135,7 +140,7 @@ async function requestAnalysis(card,form,photoInput){
   activeRequest=controller;
   button.disabled=true;
   button.textContent='Đang đối chiếu ảnh…';
-  output.innerHTML='<div class="ai-loading"><span></span><p>AI đang nhìn ảnh nhiều lượt. Nếu kết quả còn yếu, hệ thống sẽ tự thử lại — không cần bấm nhiều lần.</p></div>';
+  output.innerHTML='<div class="ai-loading"><span></span><p>AI đang nhìn ảnh nhiều lượt để gợi ý phân loại và nhãn. Nếu kết quả còn yếu, hệ thống sẽ tự thử lại.</p></div>';
   if(applied)applied.hidden=true;
   try{
     const config=await getSyncConfig();
@@ -190,9 +195,9 @@ function mount(){
   const card=document.createElement('section');
   card.className='ai-assistant-card';
   card.innerHTML=`<div class="ai-assistant-head">
-      <div><p class="eyebrow">TRỢ LÝ ẢNH</p><h3>Để AI gợi ý phân loại</h3></div><span>✦</span>
+      <div><p class="eyebrow">TRỢ LÝ ẢNH</p><h3>Để AI gợi ý phân loại + nhãn</h3></div><span>✦</span>
     </div>
-    <p class="ai-assistant-copy">AI đối chiếu nhiều lượt và tự thử lại khi còn nghi ngờ. Không có gì được lưu hoặc thay đổi cho đến khi Trân chọn áp dụng rồi tự bấm Lưu.</p>
+    <p class="ai-assistant-copy">AI đối chiếu nhiều lượt và chỉ đề xuất. Không có loại, màu, phong cách hay nhãn nào được thay đổi cho đến khi Trân chọn áp dụng.</p>
     <button type="button" class="secondary-button ai-analyze" disabled>✦ Phân tích bằng AI</button>
     <div class="ai-output"></div>
     <p class="ai-applied" hidden></p>
