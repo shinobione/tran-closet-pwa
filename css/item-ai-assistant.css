@@ -6,7 +6,8 @@
   background:linear-gradient(145deg,rgba(216,183,255,.09),rgba(239,155,189,.045)),rgba(24,19,29,.86);
   box-shadow:0 14px 34px rgba(0,0,0,.16);
 }
-.ai-photo-preview img { object-fit:contain !important; background:#17131d; }
+.photo-picker.ai-photo-preview { background:#17131d; }
+.photo-picker.ai-photo-preview img { width:100% !important; height:100% !important; object-fit:contain !important; object-position:center !important; background:#17131d; }
 .ai-assistant-head { display:flex; align-items:center; justify-content:space-between; gap:14px; }
 .ai-assistant-head h3 { margin:0; font-size:1rem; }
 .ai-assistant-head > span {

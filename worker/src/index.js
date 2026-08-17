@@ -8,7 +8,7 @@ const AI_MODEL='@cf/meta/llama-4-scout-17b-16e-instruct';
 
 const TAXONOMY={
   categories:['Shirt','Pant','Skirt','Dress','Combo','Coat','Bag','Shoes','Accessorie','Belt','Swimware','Eye Lens','Socks','Jumpsuit','Underwear','Headwear','Umbrella'],
-  colors:['Blue','Pink','Yellow','Black','Green','Purple','White','Grey','Orange','Red'],
+  colors:['Blue','Pink','Yellow','Black','Brown','Green','Purple','White','Grey','Orange','Red'],
   styles:['Hip-Hop','Sport','Casual','Classy','Cartoon','Old']
 };
 
@@ -178,7 +178,7 @@ async function describeWardrobePhoto(photo,env,mode='primary'){
       ...modePrompt,
       'Describe shape and identifying features such as handles, straps, sleeves, legs, waistband, brim, canopy, laces or neckline.',
       'For colors, report ONLY dominant colors covering the main item. Ignore floor, furniture, walls, hangers, skin, shadows, reflections and tiny logos/trim.',
-      'Distinguish black or dark grey from dark green unless green is genuinely visible on the item.',
+      'Distinguish black, dark grey, brown/tan/camel and dark green. Use brown when the object is visibly chocolate, tan, camel or earthy brown rather than forcing it to black, grey or green.',
       'Mention visible style cues only when clear: cartoon/character print, sports jersey/performance design, skate/streetwear cues, formal/elegant cues, or retro/vintage cues.',
       'Ignore brand names and background text. Do not invent unseen details. If genuinely no wardrobe item is visible, say so explicitly.'
     ].join(' '),
@@ -202,7 +202,7 @@ async function classifyDescriptions(descriptions,env){
     '- Shoes = shoes, sneakers, boots, sandals or similar footwear; a pair still maps to Shoes.',
     '- Accessorie = wardrobe accessories without a more specific category, including neck pillows or jewelry-like items.',
     '- Pant is for trousers/shorts/pants, not underwear.',
-    `Allowed color values: ${TAXONOMY.colors.join(', ')}. Choose up to 3 DOMINANT colors of the item only. Ignore background, floor, furniture, hanger, skin, shadows and tiny accents.`,
+    `Allowed color values: ${TAXONOMY.colors.join(', ')}. Choose up to 3 DOMINANT colors of the item only. Brown includes tan, camel, chocolate and earthy brown. Ignore background, floor, furniture, hanger, skin, shadows and tiny accents.`,
     `Allowed style values: ${TAXONOMY.styles.join(', ')}. Choose up to 2 only when visibly justified; an empty styles array is allowed.`,
     'Style rules: Cartoon for visible cartoon/character/novelty prints; Sport for jerseys, athletic/performance wear or clearly athletic footwear; Hip-Hop for clear streetwear/skate/urban cues; Classy for formal/elegant design; Old only for genuinely vintage/retro cues; Casual for relaxed everyday design and it may be combined with Cartoon, Sport or Hip-Hop when both are justified.',
     'Set recognized=false only when the descriptions genuinely fail to identify any wardrobe item.',
