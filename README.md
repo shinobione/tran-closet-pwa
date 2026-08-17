@@ -7,10 +7,11 @@ PWA mobile-first de la garde-robe de Trân, installable sur iPhone/Android, offl
 - **V0.1 Local Closet** ✅
 - **V0.2 Airtable Bridge** ✅ CLOSED / VERIFIED PROD
 - **V0.3 Outfits** ✅ CLOSED / VERIFIED PROD
-- **V0.4 Smart Closet** 🟡 active
+- **V0.4 Smart Closet** ✅ CLOSED / VERIFIED PROD
 - **V0.4-A Photo AI Assistant** ✅ CLOSED / VERIFIED PROD
 - **V0.4-B Duplicate Guard** ✅ CLOSED / VERIFIED PROD
-- **V0.4-C Smart Tags** 🟡 candidate `v0.4.6` — backend/snapshot/IA vérifiés, QA PWA utilisateur en attente
+- **V0.4-C Smart Tags** ✅ CLOSED / VERIFIED PROD — `v0.4.6`
+- **V0.5 Assistant** 🟡 active
 
 La PWA reste local-first : les ajouts, modifications et suppressions de vêtements et d'outfits sont appliqués immédiatement dans IndexedDB, puis envoyés vers Airtable via des files de mutations séparées lorsque le réseau et le Worker sont disponibles.
 
@@ -48,7 +49,7 @@ Le parcours réel a été vérifié : warning avant écriture, `Quay lại kiể
 
 Le guard n'effectue jamais de merge/delete automatique et n'a besoin d'aucun nouveau secret ni appel cloud.
 
-## V0.4-C — Smart Tags 🟡 CANDIDATE v0.4.6
+## V0.4-C — Smart Tags ✅ VERIFIED PROD
 
 La PR #23 est mergée sur `main` et le Worker v0.4.6 est déployé.
 
@@ -63,9 +64,11 @@ Fonctionnalités :
 - `Áp dụng gợi ý` applique aussi les tags, toujours éditables avant sauvegarde ;
 - vieux clients protégés : un payload qui omet `tags` ne les efface pas.
 
-Gates déjà passées : Worker + health SUCCESS, round-trip réversible `Cozy` via Worker/Airtable/snapshot/restauration SUCCESS, contrat IA Smart Tags SUCCESS. Le cleanup final laisse exactement 3 vêtements canoniques et aucun tag temporaire.
+Validation production complète : Worker + health SUCCESS, round-trip réversible `Cozy` SUCCESS, contrat IA Smart Tags SUCCESS, puis QA réel depuis la PWA : `VietCap` sauvegardé avec `Graphic + Logo` et `Jerry's Panty` avec `Graphic + Text`. Le snapshot canonique post-QA relit 5 vêtements et conserve ces tags.
 
-La seule gate restante avant **CLOSED / VERIFIED PROD** est le QA PWA utilisateur : affichage/édition Tags, suggestion IA + raison, application, correction manuelle et vraie sauvegarde PWA.
+## V0.5 — Assistant 🟡 ACTIVE
+
+Prochaine étape : **`Hôm nay mặc gì?`** — recommandations d'outfits à partir du vrai dressing, avec météo locale, occasion, saison, Smart Tags, couleurs/styles et rotation du dressing. Les recommandations restent explicables et aucune tenue n'est sauvegardée sans validation explicite de Trân.
 
 ## Infrastructure
 
