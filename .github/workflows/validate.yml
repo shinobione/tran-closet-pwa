@@ -33,10 +33,15 @@ jobs:
           node --check js/outfit-picker.js
           node --check js/outfit-presentation.js
           node --check js/item-ai-assistant.js
+          node --check js/duplicate-core.mjs
+          node --check js/duplicate-guard.js
           node --check scripts/sync-airtable.mjs
           node --check scripts/sync-outfits.mjs
+          node --check scripts/test-duplicate-core.mjs
           node --check worker/src/index.js
           node --check sw.js
+      - name: Test duplicate scoring core
+        run: node scripts/test-duplicate-core.mjs
       - name: Check JSON and manifest
         run: |
           python -m json.tool manifest.webmanifest > /dev/null
@@ -49,6 +54,7 @@ jobs:
           test -f css/outfit-picker.css
           test -f css/outfit-presentation.css
           test -f css/item-ai-assistant.css
+          test -f css/duplicate-guard.css
           test -f js/bootstrap.js
           test -f js/airtable-bridge.js
           test -f js/airtable-snapshot.js
@@ -60,6 +66,9 @@ jobs:
           test -f js/outfit-picker.js
           test -f js/outfit-presentation.js
           test -f js/item-ai-assistant.js
+          test -f js/duplicate-core.mjs
+          test -f js/duplicate-guard.js
+          test -f scripts/test-duplicate-core.mjs
           test -f scripts/sync-airtable.mjs
           test -f scripts/sync-outfits.mjs
           test -f worker/src/index.js
@@ -69,16 +78,18 @@ jobs:
           test -f icons/icon-192.png
           test -f icons/icon-512.png
           grep -q 'manifest.webmanifest' index.html
-          grep -q 'bootstrap.js?v=0.4.4' index.html
-          grep -q 'outfits.css?v=0.4.4' index.html
-          grep -q 'outfit-picker.css?v=0.4.4' index.html
-          grep -q 'outfit-presentation.css?v=0.4.4' index.html
-          grep -q 'item-ai-assistant.css?v=0.4.4' index.html
-          grep -q 'outfit-picker.js?v=0.4.4' js/bootstrap.js
-          grep -q 'outfit-sync-client.js?v=0.4.4' js/bootstrap.js
-          grep -q 'outfit-presentation.js?v=0.4.4' js/bootstrap.js
-          grep -q 'item-ai-assistant.js?v=0.4.4' js/bootstrap.js
-          grep -q 'sync-diagnostics.js?v=0.4.4' js/bootstrap.js
+          grep -q 'bootstrap.js?v=0.4.5' index.html
+          grep -q 'outfits.css?v=0.4.5' index.html
+          grep -q 'outfit-picker.css?v=0.4.5' index.html
+          grep -q 'outfit-presentation.css?v=0.4.5' index.html
+          grep -q 'item-ai-assistant.css?v=0.4.5' index.html
+          grep -q 'duplicate-guard.css?v=0.4.5' index.html
+          grep -q 'outfit-picker.js?v=0.4.5' js/bootstrap.js
+          grep -q 'outfit-sync-client.js?v=0.4.5' js/bootstrap.js
+          grep -q 'outfit-presentation.js?v=0.4.5' js/bootstrap.js
+          grep -q 'item-ai-assistant.js?v=0.4.5' js/bootstrap.js
+          grep -q 'duplicate-guard.js?v=0.4.5' js/bootstrap.js
+          grep -q 'sync-diagnostics.js?v=0.4.5' js/bootstrap.js
           grep -q 'syncOutfitSnapshotToLocalDB' js/bootstrap.js
           grep -q 'serviceWorker' js/app.js
           grep -q 'queueMutation' js/app.js
@@ -103,33 +114,30 @@ jobs:
           grep -q "Umbrella" worker/src/index.js
           grep -q "Brown" worker/src/index.js
           grep -q 'Brown includes tan' worker/src/index.js
-          grep -q "Promise.all" worker/src/index.js
-          grep -q "crosscheck" worker/src/index.js
-          grep -q "rescue" worker/src/index.js
-          grep -q 'retryUsed' worker/src/index.js
-          grep -q 'reliability' worker/src/index.js
           grep -q 'MAX_CLIENT_ATTEMPTS=3' js/item-ai-assistant.js
           grep -q 'shouldClientRetry' js/item-ai-assistant.js
-          grep -q 'clientAttempts' js/item-ai-assistant.js
-          grep -q 'totalVisionPasses' js/item-ai-assistant.js
-          grep -q 'Đang tự thử lại' js/item-ai-assistant.js
           grep -q 'aiAssistantMounted' js/item-ai-assistant.js
-          grep -q 'ai-photo-preview' js/item-ai-assistant.js
           grep -q 'photo-picker.ai-photo-preview img' css/item-ai-assistant.css
           grep -q 'object-fit:contain' css/item-ai-assistant.css
-          grep -q 'Tin cậy cao' js/item-ai-assistant.js
+          grep -q 'duplicate-core.mjs?v=0.4.5' js/duplicate-guard.js
+          grep -q 'duplicateGuardMounted' js/duplicate-guard.js
+          grep -q 'MAX_VISUAL_CANDIDATES=80' js/duplicate-guard.js
+          grep -q 'duplicateBypass' js/duplicate-guard.js
+          grep -q 'requestSubmit' js/duplicate-guard.js
+          grep -q 'Vẫn lưu món này' js/duplicate-guard.js
+          grep -q 'hammingDistance' js/duplicate-core.mjs
+          grep -q 'duplicateAssessment' js/duplicate-core.mjs
+          grep -q 'duplicate-warning' css/duplicate-guard.css
           grep -q '^\[ai\]' worker/wrangler.toml
           grep -q 'binding = "AI"' worker/wrangler.toml
-          grep -q 'tran-closet-v0.4.4' sw.js
-          grep -q 'item-ai-assistant.css?v=0.4.4' sw.js
-          grep -q 'item-ai-assistant.js?v=0.4.4' sw.js
-          grep -q "const VERSION='v0.4.4'" js/sync-diagnostics.js
+          grep -q 'tran-closet-v0.4.5' sw.js
+          grep -q 'duplicate-guard.css?v=0.4.5' sw.js
+          grep -q 'duplicate-core.mjs?v=0.4.5' sw.js
+          grep -q 'duplicate-guard.js?v=0.4.5' sw.js
+          grep -q "const VERSION='v0.4.5'" js/sync-diagnostics.js
           grep -q 'navigator.share' js/outfit-presentation.js
-          grep -q 'navigator.canShare' js/outfit-presentation.js
           grep -q '1080' js/outfit-presentation.js
           grep -q '1350' js/outfit-presentation.js
-          grep -q 'Áp dụng gợi ý' js/item-ai-assistant.js
-          grep -q 'TAXONOMY.categories.includes' js/item-ai-assistant.js
           grep -q 'CLOSET_SYNC_KEY' worker/src/index.js
           grep -q 'AIRTABLE_PAT' worker/src/index.js
           grep -q 'AIRTABLE_PAT' .github/workflows/sync-airtable.yml

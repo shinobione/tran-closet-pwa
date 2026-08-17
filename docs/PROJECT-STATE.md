@@ -2,12 +2,13 @@
 
 Dernière mise à jour : 2026-08-17
 
-## Production
+## Production / candidate
 
 - PWA : `https://shinobione.github.io/tran-closet-pwa/`
 - Cloudflare Worker : `https://tran-closet-sync.jerryquinet.workers.dev`
 - branche canonique : `main`
-- release candidate de closeout : `v0.4.4`
+- production close : `v0.4.4`
+- candidate active : `v0.4.5` — V0.4-B Duplicate Guard
 - stockage local : IndexedDB `tran-closet`, schema version 4
 
 ## Phase
@@ -15,137 +16,90 @@ Dernière mise à jour : 2026-08-17
 - **V0.2 — Airtable Bridge : CLOSED / VERIFIED PROD**
 - **V0.3 — Outfits : CLOSED / VERIFIED PROD**
 - **V0.4-A — Analyse photo assistée : CLOSED / VERIFIED PROD**
-- **phase active suivante : V0.4-B — Duplicate Guard**
+- **V0.4-B — Duplicate Guard : CANDIDATE v0.4.5**
 
 ## V0.2 — CLOSED / VERIFIED PROD
 
-Le bridge vêtements est vérifié de bout en bout :
-
-- CREATE + photo
-- UPDATE du même record
-- DELETE
-- retry offline
-- idempotence via `Sync Mutation ID`
-- snapshot canonique GitHub Actions
-- tombstones anti-résurrection
-- protection contre snapshots plus anciens
-- cache applicatif network-first/no-store
-
-Le canonique final est revenu à 3 vrais vêtements, sans record de test.
+Le bridge vêtements est vérifié de bout en bout : CREATE + photo, UPDATE, DELETE, retry offline, idempotence `Sync Mutation ID`, snapshot canonique, tombstones anti-résurrection et protection contre snapshots plus anciens.
 
 ## V0.3 — CLOSED / VERIFIED PROD
 
-### Local Outfit Core + Scalable Picker
-
-- outfits IndexedDB offline-first
-- minimum 2 vêtements
-- occasion / saison / note / favoris
-- recherche et filtres pour catalogue 100+
-- picker à scroll interne + ruban sélectionné
-- backup JSON vêtements + outfits
-
-### Canonical Outfit Persistence
-
-- table Airtable `Trân's Outfits` : `tblhtL2UlsgCAh6E7`
-- linked records vers `Trân's Clothes`
-- UUID stable `Outfit ID`
-- queue `outfitMutations` séparée
-- endpoint Worker `/v1/outfit-mutations`
-- CREATE / UPDATE / DELETE vérifiés
-- snapshot / bridge Outfit séparés
-- anti-doublon et anti-résurrection vérifiés
-
-### Outfit Presentation
-
-- Lookbook plein écran
-- PNG 1080×1350
-- Web Share fichier + fallback sauvegarde
-- validation utilisateur finale VERIFIED PROD
+Outfits offline-first + picker 100+, persistance Airtable par linked records, queue séparée, CREATE/UPDATE/DELETE vérifiés, Lookbook plein écran, PNG 1080×1350 et Web Share validé.
 
 ## V0.4-A — Analyse photo assistée — CLOSED / VERIFIED PROD
 
-### Contrat produit validé
+Contrat human-in-the-loop validé : l'IA propose, `Áp dụng gợi ý` applique au formulaire, puis Trân reste libre de corriger et doit encore sauvegarder normalement.
 
-L'IA reste strictement human-in-the-loop :
+Architecture :
+- Workers AI via `env.AI`
+- vision LLaVA + classification Llama 4 structurée
+- 2 passes vision + rescue
+- jusqu'à 3 analyses complètes automatiques sur un seul clic client
+- taxonomie `Underwear`, `Headwear`, `Umbrella`
+- indicateurs de fiabilité
+- crash `RESULT_CODE_HUNG` corrigé
 
-1. Trân choisit une photo.
-2. Elle déclenche explicitement `Phân tích bằng AI`.
-3. L'IA propose catégorie, couleurs et styles.
-4. Le formulaire ne change pas avant `Áp dụng gợi ý`.
-5. Après application, tout reste éditable.
-6. Aucune écriture IndexedDB/Airtable n'arrive avant `Lưu vào tủ đồ`.
-
-### Architecture vérifiée
-
-- Cloudflare Workers AI via `env.AI`
-- vision : `@cf/llava-hf/llava-1.5-7b-hf`
-- classification structurée : `@cf/meta/llama-4-scout-17b-16e-instruct`
-- endpoint authentifié : `POST /v1/analyze-item`
-- image d'analyse réduite à 1024 px sans recadrage du contenu
-- sortie `guided_json` revalidée contre `TAXONOMY`
-- aucun secret IA dans la PWA
-
-### Reliability Pass vérifié
-
-Taxonomie ajoutée jusque dans Airtable / PWA / Worker :
-
-- `Underwear` → `Đồ lót`
-- `Headwear` → `Mũ / nón`
-- `Umbrella` → `Ô / dù`
-
-Fiabilisation :
-
-- 2 inspections vision indépendantes
-- 3e passe rescue si résultat faible
-- jusqu'à 3 analyses Worker complètes déclenchées automatiquement par un seul clic client si nécessaire
-- meilleur résultat conservé
-- arrêt anticipé dès qu'une réponse est assez fiable
-- indicateurs `Tin cậy cao` / `Cần kiểm tra` / `Tin cậy thấp`
-- règles explicites chaussures par paire, sous-vêtements, couvre-chefs, parapluies
-- couleurs dominantes de l'objet seulement, autant que possible sans décor/cintre/ombres
-- crash `RESULT_CODE_HUNG` corrigé via sentinel anti-montage multiple
-
-### QA utilisateur réel — PASS
-
-Les cas réels qui avaient exposé les limites ont tous passé la candidate v0.4.3 :
-
-- chaussures DC → `Giày` avec retry automatique et un seul clic utilisateur
+QA réel PASS :
+- chaussures DC → `Giày`
 - boxer → `Đồ lót`
 - casquette → `Mũ / nón`
 - parapluie → `Ô / dù`
-- aucune écriture canonique déclenchée au simple stade analyse/proposition
 
-**V0.4-A est CLOSED / VERIFIED PROD.**
+Polish v0.4.4 :
+- `Brown` → `Nâu` canonique dans Airtable / PWA / Worker
+- distinction brown/tan/camel renforcée
+- preview photo full-frame durcie
 
-### V0.4-A.4 — polish de fermeture v0.4.4
+## V0.4-B — Duplicate Guard — CANDIDATE v0.4.5
 
-- ajout canonique `Brown` → `Nâu` dans Airtable, PWA et Worker
-- prompts couleur renforcés pour distinguer brown/tan/camel de noir/gris/vert
-- preview `Thêm` durcie en `object-fit: contain` avec sélecteur spécifique
-- aucun changement du CRUD, IndexedDB, queues, snapshots ou outfits
+Objectif : avertir avant de créer un article probablement déjà présent, sans empêcher un ajout légitime.
 
-## V0.4-B — Duplicate Guard — ACTIVE NEXT
+Architecture candidate :
+- module `duplicate-guard.js` séparé du CRUD historique
+- core pur `duplicate-core.mjs` testable indépendamment
+- perceptual hash local dHash 64 bits, calculé via canvas 9×8
+- distance de Hamming convertie en similarité visuelle
+- score métadonnées : catégorie, couleurs, styles et nom
+- score final explicable + niveaux `high / medium / none`
+- jusqu'à 3 candidats proches montrés avec photo et raisons
+- cache des fingerprints en mémoire + `sessionStorage`
+- catalogue large : maximum 80 candidats visuels, priorité aux métadonnées proches + récents
+- concurrence limitée à 5 calculs pour éviter de bloquer le téléphone
+- fonctionne sans Worker, sans Airtable et sans nouveau secret
 
-Objectif : empêcher les doublons probables avant création sans bloquer un ajout légitime.
+Sécurité UX :
+- le guard intercepte la création avant `saveItem`
+- aucun record n'est créé tant que l'avertissement est affiché
+- `Quay lại kiểm tra` revient au formulaire
+- `Vẫn lưu món này` permet explicitement de continuer
+- aucun merge/delete automatique
+- si le guard lui-même plante, il échoue ouvert : la création normale reste possible
+- toute modification du formulaire invalide l'ancien avertissement
 
-Contrat visé :
+Gates techniques prévues :
+- syntaxe JS
+- tests unitaires du scoring perceptuel/métadonnées
+- cache/version PWA v0.4.5
+- CI secrets et identité PWA
+- diff safety : pas de `app.js`, `db.js`, Worker, queues ni snapshots
 
-- comparaison visuelle locale avant sauvegarde
-- comparaison métadonnées (catégorie / couleurs / styles / nom)
-- résultat explicable avec item(s) proches
-- avertissement uniquement quand le signal est réellement utile
-- décision finale toujours laissée à Trân
-- aucun delete/merge automatique
-- fonctionnement offline-first, sans nouvelle clé ni secret
+QA utilisateur requise avant VERIFIED PROD :
+1. reprendre une photo d'un article déjà présent ;
+2. sauvegarder → avertissement attendu avant création ;
+3. `Quay lại kiểm tra` ne doit rien créer ;
+4. refaire puis `Vẫn lưu món này` doit autoriser la création ;
+5. supprimer ensuite l'éventuel article jetable de QA et vérifier la sync normale.
+
+**V0.4-B ne doit pas être marquée VERIFIED PROD avant ce QA réel.**
 
 ## V0.4-C — Smart Tags — QUEUED
 
-- suggestions de tags explicables et éditables
-- signaux utiles aux recherches, outfits et futur assistant
+- tags explicables et éditables
+- utiles à la recherche, aux outfits et au futur assistant
 
 Principe canonique : **l'IA et les heuristiques proposent, Trân décide avant toute écriture destructrice ou canonique.**
 
 ## Deferred / connus
 
 - remplacement de la photo d'un vêtement Airtable existant
-- amélioration continue des palettes/couleurs fines au-delà des couleurs canoniques
+- palettes/couleurs fines au-delà des couleurs canoniques

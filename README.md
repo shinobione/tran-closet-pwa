@@ -9,7 +9,7 @@ PWA mobile-first de la garde-robe de Trân, installable sur iPhone/Android, offl
 - **V0.3 Outfits** ✅ CLOSED / VERIFIED PROD
 - **V0.4 Smart Closet** 🟡 active
 - **V0.4-A Photo AI Assistant** ✅ CLOSED / VERIFIED PROD
-- **V0.4-B Duplicate Guard** 🟡 active next
+- **V0.4-B Duplicate Guard** 🟡 candidate `v0.4.5`
 
 La PWA reste local-first : les ajouts, modifications et suppressions de vêtements et d'outfits sont appliqués immédiatement dans IndexedDB, puis envoyés vers Airtable via des files de mutations séparées lorsque le réseau et le Worker sont disponibles.
 
@@ -31,67 +31,38 @@ Le bridge vêtements prend en charge CREATE + photo, UPDATE, DELETE, retry offli
 
 ## V0.3 — Outfits ✅ VERIFIED PROD
 
-**Phối đồ** fournit :
-- création/édition/suppression d'outfits ;
-- picker scalable 100+ articles ;
-- occasion, saison, note et favoris ;
-- sync Airtable canonique avec linked records ;
-- queue offline séparée ;
-- Lookbook plein écran ;
-- PNG 1080×1350 ;
-- Web Share + fallback sauvegarde image.
-
-CREATE, UPDATE, DELETE, snapshot retour et anti-résurrection sont vérifiés.
+**Phối đồ** fournit création/édition/suppression, picker scalable 100+, persistance Airtable par linked records, queue offline séparée, Lookbook plein écran, PNG 1080×1350 et Web Share. CRUD, snapshot retour et anti-résurrection sont vérifiés.
 
 ## V0.4-A — Analyse photo assistée ✅ VERIFIED PROD
 
 Principe : **l'IA propose, Trân valide avant toute écriture canonique.**
 
-Parcours :
-1. choisir une photo ;
-2. `Phân tích bằng AI` ;
-3. recevoir catégorie/couleurs/styles proposés ;
-4. `Áp dụng gợi ý` ;
-5. corriger si besoin ;
-6. sauvegarder normalement.
+Le pipeline validé utilise LLaVA pour la vision, Llama 4 pour la classification structurée, plusieurs passes vision, retry client automatique, indicateurs de fiabilité et les catégories `Underwear`, `Headwear`, `Umbrella`. Le QA réel a passé chaussures DC, boxer, casquette et parapluie.
 
-L'analyse seule ne modifie ni IndexedDB ni Airtable.
+Le polish v0.4.4 ajoute `Brown / Nâu` jusque dans Airtable/PWA/Worker et durcit la preview full-frame.
 
-### Reliability Pass validé
+## V0.4-B — Duplicate Guard 🟡 CANDIDATE v0.4.5
 
-- Workers AI authentifié ;
-- LLaVA pour la vision + Llama 4 pour la classification structurée ;
-- 2 passes vision + rescue serveur ;
-- jusqu'à 3 analyses complètes automatiques côté client sur un seul clic ;
-- conservation du meilleur résultat ;
-- indicateurs de fiabilité ;
-- `Underwear` / `Đồ lót` ;
-- `Headwear` / `Mũ / nón` ;
-- `Umbrella` / `Ô / dù` ;
-- garde anti-boucle `RESULT_CODE_HUNG` ;
-- QA utilisateur réel PASS sur chaussures DC, boxer, casquette et parapluie.
+Objectif : repérer un article probablement déjà présent avant sa création, sans bloquer un ajout légitime.
 
-### Polish de fermeture v0.4.4
+La candidate utilise :
+- un dHash perceptuel 64 bits calculé localement ;
+- une distance de Hamming pour la proximité visuelle ;
+- catégorie, couleurs, styles et nom pour le contexte ;
+- un score explicable avec jusqu'à 3 candidats proches ;
+- un cache local des fingerprints ;
+- une limite de 80 candidats visuels pour rester fluide avec un gros catalogue.
 
-- `Brown` / `Nâu` ajouté jusque dans Airtable, la PWA et le Worker ;
-- distinction brown/tan/camel renforcée ;
-- preview photo full-frame durcie en `contain`.
-
-**V0.4-A est CLOSED / VERIFIED PROD.**
-
-## V0.4-B — Duplicate Guard 🟡
-
-Objectif : repérer un article probablement déjà présent avant sa création, sans bloquer les ajouts légitimes.
-
-Contrat :
-- comparaison visuelle locale ;
-- comparaison catégorie / couleurs / styles / nom ;
-- score et explication compréhensibles ;
-- candidats proches montrés à Trân ;
-- possibilité de continuer malgré l'alerte ;
+UX :
+- si rien de suffisamment proche n'est trouvé, la sauvegarde continue normalement ;
+- si un doublon probable est trouvé, rien n'est encore créé ;
+- `Quay lại kiểm tra` laisse corriger le formulaire ;
+- `Vẫn lưu món này` permet explicitement de passer outre ;
 - aucun merge/delete automatique ;
-- aucun nouveau secret ;
-- fonctionnement offline-first.
+- si le guard plante, il échoue ouvert et ne bloque pas la garde-robe ;
+- aucun Worker, nouveau secret ou appel cloud n'est requis pour cette détection.
+
+**V0.4-B reste candidate tant que le warning + bypass n'ont pas été testés réellement dans la PWA.**
 
 ## V0.4-C — Smart Tags ⏳
 - suggestions de tags explicables et éditables ;
@@ -99,17 +70,9 @@ Contrat :
 
 ## Infrastructure
 
-### Lecture Airtable
+`.github/workflows/sync-airtable.yml` génère les snapshots vêtements/outfits avec le PAT read-only. `worker/` contient le backend Cloudflare sécurisé ; `.github/workflows/deploy-worker.yml` le déploie et vérifie `/health`.
 
-`.github/workflows/sync-airtable.yml` génère les snapshots vêtements et outfits avec le secret read-only `AIRTABLE_PAT`.
-
-### Écriture sécurisée
-
-`worker/` contient le Cloudflare Worker. Le navigateur ne reçoit jamais le PAT Airtable.
-
-`.github/workflows/deploy-worker.yml` déploie le Worker via Wrangler et vérifie `/health`.
-
-Secrets GitHub Actions nécessaires :
+Secrets Actions :
 - `CLOUDFLARE_API_TOKEN`
 - `CLOUDFLARE_ACCOUNT_ID`
 - `AIRTABLE_PAT_WRITE`
