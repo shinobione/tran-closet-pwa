@@ -7,7 +7,7 @@
   <meta name="google" content="notranslate" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Trân Closet" />
+  <meta name="apple-mobile-web-app-title" content="Trân's Closet" />
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png" />
@@ -15,7 +15,7 @@
   <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
   <link rel="apple-touch-startup-image" href="./branding/splash-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" />
   <link rel="stylesheet" href="./css/app.css" />
-  <link rel="stylesheet" href="./css/branding.css?v=0.5.6" />
+  <link rel="stylesheet" href="./css/branding.css?v=0.5.7" />
   <link rel="stylesheet" href="./css/outfits.css?v=0.5.1" />
   <link rel="stylesheet" href="./css/outfit-picker.css?v=0.5.1" />
   <link rel="stylesheet" href="./css/outfit-presentation.css?v=0.5.1" />
@@ -24,14 +24,14 @@
   <link rel="stylesheet" href="./css/daily-assistant.css?v=0.5.1" />
   <link rel="stylesheet" href="./css/i18n.css?v=0.5.1" />
   <link rel="stylesheet" href="./css/assistant-select-hotfix.css?v=0.5.2" />
-  <title>Tủ Đồ của Trân</title>
+  <title>Trân's Closet · Smart Fashion Wardrobe</title>
 </head>
 <body translate="no" class="notranslate">
   <div id="app" class="app-shell">
     <header class="topbar">
       <div class="topbar-brand">
-        <div class="topbar-brand-badge"><img class="topbar-brand-mark" src="./branding/logo-mark-256.png" alt="" aria-hidden="true" /></div>
-        <div class="topbar-brand-copy"><p class="eyebrow">TỦ ĐỒ CỦA TRÂN</p><h1 id="pageTitle">Tủ đồ của tôi</h1></div>
+        <img class="topbar-brand-lockup" src="./branding/header-lockup.png" alt="Trân's Closet — Smart Fashion Wardrobe" />
+        <h1 id="pageTitle" class="topbar-page-title">Tủ đồ của tôi</h1>
       </div>
       <button id="installButton" class="icon-button install-button" aria-label="Cài ứng dụng" title="Cài ứng dụng">⌄</button>
     </header>
@@ -48,5 +48,6 @@
   <dialog id="installDialog" class="sheet-dialog"></dialog>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script type="module" src="./js/bootstrap.js?v=0.5.1"></script>
+  <script type="module" src="./js/branding-runtime.js?v=0.5.7"></script>
 </body>
 </html>
