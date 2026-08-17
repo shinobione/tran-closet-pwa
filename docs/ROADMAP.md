@@ -42,21 +42,23 @@
 - comparaison catégorie / couleurs / styles / nom
 - maximum 80 candidats visuels
 - jusqu'à 3 candidats proches affichés avec raisons
-- warning avant création seulement au-dessus d'un seuil utile
-- `Quay lại kiểm tra` : vérifié sans création
-- `Vẫn lưu món này` : bypass explicite vérifié
+- warning/cancel/bypass vérifiés réellement
 - doublon volontaire supprimé depuis la PWA
 - snapshot post-delete à 3 records, anti-résurrection vérifiée
 - aucun merge/delete automatique
 
-### V0.4-C — Smart Tags 🟡 NEXT
+### V0.4-C — Smart Tags 🟡 CANDIDATE v0.4.6
+- PR #23 mergée après ré-ancrage sur V0.4-B vérifiée
 - champ Airtable canonique `Tags`
 - vocabulaire fixe de 22 tags
-- tags éditables et recherchables
+- tags éditables, visibles et recherchables
 - recherche Outfit par tags
 - suggestions IA explicables jusqu'à 5 tags
 - compatibilité vieux clients
-- PR #23 prête à ré-ancrer sur `main`, revalider puis merger
+- Worker v0.4.6 + health SUCCESS
+- smoke Worker → Airtable → snapshot → restauration SUCCESS
+- smoke contrat IA Smart Tags SUCCESS
+- QA PWA utilisateur encore requis avant CLOSED / VERIFIED PROD
 
 ## V0.5 — Assistant
 - “Hôm nay mặc gì?”
