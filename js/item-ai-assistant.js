@@ -1,7 +1,8 @@
 import {TAXONOMY,LABELS} from './data.js';
-import {getSyncConfig} from './sync-client.js?v=0.4.2';
+import {getSyncConfig} from './sync-client.js?v=0.4.3';
 
 const root=document.querySelector('#mainContent');
+const MAX_CLIENT_ATTEMPTS=3;
 let activeRequest=null;
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
@@ -27,21 +28,52 @@ async function analysisImage(dataUrl){
   return canvas.toDataURL('image/jpeg',.74);
 }
 
+function reliabilityValue(body,analysis){
+  return ['high','medium','low'].includes(body?.reliability)
+    ? body.reliability
+    : analysis?.confidence>=.9?'high':analysis?.confidence>=.78?'medium':'low';
+}
+
+function resultScore(body){
+  const analysis=body?.analysis||{};
+  const reliability=reliabilityValue(body,analysis);
+  const reliabilityScore={high:40,medium:24,low:4}[reliability]||0;
+  return (analysis.recognized?100:0)+reliabilityScore+(Number(analysis.confidence)||0)*20+(analysis.category?3:0);
+}
+
+function shouldClientRetry(body){
+  const analysis=body?.analysis||{};
+  const reliability=reliabilityValue(body,analysis);
+  if(!analysis.recognized)return true;
+  if(reliability==='low')return true;
+  if(reliability==='medium'&&(Number(analysis.confidence)||0)<.86)return true;
+  return false;
+}
+
 function reliabilityMeta(body,analysis){
-  const value=['high','medium','low'].includes(body?.reliability)?body.reliability:(analysis?.confidence>=.9?'high':analysis?.confidence>=.78?'medium':'low');
+  const value=reliabilityValue(body,analysis);
   const copy={
     high:{label:'Tin cậy cao',hint:'AI khá chắc chắn, nhưng Trân vẫn là người quyết định.'},
     medium:{label:'Cần kiểm tra',hint:'AI có tín hiệu tốt nhưng nên kiểm tra loại và màu trước khi áp dụng.'},
     low:{label:'Tin cậy thấp',hint:'Kết quả còn yếu. Nên kiểm tra kỹ hoặc thử ảnh rõ hơn.'}
   }[value];
-  return {value,...copy,retryUsed:Boolean(body?.retryUsed),attempts:Math.max(1,Number(body?.attempts)||1)};
+  return {
+    value,
+    ...copy,
+    retryUsed:Boolean(body?.retryUsed),
+    attempts:Math.max(1,Number(body?.attempts)||1),
+    clientAttempts:Math.max(1,Number(body?.clientAttempts)||1),
+    totalVisionPasses:Math.max(1,Number(body?.totalVisionPasses)||Number(body?.attempts)||1)
+  };
 }
 
 function resultMarkup(analysis,meta){
   const confidence=Math.round((Number(analysis?.confidence)||0)*100);
-  const checked=meta.attempts>1
-    ? `<div class="ai-check-note ${meta.retryUsed?'is-retry':''}">✦ ${meta.retryUsed?`AI đã tự kiểm tra lại ảnh · ${meta.attempts} lượt`:`AI đã đối chiếu ảnh · ${meta.attempts} lượt nhìn`}</div>`
-    : '';
+  const checked=meta.clientAttempts>1
+    ? `<div class="ai-check-note is-retry">✦ AI đã tự thử lại ${meta.clientAttempts-1} lần · ${meta.totalVisionPasses} lượt nhìn tổng cộng</div>`
+    : meta.attempts>1
+      ? `<div class="ai-check-note ${meta.retryUsed?'is-retry':''}">✦ ${meta.retryUsed?`AI đã tự kiểm tra lại ảnh · ${meta.attempts} lượt`:`AI đã đối chiếu ảnh · ${meta.attempts} lượt nhìn`}</div>`
+      : '';
   if(!analysis?.recognized){
     return `<div class="ai-result ai-result-warning">
       <div class="ai-result-head"><div><span>GỢI Ý AI</span><strong>Chưa nhận diện chắc chắn</strong></div><b>${confidence}%</b></div>
@@ -76,6 +108,22 @@ function applySuggestion(form,analysis,card){
   if(note){note.hidden=false;note.textContent='✓ Đã áp dụng. Hãy kiểm tra lại trước khi lưu vào tủ đồ.';}
 }
 
+async function fetchAnalysis(endpoint,token,prepared,controller){
+  const response=await fetch(`${endpoint.replace(/\/$/,'')}/v1/analyze-item`,{
+    method:'POST',
+    headers:{'content-type':'application/json','authorization':`Bearer ${token}`},
+    body:JSON.stringify({image:prepared}),
+    signal:controller.signal
+  });
+  let body=null;try{body=await response.json();}catch{}
+  if(!response.ok||!body?.ok){
+    const error=new Error(body?.error||`HTTP ${response.status}`);
+    error.status=response.status;
+    throw error;
+  }
+  return body;
+}
+
 async function requestAnalysis(card,form,photoInput){
   const image=photoInput?.dataset?.photo;
   if(!image)return;
@@ -87,22 +135,32 @@ async function requestAnalysis(card,form,photoInput){
   activeRequest=controller;
   button.disabled=true;
   button.textContent='Đang đối chiếu ảnh…';
-  output.innerHTML='<div class="ai-loading"><span></span><p>AI đang nhìn ảnh nhiều lượt để xác định món đồ, màu sắc và phong cách…</p></div>';
+  output.innerHTML='<div class="ai-loading"><span></span><p>AI đang nhìn ảnh nhiều lượt. Nếu kết quả còn yếu, hệ thống sẽ tự thử lại — không cần bấm nhiều lần.</p></div>';
   if(applied)applied.hidden=true;
   try{
     const config=await getSyncConfig();
     if(!config.endpoint||!config.token)throw new Error('SYNC_NOT_CONFIGURED');
     const prepared=await analysisImage(image);
-    const response=await fetch(`${config.endpoint.replace(/\/$/,'')}/v1/analyze-item`,{
-      method:'POST',
-      headers:{'content-type':'application/json','authorization':`Bearer ${config.token}`},
-      body:JSON.stringify({image:prepared}),
-      signal:controller.signal
-    });
-    let body=null;try{body=await response.json();}catch{}
-    if(!response.ok||!body?.ok)throw new Error(body?.error||`HTTP ${response.status}`);
-    const analysis=body.analysis||{};
-    const meta=reliabilityMeta(body,analysis);
+    const candidates=[];
+    let totalVisionPasses=0;
+
+    for(let attempt=1;attempt<=MAX_CLIENT_ATTEMPTS;attempt++){
+      if(attempt>1){
+        button.textContent=`Đang tự thử lại ${attempt-1}/${MAX_CLIENT_ATTEMPTS-1}…`;
+        output.innerHTML=`<div class="ai-loading"><span></span><p>Kết quả trước chưa đủ chắc. AI đang tự phân tích lại lần ${attempt} để chọn phương án tốt hơn…</p></div>`;
+      }
+      const body=await fetchAnalysis(config.endpoint,config.token,prepared,controller);
+      candidates.push(body);
+      totalVisionPasses+=Math.max(1,Number(body.attempts)||1);
+      const best=[...candidates].sort((a,b)=>resultScore(b)-resultScore(a))[0];
+      if(!shouldClientRetry(best))break;
+    }
+
+    const best=[...candidates].sort((a,b)=>resultScore(b)-resultScore(a))[0];
+    best.clientAttempts=candidates.length;
+    best.totalVisionPasses=totalVisionPasses;
+    const analysis=best.analysis||{};
+    const meta=reliabilityMeta(best,analysis);
     output.innerHTML=resultMarkup(analysis,meta);
     output.querySelector('.ai-apply')?.addEventListener('click',()=>applySuggestion(form,analysis,card));
   }catch(error){
@@ -110,7 +168,7 @@ async function requestAnalysis(card,form,photoInput){
     const message=String(error?.message||error);
     const friendly=message==='SYNC_NOT_CONFIGURED'
       ?'Cần cấu hình kết nối trong Hồ sơ trước khi dùng trợ lý AI.'
-      :message.includes('429')
+      :error?.status===429||message.includes('429')
         ?'AI đang bận hoặc đã đạt giới hạn hôm nay. Hãy thử lại sau.'
         :'Không phân tích được ảnh lúc này. Ảnh và biểu mẫu của bạn vẫn nguyên vẹn.';
     output.innerHTML=`<div class="ai-result ai-result-warning"><strong>Không thể phân tích</strong><p>${esc(friendly)}</p></div>`;
@@ -134,7 +192,7 @@ function mount(){
   card.innerHTML=`<div class="ai-assistant-head">
       <div><p class="eyebrow">TRỢ LÝ ẢNH</p><h3>Để AI gợi ý phân loại</h3></div><span>✦</span>
     </div>
-    <p class="ai-assistant-copy">AI đối chiếu nhiều lượt rồi chỉ đề xuất loại, màu và phong cách. Không có gì được lưu hoặc thay đổi cho đến khi Trân chọn áp dụng rồi tự bấm Lưu.</p>
+    <p class="ai-assistant-copy">AI đối chiếu nhiều lượt và tự thử lại khi còn nghi ngờ. Không có gì được lưu hoặc thay đổi cho đến khi Trân chọn áp dụng rồi tự bấm Lưu.</p>
     <button type="button" class="secondary-button ai-analyze" disabled>✦ Phân tích bằng AI</button>
     <div class="ai-output"></div>
     <p class="ai-applied" hidden></p>
