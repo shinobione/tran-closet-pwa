@@ -5,13 +5,13 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'branding/logo-source-round.jpg'
+      - 'branding/logo-source-round.b64.part*'
       - 'scripts/generate-brand-assets.py'
       - '.github/workflows/generate-brand-assets.yml'
   push:
     branches: [main]
     paths:
-      - 'branding/logo-source-round.jpg'
+      - 'branding/logo-source-round.b64.part*'
       - 'scripts/generate-brand-assets.py'
       - '.github/workflows/generate-brand-assets.yml'
 
