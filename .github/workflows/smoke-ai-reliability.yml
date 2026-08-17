@@ -1,4 +1,4 @@
-name: Diagnose V0.4-A.3 Melody vision
+name: Quality gate V0.4-A.3 vision ensemble
 
 on:
   push:
@@ -18,35 +18,51 @@ jobs:
       - name: Checkout main
         uses: actions/checkout@v6
 
-      - name: Inspect Melody Bag vision passes
+      - name: Verify canonical wardrobe recognition quality
         env:
           WORKER_URL: https://tran-closet-sync.jerryquinet.workers.dev
           CLOSET_SYNC_KEY: ${{ secrets.CLOSET_SYNC_KEY }}
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          import base64, json
+
+          analyze_one() {
+            LABEL="$1"
+            FILE="$2"
+            EXPECTED_CATEGORY="$3"
+            EXPECTED_COLOR="$4"
+            python3 - "$FILE" <<'PY'
+          import base64, json, sys
           from pathlib import Path
-          image = Path('assets/items/recrtzfBVgQOYfAQN.jpg').read_bytes()
-          payload = {'image': 'data:image/jpeg;base64,' + base64.b64encode(image).decode('ascii')}
-          Path('/tmp/ai-payload.json').write_text(json.dumps(payload), encoding='utf-8')
+          image = Path(sys.argv[1]).read_bytes()
+          Path('/tmp/ai-payload.json').write_text(json.dumps({'image':'data:image/jpeg;base64,'+base64.b64encode(image).decode('ascii')}),encoding='utf-8')
           PY
-          STATUS="$(curl --silent --show-error --output /tmp/ai-result.json --write-out '%{http_code}' \
-            -X POST \
-            -H "Authorization: Bearer $CLOSET_SYNC_KEY" \
-            -H 'Content-Type: application/json' \
-            --data-binary @/tmp/ai-payload.json \
-            "${WORKER_URL%/}/v1/analyze-item")"
-          test "$STATUS" = "200"
-          python3 - <<'PY'
-          import json
+            STATUS="$(curl --silent --show-error --output /tmp/ai-result.json --write-out '%{http_code}' \
+              -X POST -H "Authorization: Bearer $CLOSET_SYNC_KEY" -H 'Content-Type: application/json' \
+              --data-binary @/tmp/ai-payload.json "${WORKER_URL%/}/v1/analyze-item")"
+            test "$STATUS" = "200"
+            python3 - "$LABEL" "$EXPECTED_CATEGORY" "$EXPECTED_COLOR" <<'PY'
+          import json,sys
           from pathlib import Path
+          label, expected_category, expected_color=sys.argv[1:4]
           body=json.loads(Path('/tmp/ai-result.json').read_text(encoding='utf-8'))
+          a=body.get('analysis') or {}
+          assert body.get('ok') is True, body
+          assert a.get('recognized') is True, a
+          assert a.get('category') == expected_category, (label,a)
+          assert expected_color in (a.get('colors') or []), (label,a)
+          assert body.get('reliability') in {'high','medium'}, (label,body)
+          assert body.get('attempts') in {2,3}, body
           print(json.dumps({
-            'analysis': body.get('analysis'),
-            'reliability': body.get('reliability'),
-            'retryUsed': body.get('retryUsed'),
-            'attempts': body.get('attempts'),
-            'visionSummary': body.get('visionSummary')
-          }, ensure_ascii=False, indent=2))
+            'item':label,
+            'analysis':a,
+            'reliability':body.get('reliability'),
+            'retryUsed':body.get('retryUsed'),
+            'attempts':body.get('attempts'),
+            'visionModel':body.get('visionModel')
+          },ensure_ascii=False,indent=2))
           PY
+          }
+
+          analyze_one 'Neck Poca' 'assets/items/recLjpxC6kj5pGEEj.jpg' 'Accessorie' 'Blue'
+          analyze_one 'Melody Bag' 'assets/items/recrtzfBVgQOYfAQN.jpg' 'Bag' 'Pink'
+          analyze_one 'Tui Xach' 'assets/items/recZFFx4HaeVHOrTc.jpg' 'Bag' 'Red'
