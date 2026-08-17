@@ -1,1 +1,1 @@
-trigger: v0.4.4-brown-closeout
+trigger: v0.4.6-smart-tags
