@@ -1,7 +1,7 @@
 {
-  "name": "Tủ Đồ của Trân",
-  "short_name": "Trân Closet",
-  "description": "Tủ đồ cá nhân của Trân — offline, nhanh và riêng tư.",
+  "name": "Trân's Closet",
+  "short_name": "Trân's Closet",
+  "description": "Smart Fashion Wardrobe — offline, fast and private.",
   "lang": "vi",
   "id": "/tran-closet-pwa/",
   "start_url": "/tran-closet-pwa/",
