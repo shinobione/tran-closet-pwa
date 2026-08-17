@@ -9,7 +9,8 @@ const AI_MODEL='@cf/meta/llama-4-scout-17b-16e-instruct';
 const TAXONOMY={
   categories:['Shirt','Pant','Skirt','Dress','Combo','Coat','Bag','Shoes','Accessorie','Belt','Swimware','Eye Lens','Socks','Jumpsuit','Underwear','Headwear','Umbrella'],
   colors:['Blue','Pink','Yellow','Black','Brown','Green','Purple','White','Grey','Orange','Red'],
-  styles:['Hip-Hop','Sport','Casual','Classy','Cartoon','Old']
+  styles:['Hip-Hop','Sport','Casual','Classy','Cartoon','Old'],
+  tags:['Minimal','Statement','Graphic','Character','Patterned','Logo','Text','Neutral','Colorful','Oversized','Cropped','Fitted','Relaxed','Layering','Lightweight','Warm','Rain-ready','Summer','Winter','Travel-friendly','Compact','Cozy']
 };
 
 const AI_SCHEMA={
@@ -19,10 +20,12 @@ const AI_SCHEMA={
     category:{type:'string',enum:TAXONOMY.categories},
     colors:{type:'array',items:{type:'string',enum:TAXONOMY.colors},maxItems:3},
     styles:{type:'array',items:{type:'string',enum:TAXONOMY.styles},maxItems:2},
+    tags:{type:'array',items:{type:'string',enum:TAXONOMY.tags},maxItems:5},
+    tagReason:{type:'string',maxLength:180},
     confidence:{type:'number',minimum:0,maximum:1},
     reason:{type:'string',maxLength:180}
   },
-  required:['recognized','category','colors','styles','confidence','reason'],
+  required:['recognized','category','colors','styles','tags','tagReason','confidence','reason'],
   additionalProperties:false
 };
 
@@ -31,6 +34,7 @@ const FIELDS={
   category:'fldFgbepFfRYzQiSf',
   colors:'fld9c3S0zKQ1AaMWL',
   styles:'fldzFgTZ5iiakQBcy',
+  tags:'fld9hV9qirpfVfJmM',
   photo:'fldgISbij3vO9IvjM',
   syncMutationId:'flduWxlbNrsksgjNa'
 };
@@ -61,12 +65,14 @@ function bearer(request){const value=request.headers.get('authorization')||'';re
 function normalizeCategory(value){return value==='Swimware'?'Swimware ':value;}
 
 function fieldsFromPayload(payload={}){
-  return {
+  const fields={
     [FIELDS.name]:String(payload.name||'').trim(),
     [FIELDS.category]:normalizeCategory(String(payload.category||'Accessorie')),
     [FIELDS.colors]:Array.isArray(payload.colors)?payload.colors:[],
     [FIELDS.styles]:Array.isArray(payload.styles)?payload.styles:[]
   };
+  if(Array.isArray(payload.tags))fields[FIELDS.tags]=payload.tags;
+  return fields;
 }
 
 function outfitFieldsFromPayload(payload={}){
@@ -134,9 +140,11 @@ function cleanAiResult(value={}){
   const category=TAXONOMY.categories.includes(value.category)?value.category:null;
   const colors=[...new Set(Array.isArray(value.colors)?value.colors:[])].filter(v=>TAXONOMY.colors.includes(v)).slice(0,3);
   const styles=[...new Set(Array.isArray(value.styles)?value.styles:[])].filter(v=>TAXONOMY.styles.includes(v)).slice(0,2);
+  const tags=[...new Set(Array.isArray(value.tags)?value.tags:[])].filter(v=>TAXONOMY.tags.includes(v)).slice(0,5);
+  const tagReason=String(value.tagReason||'').trim().slice(0,180);
   const confidence=Math.max(0,Math.min(1,Number(value.confidence)||0));
   const reason=String(value.reason||'').trim().slice(0,180);
-  return {recognized:Boolean(value.recognized)&&Boolean(category),category,colors,styles,confidence,reason};
+  return {recognized:Boolean(value.recognized)&&Boolean(category),category,colors,styles,tags,tagReason,confidence,reason};
 }
 
 function reliabilityFor(analysis,{retryUsed=false}={}){
@@ -179,14 +187,15 @@ async function describeWardrobePhoto(photo,env,mode='primary'){
       'Describe shape and identifying features such as handles, straps, sleeves, legs, waistband, brim, canopy, laces or neckline.',
       'For colors, report ONLY dominant colors covering the main item. Ignore floor, furniture, walls, hangers, skin, shadows, reflections and tiny logos/trim.',
       'Distinguish black, dark grey, brown/tan/camel and dark green. Use brown when the object is visibly chocolate, tan, camel or earthy brown rather than forcing it to black, grey or green.',
+      'Describe visible tag-worthy evidence when present: repeated patterns, character art, graphics, logos, text, multicolor design, minimal design, oversized/cropped/fitted/relaxed cut, layering construction, lightweight/warm/rain/summer/winter function, compact/travel-friendly or cozy form.',
       'Mention visible style cues only when clear: cartoon/character print, sports jersey/performance design, skate/streetwear cues, formal/elegant cues, or retro/vintage cues.',
-      'Ignore brand names and background text. Do not invent unseen details. If genuinely no wardrobe item is visible, say so explicitly.'
+      'Ignore brand identity and background text. Do not invent unseen details. If genuinely no wardrobe item is visible, say so explicitly.'
     ].join(' '),
-    max_tokens:260
+    max_tokens:320
   });
   const description=String(vision?.description??vision?.response??vision??'').trim();
   if(!description)throw new Error('Vision model returned no description');
-  return description.slice(0,1400);
+  return description.slice(0,1600);
 }
 
 async function classifyDescriptions(descriptions,env){
@@ -205,6 +214,17 @@ async function classifyDescriptions(descriptions,env){
     `Allowed color values: ${TAXONOMY.colors.join(', ')}. Choose up to 3 DOMINANT colors of the item only. Brown includes tan, camel, chocolate and earthy brown. Ignore background, floor, furniture, hanger, skin, shadows and tiny accents.`,
     `Allowed style values: ${TAXONOMY.styles.join(', ')}. Choose up to 2 only when visibly justified; an empty styles array is allowed.`,
     'Style rules: Cartoon for visible cartoon/character/novelty prints; Sport for jerseys, athletic/performance wear or clearly athletic footwear; Hip-Hop for clear streetwear/skate/urban cues; Classy for formal/elegant design; Old only for genuinely vintage/retro cues; Casual for relaxed everyday design and it may be combined with Cartoon, Sport or Hip-Hop when both are justified.',
+    `Allowed tag values: ${TAXONOMY.tags.join(', ')}. Choose 0 to 5 tags ONLY when directly supported by visible evidence or obvious object function.`,
+    'Tag rules:',
+    '- Character = recognizable character/mascot imagery; Graphic = prominent graphic art; Patterned = repeated motif; Logo = visible logo mark; Text = prominent text.',
+    '- Neutral = restrained neutral palette; Colorful = several strong colors.',
+    '- Oversized, Cropped, Fitted, Relaxed = use only when garment cut/fit is visually evident.',
+    '- Layering = visibly suitable layer piece; Lightweight/Warm = only when construction clearly supports it.',
+    '- Rain-ready = umbrella or clearly rain-oriented item; Summer/Winter = clear seasonal construction.',
+    '- Travel-friendly/Compact = folding or clearly portable functional object; Cozy = soft/cushioned comfort object.',
+    '- Minimal = visually simple/clean; Statement = intentionally eye-catching focal design.',
+    'Do not infer tags from brand reputation, gender, price, identity, or hidden material properties.',
+    'tagReason must be one short Vietnamese sentence explaining the strongest visible evidence for the chosen tags. If tags is empty, explain briefly that no extra tag is visually certain.',
     'Set recognized=false only when the descriptions genuinely fail to identify any wardrobe item.',
     'confidence is confidence in the final classification from 0 to 1. Do not use 1.0 when the vision passes conflict materially.',
     'reason must be one short Vietnamese sentence grounded only in the descriptions.',
@@ -214,11 +234,11 @@ async function classifyDescriptions(descriptions,env){
 
   const result=await env.AI.run(AI_MODEL,{
     messages:[
-      {role:'system',content:'Return only the requested structured wardrobe classification.'},
+      {role:'system',content:'Return only the requested structured wardrobe classification and grounded smart tags.'},
       {role:'user',content:prompt}
     ],
     guided_json:AI_SCHEMA,
-    max_tokens:280,
+    max_tokens:380,
     temperature:0.05
   });
   return cleanAiResult(parseAiResponse(result?.response??result));

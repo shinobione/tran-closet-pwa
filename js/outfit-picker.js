@@ -17,7 +17,9 @@ function searchText(item){
     ...(item.colors||[]),
     ...(item.colors||[]).map(v=>translated('color',v)),
     ...(item.styles||[]),
-    ...(item.styles||[]).map(v=>translated('style',v))
+    ...(item.styles||[]).map(v=>translated('style',v)),
+    ...(item.tags||[]),
+    ...(item.tags||[]).map(v=>translated('tag',v))
   ].join(' '));
 }
 
@@ -54,7 +56,7 @@ async function enhance(form){
     </div>
     <div class="outfit-selected-strip" id="outfitSelectedStrip" hidden></div>
     <div class="outfit-picker-search-row">
-      <input id="outfitPickerSearch" type="search" autocomplete="off" placeholder="Tìm tên, loại, màu, phong cách…" aria-label="Tìm món đồ">
+      <input id="outfitPickerSearch" type="search" autocomplete="off" placeholder="Tìm tên, loại, màu, phong cách, nhãn…" aria-label="Tìm món đồ">
       <button type="button" id="outfitPickerReset">Đặt lại</button>
     </div>
     <div class="outfit-picker-quick-row">

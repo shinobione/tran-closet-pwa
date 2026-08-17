@@ -1,8 +1,8 @@
-import {getSyncConfig,testSyncConnection,flushMutationQueue,pendingMutationCount} from './sync-client.js?v=0.4.5';
-import {flushOutfitQueue,pendingOutfitMutationCount} from './outfit-sync-client.js?v=0.4.5';
+import {getSyncConfig,testSyncConnection,flushMutationQueue,pendingMutationCount} from './sync-client.js?v=0.4.6';
+import {flushOutfitQueue,pendingOutfitMutationCount} from './outfit-sync-client.js?v=0.4.6';
 import {getAllItems,getAllMutations,getAllOutfits,getAllOutfitMutations} from './db.js';
 
-const VERSION='v0.4.5';
+const VERSION='v0.4.6';
 let running=false;
 
 function orphanCount(items,mutations,idKey='localItemId'){
@@ -36,6 +36,7 @@ async function snapshot(){
     health:safeResult(health),
     itemCount:items.length,
     outfitCount:outfits.length,
+    taggedItemCount:items.filter(item=>Array.isArray(item.tags)&&item.tags.length).length,
     pendingMutations:mutations.length,
     pendingOutfitMutations:outfitMutations.length,
     orphanedLocalCreates:orphanCount(items,mutations),
@@ -45,6 +46,7 @@ async function snapshot(){
     itemStates:items.map(i=>({
       name:i.name,
       airtableRecordId:i.airtableRecordId||null,
+      tagCount:Array.isArray(i.tags)?i.tags.length:0,
       source:i.source||null,
       syncState:i.syncState||null,
       cloudWriteAt:i.cloudWriteAt||null
