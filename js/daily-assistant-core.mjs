@@ -9,6 +9,7 @@ const ROLES={
   extra:new Set(['Accessorie','Belt'])
 };
 
+const EXCLUDED_CATEGORIES=new Set(['Underwear','Swimware','Eye Lens','Socks']);
 const RAIN_CODES=new Set([51,53,55,56,57,61,63,65,66,67,80,81,82,95,96,99]);
 const NEUTRALS=new Set(['Black','White','Grey','Brown']);
 
@@ -147,6 +148,7 @@ function candidateReasons(items,profile,occasion,source){
 function groupsFor(items){
   const groups={top:[],bottom:[],one:[],shoes:[],bag:[],head:[],umbrella:[],extra:[]};
   for(const item of items){
+    if(EXCLUDED_CATEGORIES.has(item.category))continue;
     const role=roleOf(item.category);
     if(role&&groups[role])groups[role].push(item);
   }
@@ -203,7 +205,7 @@ export function recommendLooks({items=[],outfits=[],weather={},occasion='Everyda
 
   if(!candidates.some(candidate=>candidate.source==='generated')){
     const support=[...items]
-      .filter(item=>roleOf(item.category)&&!['top','bottom','one'].includes(roleOf(item.category)))
+      .filter(item=>!EXCLUDED_CATEGORIES.has(item.category)&&roleOf(item.category)&&!['top','bottom','one'].includes(roleOf(item.category)))
       .sort((a,b)=>itemWeatherScore(b,profile,occasion)-itemWeatherScore(a,profile,occasion))
       .slice(0,Math.max(2,Math.min(4,items.length)));
     if(support.length){
