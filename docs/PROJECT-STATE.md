@@ -7,8 +7,8 @@ Dernière mise à jour : 2026-08-17
 - PWA : `https://shinobione.github.io/tran-closet-pwa/`
 - Cloudflare Worker : `https://tran-closet-sync.jerryquinet.workers.dev`
 - branche canonique : `main`
-- dernière production totalement close : `v0.4.5` — V0.4-B Duplicate Guard
-- candidate active : `v0.4.6` — V0.4-C Smart Tags
+- dernière production totalement close : `v0.4.6` — V0.4-C Smart Tags
+- phase active : `V0.5` — Assistant
 - stockage local : IndexedDB `tran-closet`, schema version 4
 
 ## Phase
@@ -17,7 +17,8 @@ Dernière mise à jour : 2026-08-17
 - **V0.3 — Outfits : CLOSED / VERIFIED PROD**
 - **V0.4-A — Analyse photo assistée : CLOSED / VERIFIED PROD**
 - **V0.4-B — Duplicate Guard : CLOSED / VERIFIED PROD**
-- **V0.4-C — Smart Tags : MERGED / BACKEND VERIFIED / USER QA PENDING**
+- **V0.4-C — Smart Tags : CLOSED / VERIFIED PROD**
+- **V0.5 — Assistant : ACTIVE**
 
 ## V0.2 — CLOSED / VERIFIED PROD
 
@@ -37,9 +38,9 @@ QA réel PASS : warning avant écriture, `Quay lại kiểm tra` sans création,
 
 Le Duplicate Guard utilise un dHash perceptuel local 64 bits + métadonnées, affiche des raisons et ne merge/supprime jamais automatiquement.
 
-## V0.4-C — Smart Tags — CANDIDATE v0.4.6
+## V0.4-C — Smart Tags — CLOSED / VERIFIED PROD
 
-PR #23 `V0.4-C — Canonical Smart Tags` mergée sur `main` après ré-ancrage sur V0.4-B vérifiée.
+PR #23 `V0.4-C — Canonical Smart Tags` mergée sur `main`. Worker v0.4.6 déployé et `/health` authentifié SUCCESS.
 
 Modèle canonique :
 - champ Airtable `Tags` : `fld9hV9qirpfVfJmM` ;
@@ -59,16 +60,31 @@ IA Smart Tags :
 - `Áp dụng gợi ý` applique les tags au formulaire avec catégorie/couleurs/styles ;
 - tous les tags restent éditables avant sauvegarde.
 
-Gates déjà vérifiées en production :
-- PR ré-ancrée et CI complète verte ;
-- Worker v0.4.6 déployé + `/health` authentifié SUCCESS ;
-- smoke réversible : Worker ajoute temporairement `Cozy` à Neck Poca → Airtable voit `Cozy` → le générateur de snapshot conserve `Cozy` → Worker retire `Cozy` → Airtable revient propre ;
-- smoke IA : réponse HTTP 200, `analysis.tags` tableau de 0–5 valeurs, toutes dans la taxonomie, `tagReason` présent ;
-- après cleanup : exactement 3 vêtements canoniques et aucun tag temporaire restant.
+Gates production vérifiées :
+- CI complète verte ;
+- smoke réversible Worker → Airtable → snapshot → restauration SUCCESS ;
+- smoke IA : HTTP 200, tags conformes à la taxonomie et `tagReason` présent ;
+- **QA PWA réel PASS** : création de `VietCap` et `Jerry's Panty` depuis l'interface v0.4.6 ;
+- Airtable canonique : `VietCap` = `Headwear`, `Green + Red`, tags `Graphic + Logo` ; `Jerry's Panty` = `Underwear`, `Green`, tags `Graphic + Text` ;
+- snapshot canonique post-QA SUCCESS : `recordCount: 5`, mêmes catégories/couleurs/tags relus depuis Airtable ;
+- aucun tag temporaire de smoke restant.
 
-QA utilisateur requis avant CLOSED / VERIFIED PROD : vérifier dans la PWA réelle l'affichage/édition des Tags, une suggestion IA + raison, `Áp dụng gợi ý`, correction manuelle et sauvegarde PWA d'un tag, puis restauration.
+Les cartes compactes de collection continuent d'afficher principalement catégorie/couleurs ; les Smart Tags sont conservés canoniquement et exploités par détail/recherche/Outfit Picker.
 
 Principe canonique : **l'IA et les heuristiques proposent, Trân décide avant toute écriture destructrice ou canonique.**
+
+## V0.5 — Assistant — ACTIVE
+
+Objectif produit : `Hôm nay mặc gì?` — proposer des tenues utiles à partir du vrai dressing, sans modifier automatiquement les données.
+
+Premiers axes :
+- météo locale ;
+- suggestions d'outfits à partir des catégories, couleurs, styles et Smart Tags ;
+- contexte occasion/saison ;
+- historique des tenues ;
+- rareté d'utilisation / rotation du dressing ;
+- explication courte de chaque recommandation ;
+- validation explicite de Trân avant toute création d'outfit canonique.
 
 ## Deferred / connus
 
