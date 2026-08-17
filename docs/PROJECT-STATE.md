@@ -9,16 +9,15 @@ Dernière mise à jour : 2026-08-17
 - branche canonique : `main`
 - dernière production totalement close : `v0.4.6` — V0.4-C Smart Tags
 - phase active : `V0.5` — Assistant
+- candidate en cours : `v0.5.0` — V0.5-A `Hôm nay mặc gì?`
 - stockage local : IndexedDB `tran-closet`, schema version 4
 
 ## Phase
 
 - **V0.2 — Airtable Bridge : CLOSED / VERIFIED PROD**
 - **V0.3 — Outfits : CLOSED / VERIFIED PROD**
-- **V0.4-A — Analyse photo assistée : CLOSED / VERIFIED PROD**
-- **V0.4-B — Duplicate Guard : CLOSED / VERIFIED PROD**
-- **V0.4-C — Smart Tags : CLOSED / VERIFIED PROD**
-- **V0.5 — Assistant : ACTIVE**
+- **V0.4 — Smart Closet : CLOSED / VERIFIED PROD**
+- **V0.5-A — Daily Assistant : CANDIDATE v0.5.0**
 
 ## V0.2 — CLOSED / VERIFIED PROD
 
@@ -28,63 +27,61 @@ Bridge vêtements vérifié de bout en bout : CREATE + photo, UPDATE, DELETE, re
 
 Outfits offline-first + picker 100+, persistance Airtable par linked records, queue séparée, CREATE/UPDATE/DELETE vérifiés, Lookbook plein écran, PNG 1080×1350 et Web Share validé.
 
-## V0.4-A — Analyse photo assistée — CLOSED / VERIFIED PROD
+## V0.4 — Smart Closet — CLOSED / VERIFIED PROD
 
-Contrat human-in-the-loop validé. Pipeline Workers AI LLaVA + Llama 4 structuré, multi-pass + rescue, retry client automatique, fiabilité explicite, taxonomie `Underwear`, `Headwear`, `Umbrella`, polish `Brown / Nâu`, preview full-frame. QA réel PASS : chaussures DC, boxer, casquette, parapluie.
-
-## V0.4-B — Duplicate Guard — CLOSED / VERIFIED PROD
-
-QA réel PASS : warning avant écriture, `Quay lại kiểm tra` sans création, bypass explicite `Vẫn lưu món này`, création volontaire d'un doublon distinct, suppression PWA du doublon, retour Airtable à 3 records et snapshot post-delete sans résurrection.
-
-Le Duplicate Guard utilise un dHash perceptuel local 64 bits + métadonnées, affiche des raisons et ne merge/supprime jamais automatiquement.
-
-## V0.4-C — Smart Tags — CLOSED / VERIFIED PROD
-
-PR #23 `V0.4-C — Canonical Smart Tags` mergée sur `main`. Worker v0.4.6 déployé et `/health` authentifié SUCCESS.
-
-Modèle canonique :
-- champ Airtable `Tags` : `fld9hV9qirpfVfJmM` ;
-- vocabulaire fermé de 22 tags ;
-- tags éditables dans création/édition ;
-- tags visibles dans le détail ;
-- recherche vêtements + Outfit Picker par clés et labels vietnamiens ;
-- backup JSON v4 ;
-- mutation PWA → Worker → Airtable avec `tags[]` ;
-- snapshot Airtable → PWA avec Tags ;
-- compatibilité vieux clients : un payload sans propriété `tags` préserve les tags Airtable existants.
-
-IA Smart Tags :
-- 0–5 tags maximum ;
-- uniquement issus du vocabulaire canonique ;
-- `tagReason` court et explicable ;
-- `Áp dụng gợi ý` applique les tags au formulaire avec catégorie/couleurs/styles ;
-- tous les tags restent éditables avant sauvegarde.
-
-Gates production vérifiées :
-- CI complète verte ;
-- smoke réversible Worker → Airtable → snapshot → restauration SUCCESS ;
-- smoke IA : HTTP 200, tags conformes à la taxonomie et `tagReason` présent ;
-- **QA PWA réel PASS** : création de `VietCap` et `Jerry's Panty` depuis l'interface v0.4.6 ;
-- Airtable canonique : `VietCap` = `Headwear`, `Green + Red`, tags `Graphic + Logo` ; `Jerry's Panty` = `Underwear`, `Green`, tags `Graphic + Text` ;
-- snapshot canonique post-QA SUCCESS : `recordCount: 5`, mêmes catégories/couleurs/tags relus depuis Airtable ;
-- aucun tag temporaire de smoke restant.
-
-Les cartes compactes de collection continuent d'afficher principalement catégorie/couleurs ; les Smart Tags sont conservés canoniquement et exploités par détail/recherche/Outfit Picker.
+- V0.4-A Photo AI Assistant : multi-pass, retry auto, nouvelles catégories/couleurs, QA réel PASS.
+- V0.4-B Duplicate Guard : warning/cancel/bypass/delete/snapshot anti-résurrection vérifiés.
+- V0.4-C Smart Tags : 22 tags canoniques, IA explicable, persistance PWA → Worker → Airtable → snapshot, QA réel PASS sur `VietCap` et `Jerry's Panty`.
 
 Principe canonique : **l'IA et les heuristiques proposent, Trân décide avant toute écriture destructrice ou canonique.**
 
-## V0.5 — Assistant — ACTIVE
+## V0.5-A — `Hôm nay mặc gì?` — CANDIDATE v0.5.0
 
-Objectif produit : `Hôm nay mặc gì?` — proposer des tenues utiles à partir du vrai dressing, sans modifier automatiquement les données.
+Objectif : proposer jusqu'à 3 looks utiles à partir du vrai dressing, du contexte et de la météo, sans créer automatiquement quoi que ce soit.
 
-Premiers axes :
-- météo locale ;
-- suggestions d'outfits à partir des catégories, couleurs, styles et Smart Tags ;
-- contexte occasion/saison ;
-- historique des tenues ;
-- rareté d'utilisation / rotation du dressing ;
-- explication courte de chaque recommandation ;
-- validation explicite de Trân avant toute création d'outfit canonique.
+Architecture :
+- module `daily-assistant.js` séparé, injecté depuis la home ;
+- moteur pur `daily-assistant-core.mjs` testable sans navigateur ;
+- aucun changement du CRUD vêtements, d'IndexedDB, du Worker, des queues ou du schéma Airtable ;
+- lecture directe des vêtements/outfits locaux déjà réconciliés ;
+- météo via Open-Meteo Forecast API ;
+- ville manuelle via Open-Meteo Geocoding API ;
+- emplacement par défaut : TP. Hồ Chí Minh ;
+- géolocalisation navigateur uniquement après action explicite `Vị trí hiện tại` ;
+- cache météo local 30 minutes, strictement lié aux coordonnées ;
+- fallback sans météo si réseau indisponible.
+
+Signaux du moteur :
+- occasion : Everyday / Work / Date / Party / Travel / Sport / Formal / Other ;
+- saison météo dérivée : All / Hot / Rainy / Cool ;
+- température ressentie, max/min, pluie, probabilité de pluie et vent ;
+- catégories, styles, couleurs, favoris et Smart Tags ;
+- `Lightweight`, `Summer`, `Warm`, `Winter`, `Rain-ready`, `Travel-friendly`, etc. ;
+- harmonie couleur simple et diversité entre suggestions ;
+- exclusion des sous-vêtements du montage automatique d'un look.
+
+Comportement :
+- les outfits déjà enregistrés peuvent être remontés lorsqu'ils correspondent bien au contexte ;
+- sinon, le moteur construit des combinaisons top + bottom ou pièce unique, puis ajoute chaussures/sac/accessoires utiles ;
+- en pluie, un parapluie disponible est fortement favorisé ;
+- si le dressing ne contient pas encore assez de pièces de base, l'assistant montre seulement les accessoires pertinents et explique le manque ;
+- chaque suggestion contient des raisons courtes ;
+- `Lưu thành outfit` est disponible uniquement pour une suggestion générée d'au moins 2 pièces ;
+- la sauvegarde crée un outfit local normal puis déclenche le pipeline Outfit existant ;
+- une composition déjà présente dans `Phối đồ` n'est pas dupliquée.
+
+Release :
+- PWA/cache/diagnostics : `v0.5.0` ;
+- tests ciblés : météo pluie/chaleur, recommandation générée, parapluie automatique, exclusion underwear, priorité outfit enregistré, fallback accessoires-only.
+
+Statut : **code candidate en branche / PR à valider. Aucun statut VERIFIED PROD avant QA réel dans la PWA.**
+
+## V0.5-B — Historique & rotation — NEXT
+
+- historique des tenues portées ;
+- dernière utilisation ;
+- rareté / vêtements sous-utilisés ;
+- signal de rotation ajouté à V0.5-A sans écraser les choix manuels.
 
 ## Deferred / connus
 

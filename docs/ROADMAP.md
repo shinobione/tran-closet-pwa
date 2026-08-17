@@ -26,56 +26,66 @@
 
 ## V0.4 — Smart Closet ✅ CLOSED / VERIFIED PROD
 
-### V0.4-A — Analyse photo assistée ✅ CLOSED / VERIFIED PROD
-- Workers AI human-in-the-loop
+### V0.4-A — Analyse photo assistée ✅
 - vision multi-pass + rescue
 - retry client automatique
-- `Underwear`, `Headwear`, `Umbrella`
-- `Brown / Nâu`
+- taxonomie enrichie
 - indicateurs de fiabilité
-- preview full-frame
-- QA réel PASS : chaussures, boxer, casquette, parapluie
+- QA réel PASS
 
-### V0.4-B — Duplicate Guard ✅ CLOSED / VERIFIED PROD
-- dHash perceptuel local 64 bits
-- distance de Hamming + score visuel
-- comparaison catégorie / couleurs / styles / nom
-- maximum 80 candidats visuels
-- jusqu'à 3 candidats proches affichés avec raisons
-- warning/cancel/bypass vérifiés réellement
-- doublon volontaire supprimé depuis la PWA
-- snapshot post-delete à 3 records, anti-résurrection vérifiée
+### V0.4-B — Duplicate Guard ✅
+- dHash perceptuel + métadonnées
+- warning/cancel/bypass
 - aucun merge/delete automatique
+- QA réel + snapshot anti-résurrection PASS
 
-### V0.4-C — Smart Tags ✅ CLOSED / VERIFIED PROD
-- PR #23 mergée
-- champ Airtable canonique `Tags`
-- vocabulaire fixe de 22 tags
-- tags éditables, visibles en détail et recherchables
-- recherche Outfit par tags
-- suggestions IA explicables jusqu'à 5 tags
-- compatibilité vieux clients
-- Worker v0.4.6 + health SUCCESS
-- smoke Worker → Airtable → snapshot → restauration SUCCESS
-- smoke contrat IA Smart Tags SUCCESS
-- QA PWA réel PASS : `VietCap` → `Graphic + Logo`, `Jerry's Panty` → `Graphic + Text`
-- snapshot post-QA : `recordCount: 5`, tags relus canoniquement
+### V0.4-C — Smart Tags ✅
+- 22 tags canoniques
+- tags éditables/recherchables
+- suggestions IA explicables
+- round-trip PWA → Worker → Airtable → snapshot
+- QA réel PASS sur `VietCap` et `Jerry's Panty`
 
 ## V0.5 — Assistant 🟡 ACTIVE
 
-### V0.5-A — “Hôm nay mặc gì?” — NEXT
-- recommandations d'outfits à partir du vrai dressing
-- météo locale comme signal, pas comme vérité absolue
-- occasion / saison / météo / Smart Tags / couleurs / styles
-- explication courte de chaque suggestion
-- éviter les répétitions et favoriser la rotation du dressing
-- aucune création automatique : Trân choisit avant sauvegarde
+### V0.5-A — “Hôm nay mặc gì?” 🟡 CANDIDATE v0.5.0
+- bouton Assistant directement sur la home du dressing
+- météo actuelle + max/min + risque de pluie + vent
+- Open-Meteo sans nouveau secret
+- TP. Hồ Chí Minh par défaut
+- ville manuelle ou géolocalisation explicite
+- cache météo 30 min + fallback offline
+- occasion : quotidien, travail, date, fête, voyage, sport, formel
+- ranking des outfits déjà sauvegardés
+- génération de looks top+bottom / pièce unique
+- chaussures, sac, couvre-chef et parapluie ajoutés selon contexte
+- Smart Tags / styles / couleurs / favoris comme signaux
+- explication courte pour chaque recommandation
+- diversité entre suggestions
+- fallback accessoires si dressing incomplet
+- sauvegarde explicite seulement, minimum 2 pièces
+- déduplication d'une composition déjà existante
+- tests unitaires ciblés du moteur
+- aucun changement Worker/Airtable/DB/CRUD
 
-### V0.5-B — Historique & rotation
+QA requis avant fermeture :
+1. météo TP.HCM affichée ;
+2. changement de ville et/ou localisation actuelle ;
+3. changement d'occasion recalcule les suggestions ;
+4. dressing incomplet géré proprement ;
+5. avec assez de pièces, `Lưu thành outfit` crée un outfit puis sync via le pipeline existant.
+
+### V0.5-B — Historique & rotation — NEXT
 - historique des tenues portées
 - dernière utilisation
 - rareté / vêtements sous-utilisés
-- préférences implicites sans écraser les choix manuels
+- éviter les répétitions sans imposer la décision
+
+### V0.5-C — Assistant conversationnel
+- questions simples autour du dressing
+- raisons détaillées à la demande
+- préparation d'une tenue pour une date/occasion future
+- toujours human-in-the-loop
 
 ## V1.0 — Daily Driver
 - auth privée
