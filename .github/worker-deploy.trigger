@@ -1,1 +1,1 @@
-trigger: v0.4.2-ai-vision-diversity
+trigger: v0.4.2-restore-stable-vision
