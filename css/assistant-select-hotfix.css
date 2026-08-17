@@ -1,0 +1,4 @@
+/* V0.5.2 · Daily Assistant native select readability on Windows/Chrome. */
+.assistant-controls select{color-scheme:dark;background:#19141e;color:#fff8fb}
+.assistant-controls select option{background:#19141e;color:#fff8fb}
+.assistant-controls select option:checked{background:#ef9bbd;color:#281a2b}
