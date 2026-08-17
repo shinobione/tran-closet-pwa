@@ -1,0 +1,49 @@
+name: Smoke V0.5-A external weather APIs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/smoke-daily-assistant.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify Open-Meteo forecast and geocoding contracts
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error \
+            'https://api.open-meteo.com/v1/forecast?latitude=10.7769&longitude=106.7009&timezone=auto&forecast_days=1&current=temperature_2m%2Capparent_temperature%2Cprecipitation%2Crain%2Cshowers%2Cweather_code%2Cwind_speed_10m&daily=temperature_2m_max%2Ctemperature_2m_min%2Cprecipitation_probability_max%2Cweather_code' \
+            > /tmp/forecast.json
+          curl --fail --silent --show-error \
+            'https://geocoding-api.open-meteo.com/v1/search?name=Ho%20Chi%20Minh&count=5&language=vi&format=json' \
+            > /tmp/geocoding.json
+          python3 - <<'PY'
+          import json
+          forecast=json.load(open('/tmp/forecast.json',encoding='utf-8'))
+          geocoding=json.load(open('/tmp/geocoding.json',encoding='utf-8'))
+          assert isinstance(forecast.get('current'),dict), forecast
+          assert isinstance(forecast.get('daily'),dict), forecast
+          for key in ('temperature_2m','apparent_temperature','weather_code','wind_speed_10m'):
+              assert key in forecast['current'], (key,forecast['current'])
+          for key in ('temperature_2m_max','temperature_2m_min','precipitation_probability_max','weather_code'):
+              assert key in forecast['daily'], (key,forecast['daily'])
+              assert len(forecast['daily'][key]) >= 1, (key,forecast['daily'][key])
+          results=geocoding.get('results') or []
+          assert results, geocoding
+          first=results[0]
+          assert isinstance(first.get('latitude'),(int,float)), first
+          assert isinstance(first.get('longitude'),(int,float)), first
+          print(json.dumps({
+            'forecast_timezone':forecast.get('timezone'),
+            'current_temperature':forecast['current'].get('temperature_2m'),
+            'current_weather_code':forecast['current'].get('weather_code'),
+            'geocoding_first':{k:first.get(k) for k in ('name','admin1','country','latitude','longitude','timezone')}
+          },ensure_ascii=False,indent=2))
+          PY
