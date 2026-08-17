@@ -7,18 +7,18 @@ Dernière mise à jour : 2026-08-17
 - PWA : `https://shinobione.github.io/tran-closet-pwa/`
 - Cloudflare Worker : `https://tran-closet-sync.jerryquinet.workers.dev`
 - branche canonique : `main`
-- version production vérifiée : `v0.3.3`
-- candidate active : `v0.4.0` sur `v0.4-a-ai-photo-analysis`
-- stockage local production : IndexedDB `tran-closet`, schema version 4
+- version applicative candidate : `v0.4.3`
+- dernière phase produit entièrement close : `V0.3 — Outfits`
+- stockage local : IndexedDB `tran-closet`, schema version 4
 
 ## Phase
 
-- **dernière phase close : V0.3 — Outfits**
 - **phase active : V0.4 — Smart Closet**
-- **dernière slice vérifiée : V0.3-C — Outfit Presentation**
-- **candidate active : V0.4-A — analyse photo assistée**
+- **slice active : V0.4-A — analyse photo assistée**
+- **candidate QA : V0.4-A.3 / v0.4.3 — Reliability Pass**
+- **statut : backend et gates techniques vérifiés ; QA utilisateur final en attente**
 
-## V0.2 — État vérifié
+## V0.2 — CLOSED / VERIFIED PROD
 
 Le bridge vêtements est vérifié en production de bout en bout :
 
@@ -35,143 +35,137 @@ Le bridge vêtements est vérifié en production de bout en bout :
 
 Le test final a laissé le canonique à 3 vêtements réels, sans record jetable de test.
 
-## V0.3-A — Contrat vérifié
+## V0.3 — CLOSED / VERIFIED PROD
 
-Données outfit locales :
-- `id`
-- `name`
-- `itemIds[]`
-- `occasion`
-- `season`
-- `note`
-- `favorite`
-- `createdAt`
-- `updatedAt`
+### V0.3-A — Local Outfit Core ✅
 
-Règles :
-- minimum 2 vêtements à la création/édition
-- références vers les `item.id` locaux stables
-- si un vêtement est supprimé, sa référence est retirée des outfits
-- backup JSON V3 contient `items` + `outfits`
+- store IndexedDB `outfits`
+- création multi-items (minimum 2)
+- modification / suppression
+- occasion / saison / note
+- favoris outfits
+- composition visuelle liste/détail
+- backup JSON vêtements + outfits
+- nettoyage des références lorsqu'un vêtement est supprimé
 
-## V0.3-A.1 — Scalable Outfit Picker vérifié
+### V0.3-A.1 — Scalable Outfit Picker ✅
 
-Le sélecteur d'articles est conçu pour un catalogue large (100+ vêtements) :
-
-- recherche par nom, catégorie, couleur et style
-- filtres catégories horizontaux
-- filtres favoris et sélectionnés
-- compteur résultats / total et compteur sélection
-- ruban horizontal des vêtements déjà sélectionnés avec retrait rapide
+- recherche nom / catégorie / couleur / style
+- filtres catégories, favoris et sélectionnés
+- compteur résultats / total et sélection
+- ruban des vêtements choisis
 - grille filtrée à scroll interne
-- bouton de sauvegarde sticky dans le formulaire Outfit
+- conçu pour 100+ articles
 
-## V0.3-B — CLOSED / VERIFIED PROD
+### V0.3-B — Canonical Outfit Persistence ✅ VERIFIED PROD
 
-Schéma canonique dans la même base Airtable :
+- table Airtable `Trân's Outfits` : `tblhtL2UlsgCAh6E7`
+- linked records natifs vers `Trân's Clothes`
+- UUID stable `Outfit ID` comme clé d'idempotence
+- IndexedDB schema v4 + queue `outfitMutations` séparée
+- endpoint Worker `/v1/outfit-mutations`
+- CREATE / UPDATE / DELETE retry-safe
+- snapshot et bridge Outfit séparés
+- pending-write protection et tombstones anti-résurrection
+- migration réelle local → Airtable sans doublon
+- UPDATE réel même record
+- DELETE réel + snapshot post-delete `recordCount: 0`
 
-- table `Trân's Outfits` : `tblhtL2UlsgCAh6E7`
-- `Name`
-- `Items` : linked records vers `Trân's Clothes`
-- `Occasion`
-- `Season`
-- `Note`
-- `Favorite`
-- `Outfit ID` : UUID stable et clé d'idempotence
-- `Created At` / `Updated At` : timestamps ISO-8601
+### V0.3-C — Outfit Presentation ✅ VERIFIED PROD
 
-Architecture vérifiée :
+- Lookbook plein écran
+- safe-area mobile/iPhone
+- génération locale PNG 1080×1350
+- Web Share fichier + fallback sauvegarde PNG
+- aucune URL publique d'outfit
+- validation utilisateur finale VERIFIED PROD
 
-- IndexedDB schema v4 avec queue `outfitMutations` séparée
-- `putOutfit()` / `deleteOutfit()` queue automatiquement les writes sans modifier l'UI
-- Worker : endpoint séparé `/v1/outfit-mutations`
-- CREATE Outfit via Airtable upsert sur `Outfit ID`
-- UPDATE / DELETE idempotents
-- une mutation Outfit attend si un vêtement sélectionné n'a pas encore son `airtableRecordId`
-- snapshot séparé `airtable-outfit-snapshot.js`
-- bridge séparé avec protection pending writes, `cloudWriteAt` et tombstones anti-résurrection
-- diagnostic v0.3.2 expose séparément queues vêtements/outfits
-- le bridge vêtements existant reste isolé
+## V0.4-A — Analyse photo assistée — CANDIDATE v0.4.3
 
-Vérifications production réalisées le 16/08/2026 :
+### Contrat produit
 
-1. CI V0.3-B verte
-2. Worker v0.3.2 déployé avec health check authentifié
-3. smoke Worker Outfit CREATE → UPDATE → DELETE avec deux vrais linked records
-4. snapshot Outfit GitHub Actions lu avec le PAT read-only existant
-5. migration automatique du vrai outfit local `test` vers Airtable sans doublon
-6. reread snapshot du même UUID / record Airtable en état `synced`
-7. UPDATE réel depuis la PWA sur le même record sans duplication
-8. DELETE réel depuis la PWA → Airtable revenu à 0 outfit
-9. snapshot post-delete à `recordCount: 0`, aucune résurrection
+L'assistant IA ne remplace jamais la validation humaine :
 
-**V0.3-B est close et vérifiée en production.**
+1. Trân choisit une photo.
+2. Elle déclenche explicitement `Phân tích bằng AI`.
+3. L'IA propose uniquement catégorie, couleurs et styles.
+4. Le formulaire reste inchangé tant que `Áp dụng gợi ý` n'est pas pressé.
+5. Après application, tous les champs restent éditables.
+6. Aucune écriture IndexedDB/Airtable n'a lieu avant le bouton normal `Lưu vào tủ đồ`.
 
-## V0.3-C — CLOSED / VERIFIED PROD
+### Architecture candidate
 
-Couche de présentation ajoutée sans modifier le modèle de données ni la sync :
-
-- module `outfit-presentation.js` séparé du CRUD Outfit
-- vue Lookbook plein écran avec safe-area mobile/iPhone
-- composition visuelle premium et transitions avec respect de `prefers-reduced-motion`
-- génération locale d'une carte PNG 1080×1350 depuis les photos déjà présentes dans la PWA
-- pré-génération de la carte à l'ouverture afin de conserver le geste utilisateur requis par Web Share
-- partage natif de fichier via Web Share API quand disponible
-- fallback sauvegarde PNG quand le partage de fichier n'est pas disponible
-- aucune URL publique d'outfit : le partage image ne publie pas la garde-robe
-- jusqu'à 4 pièces visibles sur la carte, avec compteur `+N` pour les outfits plus grands
-- aucune modification `app.js`, `db.js`, Worker ou Airtable
-
-Vérifications production :
-
-1. CI PR #12 verte
-2. déploiement Pages v0.3.3 réussi sur le commit `1d9f7f8c793a30bccf655274d0e5cc6cc2eddd94`
-3. rendu Lookbook généré vérifié avec photos, titre, occasion/saison et branding
-4. fichier PNG `tran-closet-lookbook-test.png` généré et transmis à la feuille de partage système
-5. fallback image et logique Web Share intégrés sans toucher au CRUD/sync
-6. validation utilisateur finale : **VERIFIED PROD**
-
-**V0.3 est désormais close.**
-
-## V0.4-A — CANDIDATE v0.4.0
-
-Objectif : assister la création d'un vêtement à partir de sa photo sans donner à l'IA le droit de modifier ou sauvegarder les données.
-
-Contrat candidat :
-
-- moteur : Cloudflare Workers AI via binding `env.AI`
-- modèle : `@cf/meta/llama-4-scout-17b-16e-instruct`
+- Cloudflare Workers AI via binding `env.AI`
+- vision stable : `@cf/llava-hf/llava-1.5-7b-hf`
+- classification taxonomique : `@cf/meta/llama-4-scout-17b-16e-instruct`
 - endpoint authentifié séparé : `POST /v1/analyze-item`
-- aucune nouvelle clé IA exposée au navigateur
-- l'image n'est envoyée à l'IA qu'après action explicite `Phân tích bằng AI`
-- une copie réduite à 1024 px / JPEG est utilisée pour l'analyse ; la photo originale du formulaire n'est pas remplacée
-- sortie guidée et revalidée strictement contre la taxonomie existante
-- proposition limitée à `category`, jusqu'à 3 `colors`, jusqu'à 2 `styles`, confiance et justification courte
-- aucun nom de marque, matériau ou détail non visible n'est accepté comme donnée canonique
-- l'analyse ne pré-remplit rien automatiquement
-- bouton séparé `Áp dụng gợi ý` pour appliquer la proposition au formulaire
-- après application, tous les champs restent éditables
-- aucune écriture IndexedDB/Airtable n'arrive avant le bouton normal `Lưu vào tủ đồ`
-- aucun changement du schéma IndexedDB, des queues, d'Airtable ou du CRUD historique
+- image d'analyse réduite à 1024 px en conservant le cadre complet
+- preview UI en `contain` pour montrer l'image entière
+- sortie guidée + revalidation stricte contre la taxonomie
+- aucun secret IA dans le navigateur
 
-Gates avant clôture :
+### V0.4-A.1/A.2 — fondations et correctifs
 
-1. CI V0.4-A verte
-2. Worker avec binding Workers AI déployé et `/health` vert avec feature AI
-3. smoke réel `/v1/analyze-item` sur une photo canonique existante
-4. réponse contenue strictement dans `TAXONOMY`
-5. PWA v0.4.0 déployée
-6. test réel : photo → analyse → proposition → appliquer → correction éventuelle → sauvegarde normale
-7. vérification qu'aucune écriture n'a lieu au simple stade analyse/proposition
+- premier pipeline direct Llama 4 abandonné car l'image n'était pas réellement exploitée dans cette interface
+- pipeline LLaVA → Llama 4 validé sur photos canoniques
+- correction du payload LLaVA en tableau d'octets
+- hotfix `RESULT_CODE_HUNG` : le montage répétitif de la carte IA dans `Thêm` est bloqué par un sentinel sur `#itemForm`
+- validation utilisateur : `Thêm` s'ouvre de nouveau normalement
 
-## V0.4 — Smart Closet
+### V0.4-A.3 — Reliability Pass / v0.4.3
 
-Direction produit après V0.4-A :
+Taxonomie canonique enrichie, dans la PWA, le Worker et Airtable :
 
-- V0.4-B : détection de doublons probable avant création
-- V0.4-C : suggestions de tags explicables et éditables
+- `Underwear` → `Đồ lót`
+- `Headwear` → `Mũ / nón`
+- `Umbrella` → `Ô / dù`
 
-Le principe canonique reste : **l'IA propose, Trân valide avant toute écriture canonique**.
+Fiabilisation serveur :
+
+- deux inspections vision indépendantes par analyse
+- troisième passe de secours si la classification reste faible
+- règles explicites pour paire de chaussures, sous-vêtements, couvre-chefs et parapluies
+- couleurs dominantes de l'objet uniquement ; décor, cintre, peau, ombres et petits accents ignorés autant que possible
+- jusqu'à deux styles lorsque visuellement justifiés
+- réponse enrichie avec `reliability`, `retryUsed` et `attempts`
+
+Fiabilisation client v0.4.3 :
+
+- un seul clic utilisateur peut lancer jusqu'à 3 analyses Worker complètes
+- retry automatique si le meilleur résultat est non reconnu, faible ou medium trop peu confiant
+- arrêt anticipé dès qu'un résultat assez fiable existe
+- conservation du meilleur résultat entre les tentatives
+- affichage du niveau `Tin cậy cao` / `Cần kiểm tra` / `Tin cậy thấp`
+- affichage du nombre de retries automatiques et de passes vision cumulées
+- l'utilisateur n'a plus à cliquer quatre fois manuellement pour tenter d'obtenir une reconnaissance
+
+### Gates techniques déjà validées
+
+- CI syntaxe / shell / secrets verte
+- isolation et cache PWA verts
+- Worker restauré sur le backend vision stable après rejet d'une expérimentation moins fiable
+- déploiement Worker + `/health` authentifié : SUCCESS
+- smoke backend sur Neck Poca, Melody Bag et Tui Xach : HTTP 200 + contrat reliability valide
+- aucun changement du CRUD, d'IndexedDB, des queues, des snapshots ou des outfits pour le retry client
+
+### QA utilisateur requise avant clôture
+
+Priorité aux cas réels qui avaient exposé les limites :
+
+- chaussures DC : un seul clic doit suffire grâce aux retries automatiques ; attendu `Giày`
+- boxer : attendu `Đồ lót`
+- casquette : attendu `Mũ / nón`
+- parapluie : attendu `Ô / dù`
+- maillot Hazard : attendu `Áo`, avec style/couleurs à contrôler
+
+**V0.4-A ne sera marquée CLOSED / VERIFIED PROD qu'après ce QA réel.**
+
+## V0.4 — suite
+
+- V0.4-B : Duplicate Guard — doublons probables avant création
+- V0.4-C : Smart Tags — tags explicables et éditables
+
+Principe canonique : **l'IA propose, Trân valide avant toute écriture canonique**.
 
 ## Deferred / connus
 
