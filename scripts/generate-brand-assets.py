@@ -1,8 +1,6 @@
 from pathlib import Path
-import math
 
-from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont
-import numpy as np
+from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageStat
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / 'branding' / 'logo-source-round.jpg'
@@ -13,24 +11,30 @@ BRANDING.mkdir(parents=True, exist_ok=True)
 ICONS.mkdir(parents=True, exist_ok=True)
 
 source = Image.open(SOURCE).convert('RGB')
-# Source is the canonical crop from the selected round logo artwork.
-# The upper portion contains the circular hanger/aperture/wardrobe mark.
-mark_crop = source.crop((205, 15, 815, 555))
+# Source is the canonical compact crop from the selected round logo artwork.
+# Keep the mark crop proportional so a future higher-resolution replacement works unchanged.
+w, h = source.size
+mark_crop = source.crop((
+    round(w * .203),
+    round(h * .021),
+    round(w * .807),
+    round(h * .771),
+))
 lockup_crop = source.copy()
 
-arr = np.array(mark_crop)
-top_bg = tuple(int(x) for x in arr[:30].mean(axis=(0, 1)))
-bottom_bg = tuple(int(x) for x in arr[-30:].mean(axis=(0, 1)))
+sample_h = max(4, round(mark_crop.height * .055))
+mark_w, mark_h = mark_crop.size
+top_bg = tuple(int(v) for v in ImageStat.Stat(mark_crop.crop((0, 0, mark_w, sample_h))).mean[:3])
+bottom_bg = tuple(int(v) for v in ImageStat.Stat(mark_crop.crop((0, mark_h - sample_h, mark_w, mark_h))).mean[:3])
 
 
 def background_gradient(size):
     canvas = Image.new('RGB', (size, size))
-    pixels = canvas.load()
+    draw = ImageDraw.Draw(canvas)
     for y in range(size):
         t = y / max(1, size - 1)
         color = tuple(int(top_bg[i] * (1 - t) + bottom_bg[i] * t) for i in range(3))
-        for x in range(size):
-            pixels[x, y] = color
+        draw.line((0, y, size, y), fill=color)
     return canvas
 
 
@@ -94,4 +98,4 @@ for text, font, y, fill in (
 
 quantized_save(splash, BRANDING / 'splash-1242x2688.png')
 
-print('Brand assets generated from', SOURCE.relative_to(ROOT))
+print('Brand assets generated from', SOURCE.relative_to(ROOT), source.size)
