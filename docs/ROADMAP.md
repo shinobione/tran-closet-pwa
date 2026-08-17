@@ -36,25 +36,27 @@
 - preview full-frame
 - QA réel PASS : chaussures, boxer, casquette, parapluie
 
-### V0.4-B — Duplicate Guard 🟡 CANDIDATE v0.4.5
+### V0.4-B — Duplicate Guard ✅ CLOSED / VERIFIED PROD
 - dHash perceptuel local 64 bits
 - distance de Hamming + score visuel
 - comparaison catégorie / couleurs / styles / nom
-- maximum 80 candidats visuels pour gros catalogue
-- cache des fingerprints local à la session
+- maximum 80 candidats visuels
 - jusqu'à 3 candidats proches affichés avec raisons
 - warning avant création seulement au-dessus d'un seuil utile
-- `Quay lại kiểm tra` : aucune création
-- `Vẫn lưu món này` : bypass explicite
-- fail-open si le guard rencontre une erreur
+- `Quay lại kiểm tra` : vérifié sans création
+- `Vẫn lưu món này` : bypass explicite vérifié
+- doublon volontaire supprimé depuis la PWA
+- snapshot post-delete à 3 records, anti-résurrection vérifiée
 - aucun merge/delete automatique
-- offline-first, aucun nouveau secret
-- QA utilisateur requis avant VERIFIED PROD
 
-### V0.4-C — Smart Tags ⏳ QUEUED
-- suggestions de tags explicables et éditables
-- tags utiles à la recherche et aux outfits
-- préparation des signaux pour l'assistant V0.5
+### V0.4-C — Smart Tags 🟡 NEXT
+- champ Airtable canonique `Tags`
+- vocabulaire fixe de 22 tags
+- tags éditables et recherchables
+- recherche Outfit par tags
+- suggestions IA explicables jusqu'à 5 tags
+- compatibilité vieux clients
+- PR #23 prête à ré-ancrer sur `main`, revalider puis merger
 
 ## V0.5 — Assistant
 - “Hôm nay mặc gì?”
