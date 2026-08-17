@@ -13,7 +13,7 @@ permissions:
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     env:
       WORKER_URL: https://tran-closet-sync.jerryquinet.workers.dev
       AIRTABLE_BASE: appw8WNvdDuXUgYvN
@@ -112,3 +112,36 @@ jobs:
             > /tmp/airtable-restored.json
           jq -e --arg field "$TAG_FIELD" '((.fields[$field] // []) | length) == 0' /tmp/airtable-restored.json >/dev/null
           echo 'Airtable Tags restored to empty ✓'
+
+      - name: Verify AI Smart Tags contract on canonical photo
+        env:
+          CLOSET_SYNC_KEY: ${{ secrets.CLOSET_SYNC_KEY }}
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          import base64,json
+          from pathlib import Path
+          image=Path('assets/items/recZFFx4HaeVHOrTc.jpg').read_bytes()
+          Path('/tmp/ai-tags-payload.json').write_text(json.dumps({'image':'data:image/jpeg;base64,'+base64.b64encode(image).decode('ascii')}),encoding='utf-8')
+          PY
+          STATUS="$(curl --silent --show-error --output /tmp/ai-tags-result.json --write-out '%{http_code}' \
+            -X POST \
+            -H "Authorization: Bearer $CLOSET_SYNC_KEY" \
+            -H 'Content-Type: application/json' \
+            --data-binary @/tmp/ai-tags-payload.json \
+            "${WORKER_URL%/}/v1/analyze-item")"
+          echo "AI tags HTTP $STATUS"
+          test "$STATUS" = "200"
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import {TAXONOMY} from './js/data.js';
+          const body=JSON.parse(fs.readFileSync('/tmp/ai-tags-result.json','utf8'));
+          if(body.ok!==true)throw new Error(`AI response not ok: ${JSON.stringify(body)}`);
+          const analysis=body.analysis||{};
+          if(!Array.isArray(analysis.tags))throw new Error('analysis.tags is not an array');
+          if(analysis.tags.length>5)throw new Error(`too many tags: ${analysis.tags.length}`);
+          const invalid=analysis.tags.filter(tag=>!TAXONOMY.tags.includes(tag));
+          if(invalid.length)throw new Error(`invalid tags: ${invalid.join(', ')}`);
+          if(typeof analysis.tagReason!=='string')throw new Error('tagReason is not a string');
+          console.log(JSON.stringify({recognized:analysis.recognized,category:analysis.category,tags:analysis.tags,tagReason:analysis.tagReason,reliability:body.reliability,attempts:body.attempts},null,2));
+          NODE
