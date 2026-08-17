@@ -27,9 +27,13 @@ async function getLocation(){
   return (await getMeta(LOCATION_KEY))||DEFAULT_LOCATION;
 }
 
+function sameLocation(cache,location){
+  return Boolean(cache)&&Math.abs(Number(cache.latitude)-Number(location.latitude))<.01&&Math.abs(Number(cache.longitude)-Number(location.longitude))<.01;
+}
+
 async function fetchWeather(location,force=false){
   const cached=await getMeta(WEATHER_KEY);
-  const same=cached&&Math.abs(Number(cached.latitude)-Number(location.latitude))<.01&&Math.abs(Number(cached.longitude)-Number(location.longitude))<.01;
+  const same=sameLocation(cached,location);
   if(!force&&same&&Date.now()-Number(cached.fetchedAt||0)<30*60*1000)return cached.weather;
   const params=new URLSearchParams({
     latitude:String(location.latitude),longitude:String(location.longitude),timezone:'auto',forecast_days:'1',
@@ -81,11 +85,12 @@ function itemTile(item){
 }
 
 function suggestionCard(suggestion,index){
+  const saveable=suggestion.complete&&suggestion.itemIds.length>=2;
   const action=suggestion.source==='saved'
-    ? `<button type="button" class="secondary-button" data-open-outfits>Voir dans Phối đồ</button>`
-    : suggestion.complete
+    ? `<button type="button" class="secondary-button" data-open-outfits>Mở trong Phối đồ</button>`
+    : saveable
       ? `<button type="button" class="primary-button" data-save-look="${index}">Lưu thành outfit</button>`
-      : `<small class="assistant-incomplete">Thêm một áo + quần/váy, hoặc đầm/jumpsuit để tạo outfit hoàn chỉnh.</small>`;
+      : `<small class="assistant-incomplete">${suggestion.complete?'Thêm ít nhất một món nữa để lưu thành outfit.':'Thêm một áo + quần/váy, hoặc đầm/jumpsuit để tạo outfit hoàn chỉnh.'}</small>`;
   return `<article class="assistant-suggestion ${suggestion.complete?'':'is-partial'}">
     <div class="assistant-suggestion-head"><div><p>${suggestion.source==='saved'?'OUTFIT ĐÃ LƯU':suggestion.complete?'GỢI Ý HÔM NAY':'TỦ ĐỒ HIỆN TẠI'}</p><h3>${esc(suggestion.name)}</h3></div><span>#${index+1}</span></div>
     <div class="assistant-items">${suggestion.items.map(itemTile).join('')}</div>
@@ -127,7 +132,7 @@ async function recompute(forceWeather=false){
     state.location=await getLocation();
     try{state.weather=await fetchWeather(state.location,forceWeather);}catch(error){
       const cached=await getMeta(WEATHER_KEY);
-      state.weather=cached?.weather||null;
+      state.weather=sameLocation(cached,state.location)?cached.weather:null;
       state.error=state.weather?'Không lấy được thời tiết mới · đang dùng dữ liệu gần nhất.':'Không lấy được thời tiết lúc này.';
     }
     const [items,outfits]=await Promise.all([getAllItems(),getAllOutfits()]);
@@ -152,7 +157,7 @@ async function searchCity(query){
 
 async function saveLook(index,button){
   const suggestion=state.suggestions[index];
-  if(!suggestion?.complete||suggestion.source!=='generated')return;
+  if(!suggestion?.complete||suggestion.source!=='generated'||suggestion.itemIds.length<2)return;
   const existing=await getAllOutfits();
   const signature=ids=>[...ids].map(String).sort().join('|');
   const sig=signature(suggestion.itemIds);
@@ -176,8 +181,8 @@ function bindDialog(){
   d.querySelector('[data-assistant-occasion]')?.addEventListener('change',async event=>{state.occasion=event.target.value;await recompute(false);});
   d.querySelector('[data-refresh-weather]')?.addEventListener('click',()=>recompute(true));
   d.querySelector('[data-location-edit]')?.addEventListener('click',()=>{const editor=d.querySelector('.assistant-location-editor');editor.hidden=!editor.hidden;});
-  d.querySelector('[data-use-location]')?.addEventListener('click',async button=>{
-    button.target.disabled=true;
+  d.querySelector('[data-use-location]')?.addEventListener('click',async event=>{
+    event.currentTarget.disabled=true;
     try{
       const pos=await geolocate();
       await setMeta(LOCATION_KEY,{name:'Vị trí hiện tại',latitude:pos.coords.latitude,longitude:pos.coords.longitude});
