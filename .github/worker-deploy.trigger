@@ -1,1 +1,1 @@
-trigger: v0.4.2-restore-stable-vision
+trigger: v0.4.4-brown-closeout
