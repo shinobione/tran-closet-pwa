@@ -10,7 +10,7 @@ PWA mobile-first de la garde-robe de Trân, installable sur iPhone/Android, offl
 - **V0.4 Smart Closet** 🟡 active
 - **V0.4-A Photo AI Assistant** ✅ CLOSED / VERIFIED PROD
 - **V0.4-B Duplicate Guard** ✅ CLOSED / VERIFIED PROD
-- **V0.4-C Smart Tags** 🟡 next / PR #23
+- **V0.4-C Smart Tags** 🟡 candidate `v0.4.6` — backend/snapshot/IA vérifiés, QA PWA utilisateur en attente
 
 La PWA reste local-first : les ajouts, modifications et suppressions de vêtements et d'outfits sont appliqués immédiatement dans IndexedDB, puis envoyés vers Airtable via des files de mutations séparées lorsque le réseau et le Worker sont disponibles.
 
@@ -48,16 +48,24 @@ Le parcours réel a été vérifié : warning avant écriture, `Quay lại kiể
 
 Le guard n'effectue jamais de merge/delete automatique et n'a besoin d'aucun nouveau secret ni appel cloud.
 
-## V0.4-C — Smart Tags 🟡 NEXT
+## V0.4-C — Smart Tags 🟡 CANDIDATE v0.4.6
 
-Préparé derrière la gate Duplicate Guard :
+La PR #23 est mergée sur `main` et le Worker v0.4.6 est déployé.
+
+Fonctionnalités :
 - champ Airtable canonique `Tags` ;
-- vocabulaire fixe de 22 tags ;
-- tags éditables, recherchables et disponibles dans Outfit Picker ;
-- suggestions IA jusqu'à 5 tags + raison courte ;
-- compatibilité vieux clients pour ne pas effacer les tags existants.
+- vocabulaire fixe de 22 tags avec labels vietnamiens ;
+- tags éditables dans création/édition et visibles dans le détail ;
+- recherche vêtements et Outfit Picker par tags ;
+- backup JSON v4 ;
+- sync PWA → Worker → Airtable et snapshot retour avec Tags ;
+- suggestions IA de 0–5 tags maximum, strictement dans la taxonomie, avec `tagReason` ;
+- `Áp dụng gợi ý` applique aussi les tags, toujours éditables avant sauvegarde ;
+- vieux clients protégés : un payload qui omet `tags` ne les efface pas.
 
-PR #23 doit être ré-ancrée sur le `main` actuel, revalidée, mergée puis testée de bout en bout.
+Gates déjà passées : Worker + health SUCCESS, round-trip réversible `Cozy` via Worker/Airtable/snapshot/restauration SUCCESS, contrat IA Smart Tags SUCCESS. Le cleanup final laisse exactement 3 vêtements canoniques et aucun tag temporaire.
+
+La seule gate restante avant **CLOSED / VERIFIED PROD** est le QA PWA utilisateur : affichage/édition Tags, suggestion IA + raison, application, correction manuelle et vraie sauvegarde PWA.
 
 ## Infrastructure
 
