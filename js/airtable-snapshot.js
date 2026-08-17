@@ -1,10 +1,51 @@
 export const AIRTABLE_SNAPSHOT = {
-  "syncedAt": "2026-08-17T06:21:30.288Z",
+  "syncedAt": "2026-08-17T06:37:22.384Z",
   "source": "airtable",
   "baseId": "appw8WNvdDuXUgYvN",
   "tableId": "tblKdCi4MI4AH26y8",
-  "recordCount": 3,
+  "recordCount": 5,
   "items": [
+    {
+      "id": "airtable-recKr0w0g9A6viuwj",
+      "airtableRecordId": "recKr0w0g9A6viuwj",
+      "name": "Jerry's Panty",
+      "category": "Underwear",
+      "colors": [
+        "Green"
+      ],
+      "styles": [],
+      "tags": [
+        "Graphic",
+        "Text"
+      ],
+      "photo": "./assets/items/recKr0w0g9A6viuwj.jpg",
+      "favorite": false,
+      "source": "airtable",
+      "syncState": "synced",
+      "createdAt": "2026-08-17T06:34:31.000Z",
+      "updatedAt": "2026-08-17T06:34:31.000Z"
+    },
+    {
+      "id": "airtable-recLYZZgUOsE33ddz",
+      "airtableRecordId": "recLYZZgUOsE33ddz",
+      "name": "VietCap",
+      "category": "Headwear",
+      "colors": [
+        "Green",
+        "Red"
+      ],
+      "styles": [],
+      "tags": [
+        "Graphic",
+        "Logo"
+      ],
+      "photo": "./assets/items/recLYZZgUOsE33ddz.jpg",
+      "favorite": false,
+      "source": "airtable",
+      "syncState": "synced",
+      "createdAt": "2026-08-17T06:33:07.000Z",
+      "updatedAt": "2026-08-17T06:33:07.000Z"
+    },
     {
       "id": "airtable-recLjpxC6kj5pGEEj",
       "airtableRecordId": "recLjpxC6kj5pGEEj",
@@ -16,6 +57,7 @@ export const AIRTABLE_SNAPSHOT = {
       "styles": [
         "Casual"
       ],
+      "tags": [],
       "photo": "./assets/items/recLjpxC6kj5pGEEj.jpg",
       "favorite": false,
       "source": "airtable",
@@ -35,6 +77,7 @@ export const AIRTABLE_SNAPSHOT = {
       "styles": [
         "Classy"
       ],
+      "tags": [],
       "photo": "./assets/items/recZFFx4HaeVHOrTc.jpg",
       "favorite": false,
       "source": "airtable",
@@ -53,6 +96,7 @@ export const AIRTABLE_SNAPSHOT = {
       "styles": [
         "Cartoon"
       ],
+      "tags": [],
       "photo": "./assets/items/recrtzfBVgQOYfAQN.jpg",
       "favorite": false,
       "source": "airtable",
