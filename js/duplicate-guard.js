@@ -1,6 +1,6 @@
 import {getAllItems} from './db.js';
 import {LABELS} from './data.js';
-import {metadataSimilarity,hammingDistance,duplicateAssessment,duplicateReasons} from './duplicate-core.mjs';
+import {metadataSimilarity,hammingDistance,duplicateAssessment,duplicateReasons} from './duplicate-core.mjs?v=0.4.5';
 
 const root=document.querySelector('#mainContent');
 const hashMemory=new Map();
