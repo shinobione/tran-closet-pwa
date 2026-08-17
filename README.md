@@ -9,7 +9,8 @@ PWA mobile-first de la garde-robe de Trân, installable sur iPhone/Android, offl
 - **V0.3 Outfits** ✅ CLOSED / VERIFIED PROD
 - **V0.4 Smart Closet** 🟡 active
 - **V0.4-A Photo AI Assistant** ✅ CLOSED / VERIFIED PROD
-- **V0.4-B Duplicate Guard** 🟡 candidate `v0.4.5`
+- **V0.4-B Duplicate Guard** ✅ CLOSED / VERIFIED PROD
+- **V0.4-C Smart Tags** 🟡 next / PR #23
 
 La PWA reste local-first : les ajouts, modifications et suppressions de vêtements et d'outfits sont appliqués immédiatement dans IndexedDB, puis envoyés vers Airtable via des files de mutations séparées lorsque le réseau et le Worker sont disponibles.
 
@@ -27,7 +28,7 @@ Flux canonique :
 
 `PWA / IndexedDB → file de mutations → Worker authentifié → Airtable → snapshot GitHub → PWA`
 
-Le bridge vêtements prend en charge CREATE + photo, UPDATE, DELETE, retry offline, idempotence via `Sync Mutation ID`, tombstones anti-résurrection et protection contre snapshots plus anciens. Le round-trip réel a été vérifié en production.
+CREATE + photo, UPDATE, DELETE, retry offline, idempotence via `Sync Mutation ID`, tombstones anti-résurrection et snapshots canoniques sont vérifiés en production.
 
 ## V0.3 — Outfits ✅ VERIFIED PROD
 
@@ -37,36 +38,26 @@ Le bridge vêtements prend en charge CREATE + photo, UPDATE, DELETE, retry offli
 
 Principe : **l'IA propose, Trân valide avant toute écriture canonique.**
 
-Le pipeline validé utilise LLaVA pour la vision, Llama 4 pour la classification structurée, plusieurs passes vision, retry client automatique, indicateurs de fiabilité et les catégories `Underwear`, `Headwear`, `Umbrella`. Le QA réel a passé chaussures DC, boxer, casquette et parapluie.
+Pipeline validé : LLaVA pour la vision, Llama 4 pour la classification structurée, plusieurs passes vision, retry client automatique, indicateurs de fiabilité, catégories `Underwear`, `Headwear`, `Umbrella`, couleur `Brown / Nâu`, preview full-frame. QA réel : chaussures DC, boxer, casquette et parapluie.
 
-Le polish v0.4.4 ajoute `Brown / Nâu` jusque dans Airtable/PWA/Worker et durcit la preview full-frame.
+## V0.4-B — Duplicate Guard ✅ VERIFIED PROD
 
-## V0.4-B — Duplicate Guard 🟡 CANDIDATE v0.4.5
+Le Duplicate Guard repère localement un article probablement déjà présent avant création : dHash perceptuel 64 bits, distance de Hamming, métadonnées, score explicable et jusqu'à 3 candidats proches.
 
-Objectif : repérer un article probablement déjà présent avant sa création, sans bloquer un ajout légitime.
+Le parcours réel a été vérifié : warning avant écriture, `Quay lại kiểm tra` sans création, bypass explicite `Vẫn lưu món này`, création d'un doublon volontaire distinct, suppression PWA du doublon, retour Airtable à 3 records et snapshot post-delete sans résurrection.
 
-La candidate utilise :
-- un dHash perceptuel 64 bits calculé localement ;
-- une distance de Hamming pour la proximité visuelle ;
-- catégorie, couleurs, styles et nom pour le contexte ;
-- un score explicable avec jusqu'à 3 candidats proches ;
-- un cache local des fingerprints ;
-- une limite de 80 candidats visuels pour rester fluide avec un gros catalogue.
+Le guard n'effectue jamais de merge/delete automatique et n'a besoin d'aucun nouveau secret ni appel cloud.
 
-UX :
-- si rien de suffisamment proche n'est trouvé, la sauvegarde continue normalement ;
-- si un doublon probable est trouvé, rien n'est encore créé ;
-- `Quay lại kiểm tra` laisse corriger le formulaire ;
-- `Vẫn lưu món này` permet explicitement de passer outre ;
-- aucun merge/delete automatique ;
-- si le guard plante, il échoue ouvert et ne bloque pas la garde-robe ;
-- aucun Worker, nouveau secret ou appel cloud n'est requis pour cette détection.
+## V0.4-C — Smart Tags 🟡 NEXT
 
-**V0.4-B reste candidate tant que le warning + bypass n'ont pas été testés réellement dans la PWA.**
+Préparé derrière la gate Duplicate Guard :
+- champ Airtable canonique `Tags` ;
+- vocabulaire fixe de 22 tags ;
+- tags éditables, recherchables et disponibles dans Outfit Picker ;
+- suggestions IA jusqu'à 5 tags + raison courte ;
+- compatibilité vieux clients pour ne pas effacer les tags existants.
 
-## V0.4-C — Smart Tags ⏳
-- suggestions de tags explicables et éditables ;
-- tags utiles aux recherches, outfits et futur assistant.
+PR #23 doit être ré-ancrée sur le `main` actuel, revalidée, mergée puis testée de bout en bout.
 
 ## Infrastructure
 
