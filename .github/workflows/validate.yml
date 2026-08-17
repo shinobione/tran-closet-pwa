@@ -69,16 +69,16 @@ jobs:
           test -f icons/icon-192.png
           test -f icons/icon-512.png
           grep -q 'manifest.webmanifest' index.html
-          grep -q 'bootstrap.js?v=0.4.3' index.html
-          grep -q 'outfits.css?v=0.4.3' index.html
-          grep -q 'outfit-picker.css?v=0.4.3' index.html
-          grep -q 'outfit-presentation.css?v=0.4.3' index.html
-          grep -q 'item-ai-assistant.css?v=0.4.3' index.html
-          grep -q 'outfit-picker.js?v=0.4.3' js/bootstrap.js
-          grep -q 'outfit-sync-client.js?v=0.4.3' js/bootstrap.js
-          grep -q 'outfit-presentation.js?v=0.4.3' js/bootstrap.js
-          grep -q 'item-ai-assistant.js?v=0.4.3' js/bootstrap.js
-          grep -q 'sync-diagnostics.js?v=0.4.3' js/bootstrap.js
+          grep -q 'bootstrap.js?v=0.4.4' index.html
+          grep -q 'outfits.css?v=0.4.4' index.html
+          grep -q 'outfit-picker.css?v=0.4.4' index.html
+          grep -q 'outfit-presentation.css?v=0.4.4' index.html
+          grep -q 'item-ai-assistant.css?v=0.4.4' index.html
+          grep -q 'outfit-picker.js?v=0.4.4' js/bootstrap.js
+          grep -q 'outfit-sync-client.js?v=0.4.4' js/bootstrap.js
+          grep -q 'outfit-presentation.js?v=0.4.4' js/bootstrap.js
+          grep -q 'item-ai-assistant.js?v=0.4.4' js/bootstrap.js
+          grep -q 'sync-diagnostics.js?v=0.4.4' js/bootstrap.js
           grep -q 'syncOutfitSnapshotToLocalDB' js/bootstrap.js
           grep -q 'serviceWorker' js/app.js
           grep -q 'queueMutation' js/app.js
@@ -96,9 +96,13 @@ jobs:
           grep -q "Underwear" js/data.js
           grep -q "Headwear" js/data.js
           grep -q "Umbrella" js/data.js
+          grep -q "Brown" js/data.js
+          grep -q "Brown:'Nâu'" js/data.js
           grep -q "Underwear" worker/src/index.js
           grep -q "Headwear" worker/src/index.js
           grep -q "Umbrella" worker/src/index.js
+          grep -q "Brown" worker/src/index.js
+          grep -q 'Brown includes tan' worker/src/index.js
           grep -q "Promise.all" worker/src/index.js
           grep -q "crosscheck" worker/src/index.js
           grep -q "rescue" worker/src/index.js
@@ -111,14 +115,15 @@ jobs:
           grep -q 'Đang tự thử lại' js/item-ai-assistant.js
           grep -q 'aiAssistantMounted' js/item-ai-assistant.js
           grep -q 'ai-photo-preview' js/item-ai-assistant.js
+          grep -q 'photo-picker.ai-photo-preview img' css/item-ai-assistant.css
           grep -q 'object-fit:contain' css/item-ai-assistant.css
           grep -q 'Tin cậy cao' js/item-ai-assistant.js
           grep -q '^\[ai\]' worker/wrangler.toml
           grep -q 'binding = "AI"' worker/wrangler.toml
-          grep -q 'tran-closet-v0.4.3' sw.js
-          grep -q 'item-ai-assistant.css?v=0.4.3' sw.js
-          grep -q 'item-ai-assistant.js?v=0.4.3' sw.js
-          grep -q "const VERSION='v0.4.3'" js/sync-diagnostics.js
+          grep -q 'tran-closet-v0.4.4' sw.js
+          grep -q 'item-ai-assistant.css?v=0.4.4' sw.js
+          grep -q 'item-ai-assistant.js?v=0.4.4' sw.js
+          grep -q "const VERSION='v0.4.4'" js/sync-diagnostics.js
           grep -q 'navigator.share' js/outfit-presentation.js
           grep -q 'navigator.canShare' js/outfit-presentation.js
           grep -q '1080' js/outfit-presentation.js
