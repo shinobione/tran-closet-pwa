@@ -8,7 +8,8 @@ PWA mobile-first de la garde-robe de Trân, installable sur iPhone/Android, offl
 - **V0.2 Airtable Bridge** ✅ CLOSED / VERIFIED PROD
 - **V0.3 Outfits** ✅ CLOSED / VERIFIED PROD
 - **V0.4 Smart Closet** 🟡 active
-- **V0.4-A.3 Photo AI Reliability Pass** 🟡 `v0.4.3` — candidate QA utilisateur
+- **V0.4-A Photo AI Assistant** ✅ CLOSED / VERIFIED PROD
+- **V0.4-B Duplicate Guard** 🟡 active next
 
 La PWA reste local-first : les ajouts, modifications et suppressions de vêtements et d'outfits sont appliqués immédiatement dans IndexedDB, puis envoyés vers Airtable via des files de mutations séparées lorsque le réseau et le Worker sont disponibles.
 
@@ -26,69 +27,75 @@ Flux canonique :
 
 `PWA / IndexedDB → file de mutations → Worker authentifié → Airtable → snapshot GitHub → PWA`
 
-Le bridge vêtements prend en charge :
-- CREATE avec photo ;
-- UPDATE ;
-- DELETE ;
-- retry offline ;
-- idempotence via `Sync Mutation ID` ;
-- tombstones anti-résurrection ;
-- protection contre les snapshots plus anciens.
-
-Le round-trip réel a été vérifié de bout en bout en production.
+Le bridge vêtements prend en charge CREATE + photo, UPDATE, DELETE, retry offline, idempotence via `Sync Mutation ID`, tombstones anti-résurrection et protection contre snapshots plus anciens. Le round-trip réel a été vérifié en production.
 
 ## V0.3 — Outfits ✅ VERIFIED PROD
 
-L'onglet **Phối đồ** permet :
+**Phối đồ** fournit :
 - création/édition/suppression d'outfits ;
-- picker scalable pour gros catalogue ;
+- picker scalable 100+ articles ;
 - occasion, saison, note et favoris ;
-- sync Airtable canonique via table Outfit séparée et linked records ;
-- queue offline dédiée ;
+- sync Airtable canonique avec linked records ;
+- queue offline séparée ;
 - Lookbook plein écran ;
-- génération PNG 1080×1350 ;
-- partage natif Web Share avec fallback sauvegarde image.
+- PNG 1080×1350 ;
+- Web Share + fallback sauvegarde image.
 
-CREATE, UPDATE, DELETE, snapshot retour et anti-résurrection ont été vérifiés en production.
+CREATE, UPDATE, DELETE, snapshot retour et anti-résurrection sont vérifiés.
 
-## V0.4-A — Analyse photo assistée 🟡 v0.4.3
+## V0.4-A — Analyse photo assistée ✅ VERIFIED PROD
 
-Principe produit : **l'IA propose, Trân valide avant toute écriture canonique.**
+Principe : **l'IA propose, Trân valide avant toute écriture canonique.**
 
 Parcours :
 1. choisir une photo ;
-2. cliquer explicitement `Phân tích bằng AI` ;
-3. recevoir une proposition de catégorie, couleurs et styles ;
-4. cliquer `Áp dụng gợi ý` pour copier la proposition dans le formulaire ;
-5. corriger librement ;
-6. sauvegarder avec le bouton normal.
+2. `Phân tích bằng AI` ;
+3. recevoir catégorie/couleurs/styles proposés ;
+4. `Áp dụng gợi ý` ;
+5. corriger si besoin ;
+6. sauvegarder normalement.
 
 L'analyse seule ne modifie ni IndexedDB ni Airtable.
 
-### Reliability Pass V0.4-A.3
+### Reliability Pass validé
 
-La candidate `v0.4.3` ajoute :
-- taxonomie canonique enrichie avec `Underwear` (`Đồ lót`), `Headwear` (`Mũ / nón`) et `Umbrella` (`Ô / dù`) ;
-- preview de la photo complète au lieu d'un cadrage visuellement trompeur ;
-- deux passes vision serveur, avec troisième passe de secours si nécessaire ;
-- règles plus strictes sur l'objet principal, les couleurs de fond et les styles ;
-- niveaux `Tin cậy cao`, `Cần kiểm tra`, `Tin cậy thấp` ;
-- retry automatique côté PWA : un seul clic utilisateur peut lancer jusqu'à trois analyses complètes, avec arrêt anticipé et conservation du meilleur résultat ;
-- compteur de retries/passes lorsque le système a dû réessayer ;
-- garde anti-boucle DOM corrigeant la régression `RESULT_CODE_HUNG` sur l'écran `Thêm`.
+- Workers AI authentifié ;
+- LLaVA pour la vision + Llama 4 pour la classification structurée ;
+- 2 passes vision + rescue serveur ;
+- jusqu'à 3 analyses complètes automatiques côté client sur un seul clic ;
+- conservation du meilleur résultat ;
+- indicateurs de fiabilité ;
+- `Underwear` / `Đồ lót` ;
+- `Headwear` / `Mũ / nón` ;
+- `Umbrella` / `Ô / dù` ;
+- garde anti-boucle `RESULT_CODE_HUNG` ;
+- QA utilisateur réel PASS sur chaussures DC, boxer, casquette et parapluie.
 
-Le Worker stable a été redéployé et le contrat d'analyse a repassé un smoke sur les trois photos canoniques. La clôture de V0.4-A attend encore le QA utilisateur sur les cas réels qui avaient révélé les faiblesses : chaussures, boxer, casquette, parapluie et maillot.
+### Polish de fermeture v0.4.4
 
-## Suite V0.4
+- `Brown` / `Nâu` ajouté jusque dans Airtable, la PWA et le Worker ;
+- distinction brown/tan/camel renforcée ;
+- preview photo full-frame durcie en `contain`.
 
-### V0.4-B — Duplicate Guard
-- détection de doublons probables avant création ;
-- comparaison visuelle + métadonnées ;
-- décision finale laissée à l'utilisateur.
+**V0.4-A est CLOSED / VERIFIED PROD.**
 
-### V0.4-C — Smart Tags
-- suggestions de tags utiles ;
-- tags explicables et éditables.
+## V0.4-B — Duplicate Guard 🟡
+
+Objectif : repérer un article probablement déjà présent avant sa création, sans bloquer les ajouts légitimes.
+
+Contrat :
+- comparaison visuelle locale ;
+- comparaison catégorie / couleurs / styles / nom ;
+- score et explication compréhensibles ;
+- candidats proches montrés à Trân ;
+- possibilité de continuer malgré l'alerte ;
+- aucun merge/delete automatique ;
+- aucun nouveau secret ;
+- fonctionnement offline-first.
+
+## V0.4-C — Smart Tags ⏳
+- suggestions de tags explicables et éditables ;
+- tags utiles aux recherches, outfits et futur assistant.
 
 ## Infrastructure
 
@@ -109,8 +116,6 @@ Secrets GitHub Actions nécessaires :
 - `CLOSET_SYNC_KEY`
 
 ## Développement local
-
-La PWA doit être servie en HTTP(S) :
 
 ```bash
 python3 -m http.server 4173
