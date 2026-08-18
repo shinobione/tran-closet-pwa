@@ -1,0 +1,71 @@
+name: Validate V0.5.9 UX i18n colors
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-v059:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          node --check js/data.js
+          node --check js/photo-picker-mobile.js
+          node --check js/v059-ux-fixes.js
+          node --check js/i18n-v059-hotfix.js
+          node --check worker/src/v059.js
+          node --check js/bootstrap.js
+          node --check sw.js
+      - name: Check dual camera and gallery contract
+        run: |
+          grep -q "camera.id='cameraInput'" js/photo-picker-mobile.js
+          grep -q "camera.setAttribute('capture','environment')" js/photo-picker-mobile.js
+          grep -q "input.removeAttribute('capture')" js/photo-picker-mobile.js
+          grep -q "data-photo-camera" js/photo-picker-mobile.js
+          grep -q "data-photo-gallery" js/photo-picker-mobile.js
+          grep -q "input.dataset.photo=photo" js/photo-picker-mobile.js
+      - name: Check uninterrupted search contract
+        run: |
+          grep -q "#searchInput" js/v059-ux-fixes.js
+          grep -q "queueMicrotask" js/v059-ux-fixes.js
+          grep -q "focus({preventScroll:true})" js/v059-ux-fixes.js
+          grep -q "setSelectionRange" js/v059-ux-fixes.js
+      - name: Check expanded color taxonomy and French labels
+        run: |
+          grep -q "'Navy','Light Blue','Turquoise','Teal'" js/data.js
+          grep -q "'Camel','Beige','Cream'" js/data.js
+          grep -q "'Olive','Khaki','Mint'" js/data.js
+          grep -q "'Burgundy','Gold','Silver'" js/data.js
+          grep -q "Navy:'Bleu marine'" js/data.js
+          grep -q "Cream:'Crème'" js/data.js
+          grep -q "Burgundy:'Bordeaux'" js/data.js
+          grep -q "Gold:'Doré'" js/data.js
+          grep -q "Silver:'Argenté'" js/data.js
+      - name: Check AI fine-color Worker contract
+        run: |
+          grep -q "main = \"src/v059.js\"" worker/wrangler.toml
+          grep -q "detectFineColors" worker/src/v059.js
+          grep -q "Use Navy for very dark blue" worker/src/v059.js
+          grep -q "Distinguish Beige, Cream and White" worker/src/v059.js
+          grep -q "colorTaxonomy='v0.5.9'" worker/src/v059.js
+      - name: Check integration and French cleanup
+        run: |
+          test -f css/v059-ux.css
+          grep -q "v059-ux.css?v=0.5.9" index.html
+          grep -q "v059-ux-fixes.js?v=0.5.9" js/bootstrap.js
+          grep -q "i18n-v059-hotfix.js?v=0.5.9" js/bootstrap.js
+          grep -q "v059-ux-fixes.js?v=0.5.9" sw.js
+          grep -q "i18n-v059-hotfix.js?v=0.5.9" sw.js
+          grep -q "Prendre une photo" js/i18n-v059-hotfix.js
+          grep -q "Choisir dans la galerie" js/i18n-v059-hotfix.js
+          grep -q "Météo + vrai dressing + occasion du jour" js/i18n-v059-hotfix.js
