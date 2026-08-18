@@ -1,9 +1,9 @@
 export const AIRTABLE_SNAPSHOT = {
-  "syncedAt": "2026-08-18T17:24:17.222Z",
+  "syncedAt": "2026-08-18T18:58:23.211Z",
   "source": "airtable",
   "baseId": "appw8WNvdDuXUgYvN",
   "tableId": "tblKdCi4MI4AH26y8",
-  "recordCount": 9,
+  "recordCount": 8,
   "items": [
     {
       "id": "airtable-rec1rhHLdY61btiZz",
@@ -25,21 +25,6 @@ export const AIRTABLE_SNAPSHOT = {
       "syncState": "synced",
       "createdAt": "2026-08-17T18:55:32.000Z",
       "updatedAt": "2026-08-17T18:55:32.000Z"
-    },
-    {
-      "id": "airtable-rec6sAxfNivkTmiMp",
-      "airtableRecordId": "rec6sAxfNivkTmiMp",
-      "name": "Celling",
-      "category": "Shirt",
-      "colors": [],
-      "styles": [],
-      "tags": [],
-      "photo": "./assets/items/rec6sAxfNivkTmiMp.jpg",
-      "favorite": false,
-      "source": "airtable",
-      "syncState": "synced",
-      "createdAt": "2026-08-18T16:53:37.000Z",
-      "updatedAt": "2026-08-18T16:53:37.000Z"
     },
     {
       "id": "airtable-recKr0w0g9A6viuwj",
@@ -83,23 +68,30 @@ export const AIRTABLE_SNAPSHOT = {
       "updatedAt": "2026-08-17T06:33:07.000Z"
     },
     {
-      "id": "airtable-recLjpxC6kj5pGEEj",
-      "airtableRecordId": "recLjpxC6kj5pGEEj",
-      "name": "Neck Poca",
-      "category": "Accessorie",
+      "id": "airtable-recOVCsfXOTsu68At",
+      "airtableRecordId": "recOVCsfXOTsu68At",
+      "name": "Slagao Shirt",
+      "category": "Shirt",
       "colors": [
-        "Blue"
+        "Blue",
+        "White"
       ],
       "styles": [
         "Casual"
       ],
-      "tags": [],
-      "photo": "./assets/items/recLjpxC6kj5pGEEj.jpg",
+      "tags": [
+        "Logo",
+        "Text",
+        "Colorful",
+        "Relaxed",
+        "Summer"
+      ],
+      "photo": "./assets/items/recOVCsfXOTsu68At.jpg",
       "favorite": false,
       "source": "airtable",
       "syncState": "synced",
-      "createdAt": "2026-08-16T18:42:42.000Z",
-      "updatedAt": "2026-08-16T18:42:42.000Z"
+      "createdAt": "2026-08-18T17:33:13.000Z",
+      "updatedAt": "2026-08-18T17:33:13.000Z"
     },
     {
       "id": "airtable-recZFFx4HaeVHOrTc",
