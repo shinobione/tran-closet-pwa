@@ -14,14 +14,31 @@ async function compress(file){
   return canvas.toDataURL('image/jpeg',.78);
 }
 
+function sourceMarkup(){
+  return `<div class="photo-source-actions" data-photo-source-actions>
+    <button type="button" class="secondary-button" data-photo-camera><span>📷</span><b>Chụp ảnh</b></button>
+    <button type="button" class="secondary-button" data-photo-gallery><span>▧</span><b>Chọn từ thư viện</b></button>
+  </div>`;
+}
+
+function ensurePickerIntro(preview){
+  if(preview.querySelector('img'))return;
+  let intro=preview.querySelector('[data-photo-picker-intro]');
+  if(!intro){
+    intro=document.createElement('div');
+    intro.dataset.photoPickerIntro='1';
+    intro.className='photo-picker-intro';
+    intro.innerHTML='<span>＋</span><strong>Thêm ảnh</strong><small>Chụp ảnh hoặc chọn từ thư viện</small>';
+    preview.replaceChildren(intro);
+  }
+}
+
 function patchPhotoInput(){
   const input=document.querySelector('#photoInput');
   const preview=document.querySelector('#photoPreview');
   const form=document.querySelector('#itemForm');
   if(!input||!preview||!form)return false;
 
-  // The canonical input remains the gallery/file picker. A dedicated second
-  // input owns capture=environment so mobile users always keep BOTH choices.
   input.removeAttribute('capture');
   input.setAttribute('accept','image/*');
 
@@ -36,12 +53,22 @@ function patchPhotoInput(){
     input.after(camera);
   }
 
-  let actions=form.parentElement?.querySelector('.photo-source-actions');
+  ensurePickerIntro(preview);
+  let actions=preview.querySelector('[data-photo-source-actions]');
   if(!actions){
-    actions=document.createElement('div');
-    actions.className='photo-source-actions';
-    actions.innerHTML=`<button type="button" class="secondary-button" data-photo-camera>📷 Chụp ảnh</button><button type="button" class="secondary-button" data-photo-gallery>▧ Chọn từ thư viện</button>`;
-    preview.after(actions);
+    preview.insertAdjacentHTML('beforeend',sourceMarkup());
+    actions=preview.querySelector('[data-photo-source-actions]');
+  }
+
+  // app.js historically made the whole frame open the gallery. Stop that here:
+  // the frame itself is now a source chooser and both choices are visible in it.
+  if(preview.dataset.v0510SourceBound!=='1'){
+    preview.dataset.v0510SourceBound='1';
+    preview.addEventListener('click',event=>{
+      if(event.target.closest('[data-photo-camera],[data-photo-gallery]'))return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    },true);
   }
 
   const cameraButton=actions.querySelector('[data-photo-camera]');
@@ -60,6 +87,7 @@ function patchPhotoInput(){
     galleryButton.addEventListener('click',event=>{
       event.preventDefault();
       event.stopPropagation();
+      input.value='';
       input.click();
     });
   }
@@ -72,7 +100,9 @@ function patchPhotoInput(){
         const photo=await compress(file);
         input.value='';
         input.dataset.photo=photo;
-        preview.innerHTML=`<img src="${photo}" alt="Xem trước">`;
+        preview.innerHTML=`<img src="${photo}" alt="Xem trước">${sourceMarkup()}`;
+        preview.dataset.v0510SourceBound='';
+        patchPhotoInput();
         input.dispatchEvent(new Event('change',{bubbles:true}));
       }catch(error){
         console.warn('Camera photo processing failed.',error);
@@ -83,6 +113,4 @@ function patchPhotoInput(){
 }
 
 patchPhotoInput();
-if(root){
-  new MutationObserver(()=>patchPhotoInput()).observe(root,{childList:true,subtree:true});
-}
+if(root)new MutationObserver(()=>patchPhotoInput()).observe(root,{childList:true,subtree:true});

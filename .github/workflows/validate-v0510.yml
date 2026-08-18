@@ -1,0 +1,66 @@
+name: Validate V0.5.10 QA UX and build version
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-v0510:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          node --check js/photo-picker-mobile.js
+          node --check js/v0510-search.js
+          node --check js/i18n-v0510-profile.js
+          node --check js/build-version.js
+          node --check js/sync-diagnostics.js
+          node --check js/bootstrap.js
+          node --check sw.js
+      - name: Check photo source chooser
+        run: |
+          grep -q "camera.setAttribute('capture','environment')" js/photo-picker-mobile.js
+          grep -q "input.removeAttribute('capture')" js/photo-picker-mobile.js
+          grep -q "preview.insertAdjacentHTML('beforeend',sourceMarkup())" js/photo-picker-mobile.js
+          grep -q "event.stopImmediatePropagation()" js/photo-picker-mobile.js
+      - name: Check non destructive search
+        run: |
+          grep -q "event.stopImmediatePropagation()" js/v0510-search.js
+          grep -q "card.hidden=!show" js/v0510-search.js
+          grep -q "FR_LABELS" js/v0510-search.js
+          if grep -q "state.query=e.target.value;render()" js/v0510-search.js; then exit 1; fi
+      - name: Check reliable deployment version
+        run: |
+          test "$(tr -d '\r\n' < VERSION)" = "v0.5.10"
+          grep -q "git rev-parse HEAD" .github/workflows/deploy-pages.yml
+          grep -q "build-info.json" .github/workflows/deploy-pages.yml
+          grep -q "cache:'no-store'" js/build-version.js
+          grep -q "TranClosetBuildInfo" js/build-version.js
+          grep -q "build-info.json" sw.js
+          grep -q "build:{sha:" js/sync-diagnostics.js
+      - name: Check integration
+        run: |
+          test -f css/v0510-ux.css
+          grep -q "v0510-ux.css?v=0.5.10" index.html
+          grep -q "photo-picker-mobile.js?v=0.5.10" js/bootstrap.js
+          grep -q "v0510-search.js?v=0.5.10" js/bootstrap.js
+          grep -q "i18n-v0510-profile.js?v=0.5.10" js/bootstrap.js
+          grep -q "build-version.js?v=0.5.10" js/bootstrap.js
+          grep -q "sync-diagnostics.js?v=0.5.10" js/bootstrap.js
+          grep -q "v0510-search.js?v=0.5.10" sw.js
+          grep -q "build-version.js?v=0.5.10" sw.js
+      - name: Check French profile coverage
+        run: |
+          grep -q "Synchronisation configurée" js/i18n-v0510-profile.js
+          grep -q "Adresse du Worker" js/i18n-v0510-profile.js
+          grep -q "Clé de synchronisation" js/i18n-v0510-profile.js
+          grep -q "Réinitialiser les données locales" js/i18n-v0510-profile.js

@@ -30,6 +30,24 @@ jobs:
         with:
           ref: main
 
+      - name: Build exact deployment stamp
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const cp=require('child_process');
+          const version=fs.readFileSync('VERSION','utf8').trim();
+          const sha=cp.execSync('git rev-parse HEAD').toString().trim();
+          const body={
+            version,
+            sha,
+            shortSha:sha.slice(0,7),
+            builtAt:new Date().toISOString(),
+            runId:process.env.GITHUB_RUN_ID||null
+          };
+          fs.writeFileSync('build-info.json',JSON.stringify(body,null,2)+'\n');
+          console.log(`Deploying ${body.version} @ ${body.shortSha}`);
+          NODE
+
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
