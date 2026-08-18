@@ -1,0 +1,109 @@
+name: V0.5.16 one-shot branch cleanup
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/v0516-branch-cleanup-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    if: github.repository == 'shinobione/tran-closet-pwa'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Delete proven historical branches
+        shell: bash
+        run: |
+          set -euo pipefail
+          branches=(
+            'agent/airtable-sync-trigger'
+            'agent/airtable-v0.2a'
+            'agent/airtable-v0.2b'
+            'agent/cloudflare-worker-deploy'
+            'agent/pages-after-airtable-sync'
+            'agent/pages-deploy'
+            'agent/pwa-v0.1'
+            'docs/v0.5.16-canonical-roadmap'
+            'docs/v0.5.16-roadmap-closeout'
+            'dummy-never'
+            'fix/pwa-identity-cache-isolation-20260816'
+            'fix/pwa-identity-cache-isolation-v2-20260816'
+            'fix-v057-exact-user-assets'
+            'hotfix-v0.4.1-add-hang'
+            'hotfix-v0.4.2-restore-vision'
+            'safety/post-pwa-isolation-live-20260816-2232'
+            'safety/pre-pwa-isolation-20260816-2224'
+            'safety/pre-pwa-isolation-v031-20260816-2227'
+            'safety/pwa-isolation-green-premerge-20260816-2231'
+            'v0.3-a1-scalable-outfit-picker'
+            'v0.3-a-local-outfits'
+            'v0.3-b-canonical-outfits'
+            'v0.3-c-outfit-presentation'
+            'v0.4-a.3-auto-retry'
+            'v0.4-a.3-reliability'
+            'v0.4-a.3-vision-diversity'
+            'v0.4-a.4-polish-closeout'
+            'v0.4-a-ai-photo-analysis'
+            'v0.4-a-llava-byte-array-fix'
+            'v0.4-a-vision-pipeline-fix'
+            'v0.4-b-duplicate-guard'
+            'v0.4-c-smart-tags'
+            'v0.5-a-daily-assistant'
+            'v0.5.1-fr-vi-i18n'
+            'v0.5.2-assistant-select-fix'
+            'v0.5.2-assistant-select-fix-r2'
+            'v0.5.3-wearability-guard'
+            'v0.5.4-incomplete-look-guidance'
+            'v0.5.5-branding-integration'
+            'v0.5.5-branding-pack'
+            'v0.5.6-brand-visibility'
+            'v0.5.7-assets-clean'
+            'v0.5.7-assets-clean-pr'
+            'v0.5.7-brand-reset'
+            'v0.5.7-branding-final-candidate'
+            'v0.5.7-branding-final-fix'
+            'v0.5.7-clean-candidate'
+            'v0.5.7-exact-branding-clean'
+            'v0.5.7-exact-branding-final'
+            'v0.5.7-exact-user-assets'
+            'v0.5.7-fix'
+            'v0.5.7-user-assets'
+            'v0.5.7-visible-branding-hotfix'
+            'v0.5.8-exact-favicon-master'
+            'v0.5.8-icon-safezone-fix'
+            'v0.5.8-live-sync-polling'
+            'v0.5.8-mobile-sync-ai-hotfix'
+            'v0.5.9-mobile-ux-i18n-colors'
+            'v0.5.10-qa-ux-version'
+            'v0.5.11-profile-crash-hotfix'
+            'v0.5.12-sync-crash-hotfix'
+            'v0.5.13-profile-stability-i18n'
+            'v0.5.14-delete-reconciliation'
+            'v0.5.15-cors-delete-fix'
+            'ops/v0.5.16-branch-cleanup'
+          )
+
+          deleted=0
+          missing=0
+          for branch in "${branches[@]}"; do
+            if git ls-remote --exit-code --heads origin "refs/heads/$branch" >/dev/null 2>&1; then
+              echo "Deleting $branch"
+              git push origin --delete "$branch"
+              deleted=$((deleted + 1))
+            else
+              echo "Already absent: $branch"
+              missing=$((missing + 1))
+            fi
+          done
+
+          echo "Deleted: $deleted"
+          echo "Already absent: $missing"
