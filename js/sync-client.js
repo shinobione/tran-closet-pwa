@@ -1,5 +1,5 @@
 import {getAllMutations,deleteMutation,putMutation,getMeta,setMeta,getAllItems,putItem} from './db.js';
-import {reconcileDeleteResults} from './delete-reconciliation.mjs?v=0.5.14';
+import {reconcileDeleteResults} from './delete-reconciliation.mjs?v=0.5.15';
 
 const DEFAULT_ENDPOINT='https://tran-closet-sync.jerryquinet.workers.dev';
 const ENDPOINT_KEY='sync-endpoint';
@@ -93,7 +93,7 @@ async function reconcileFailedDeletes(endpoint,token,mutations,results){
 
   try{
     const response=await fetch(`${endpoint}/v1/items`,{
-      headers:{'authorization':`Bearer ${token}`,'cache-control':'no-cache'},
+      headers:{'authorization':`Bearer ${token}`},
       cache:'no-store'
     });
     if(!response.ok)return results;

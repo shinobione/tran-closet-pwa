@@ -1,4 +1,4 @@
-name: Validate V0.5.14 delete reconciliation
+name: Validate delete reconciliation
 
 on:
   pull_request:
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  validate-v0514:
+  validate-delete-reconciliation:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -53,10 +53,11 @@ jobs:
           grep -q "/v1/items" js/sync-client.js
           grep -q "reconcileDeleteResults" js/sync-client.js
           grep -q "mutationStates" js/sync-diagnostics.js
-          grep -q "delete-reconciliation.mjs?v=0.5.14" sw.js
       - name: Check version alignment
         run: |
-          test "$(tr -d '\r\n' < VERSION)" = "v0.5.14"
-          grep -q "version:'v0.5.14'" js/build-version.js
-          grep -q "sync-diagnostics.js?v=0.5.14" js/bootstrap.js
-          grep -q "build-version.js?v=0.5.14" js/bootstrap.js
+          VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
+          VERSION_QUERY="${VERSION_VALUE#v}"
+          grep -q "version:'${VERSION_VALUE}'" js/build-version.js
+          grep -q "sync-diagnostics.js?v=${VERSION_QUERY}" js/bootstrap.js
+          grep -q "build-version.js?v=${VERSION_QUERY}" js/bootstrap.js
+          grep -q "delete-reconciliation.mjs?v=${VERSION_QUERY}" sw.js
