@@ -4,7 +4,8 @@
 >
 > Current factual runtime state lives in [`PROJECT-STATE.md`](./PROJECT-STATE.md). When chat history and the repository disagree, **verify `main` and follow the repository**.
 
-Last roadmap reset: **2026-08-18**
+Last roadmap reset: **2026-08-18**  
+Current slice: **V0.5.16 · Slice 16.1 — GitHub hygiene**
 
 ---
 
@@ -115,20 +116,22 @@ Current capabilities already present in production:
 
 Goal: turn the currently working v0.5.15 product into a clean, resumable, testable base before adding new product features.
 
-## Slice 16.0 — Canonical documentation & continuation protocol 🔵 CURRENT
+## Slice 16.0 — Canonical documentation & continuation protocol ✅ CLOSED
 
-Deliverables:
-- make `ROADMAP.md` the cross-session master roadmap;
-- make `PROJECT-STATE.md` describe the real v0.5.15 state;
-- make README point to those two files instead of duplicating stale project history;
-- record the stable baseline and current blockers;
-- establish the session continuation rules above.
+Completed by PR **#46**.
 
-Exit criteria:
+Delivered:
+- `ROADMAP.md` is the cross-session master roadmap;
+- `PROJECT-STATE.md` describes the audited v0.5.15 baseline and blockers;
+- README points new sessions to `VERSION` → `PROJECT-STATE` → `ROADMAP`;
+- stable baseline and current blockers are recorded;
+- session continuation and verification vocabulary are explicit.
+
+Exit criteria met:
 - a new chat can recover the project state from the repo without relying on previous chat transcripts;
-- README / PROJECT-STATE / ROADMAP agree on current version and active phase.
+- README / PROJECT-STATE / ROADMAP now share the same continuation model.
 
-## Slice 16.1 — GitHub hygiene
+## Slice 16.1 — GitHub hygiene 🔵 CURRENT
 
 Deliverables:
 - close obsolete PR #33 (old V0.5.7 branding recovery);
