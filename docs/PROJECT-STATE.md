@@ -4,7 +4,7 @@
 >
 > This file records the current factual checkpoint. The roadmap records sequencing. If a chat transcript disagrees with the repository, re-verify `main` and follow the repository.
 
-Last state update: **2026-08-18**
+Last state update: **2026-08-19**
 
 ---
 
@@ -15,12 +15,13 @@ Last state update: **2026-08-18**
 - version file: **`v0.5.15`**
 - last runtime-changing main SHA: **`f7227e41c439c1053f43e48941314d89ae12efdc`** — V0.5.15 CORS-safe delete reconciliation
 - canonical roadmap reset: PR **#46**, state closeout: PR **#47**
+- GitHub hygiene closeout: PR **#48**, one-shot cleanup self-removal commit **`32295711db935cd9947fa361a3503438f3d50526`**
 - PWA: `https://shinobione.github.io/tran-closet-pwa/`
 - Cloudflare Worker: `https://tran-closet-sync.jerryquinet.workers.dev`
 - IndexedDB: `tran-closet`, schema version **4**
 - Worker entrypoint currently configured by `worker/wrangler.toml`: `src/v059.js`
 
-The documentation reset did **not** change runtime behavior, Worker code, Airtable data, branding assets or `VERSION`.
+The documentation and GitHub-hygiene work did **not** change runtime behavior, Worker code, Airtable data, branding assets or `VERSION`.
 
 ### Last known clean device diagnostic — v0.5.15
 
@@ -50,7 +51,8 @@ The stale clothing DELETE reconciliation bug targeting `rec6sAxfNivkTmiMp` is co
 - **V0.5-A — Daily Assistant:** 🟢 deployed / operational; overall V0.5 remains open
 - **V0.5.16 — Consolidation & Hardening:** 🔵 active engineering phase
   - **Slice 16.0 — canonical docs / continuation protocol:** ✅ CLOSED
-  - **Slice 16.1 — GitHub hygiene:** 🔵 CURRENT
+  - **Slice 16.1 — GitHub hygiene:** ✅ CLOSED
+  - **Slice 16.2 — live Outfit sync parity:** 🔵 CURRENT / P1
 - **V0.5-B — Wear history & rotation:** ⏭ blocked until V0.5.16 closeout
 
 Canonical principle remains:
@@ -103,7 +105,7 @@ At the end of every merged slice, update this file and the roadmap if sequencing
 - local PNG 1080×1350 generation and file sharing;
 - snapshot anti-resurrection support.
 
-**Known asymmetry:** Outfit writes are live, but cross-device Outfit reads still need live-sync parity with clothing. This is V0.5.16 Slice 16.2 and remains the highest product-integrity priority after GitHub cleanup.
+**Known asymmetry:** Outfit writes are live, but cross-device Outfit reads still need live-sync parity with clothing. This is V0.5.16 Slice 16.2 and is the current highest product-integrity priority.
 
 ### Smart Closet / AI
 
@@ -204,10 +206,15 @@ Category/color/style/tag definitions are duplicated between client code, Worker 
 
 ### GitHub hygiene / governance
 
-At audit time:
-- obsolete branding recovery PR **#33** was still open and must not be merged;
-- many historical branches from V0.3–V0.5.15 remain;
-- `main` was not protected;
+Slice 16.1 cleanup completed on 2026-08-19:
+- obsolete branding recovery PR **#33** was closed without merge;
+- cleanup PR **#48** ran a one-shot branch cleanup and was merged only to execute the repository operation;
+- the runner deleted the proven merged/superseded historical branches and then removed itself from `main`;
+- branch inventory now contains **only `main`**;
+- open PR inventory is **empty**.
+
+Remaining governance debt is deliberately deferred to Slice 16.9:
+- `main` is still not protected;
 - some automation workflows can commit generated snapshots/assets directly to `main`.
 
 ### Branding source clutter
@@ -221,8 +228,8 @@ Current identity is correct, but `branding/` still contains current and historic
 Full deliverables and exit criteria live in `docs/ROADMAP.md`.
 
 1. 16.0 canonical docs / continuation protocol — ✅ CLOSED
-2. 16.1 GitHub hygiene — 🔵 CURRENT
-3. 16.2 live Outfit sync parity — P1
+2. 16.1 GitHub hygiene — ✅ CLOSED
+3. 16.2 live Outfit sync parity — 🔵 CURRENT / P1
 4. 16.3 incomplete Outfit integrity
 5. 16.4 runtime hotfix consolidation
 6. 16.5 i18n architecture cleanup
@@ -239,16 +246,16 @@ Full deliverables and exit criteria live in `docs/ROADMAP.md`.
 
 ## Next canonical action
 
-### Slice 16.1 — GitHub hygiene
+### Slice 16.2 — live Outfit sync parity (P1)
 
-1. Verify open PRs on current `main`.
-2. Close obsolete PR **#33** without merging it.
-3. Inventory historical branches and classify them: merged / superseded / active / unknown.
-4. Delete only branches proven merged or superseded, in controlled batches.
-5. Keep `main` plus genuinely active work branches.
-6. Record the resulting branch/PR state here and advance the roadmap to Slice 16.2.
-
-Then begin **Slice 16.2 — live Outfit sync parity (P1)**.
+1. Add authenticated canonical `GET /v1/outfits` in the Worker using the existing read-only Airtable path/credentials.
+2. Add client `syncLiveCanonicalOutfits()` equivalent to clothing live sync.
+3. Preserve outfits protected by pending local Outfit mutations during reconciliation.
+4. Propagate canonical remote deletes locally only when no local pending mutation protects the Outfit.
+5. Add visibility/online polling parity with clothing.
+6. Extend diagnostics with live Outfit record count plus last sync/error state.
+7. Add behavior-focused regression coverage for create/update/delete cross-device reconciliation and pending-write protection.
+8. Merge only after CI is green; then deploy Worker/PWA as required and perform real two-device QA before calling the slice VERIFIED PROD/CLOSED.
 
 ---
 
