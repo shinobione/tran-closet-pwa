@@ -1,4 +1,4 @@
-name: Validate V0.5.13 profile stability and French AI
+name: Validate Profile stability and French AI
 
 on:
   pull_request:
@@ -39,12 +39,13 @@ jobs:
           grep -q "L’IA a réessayé automatiquement" js/i18n-v0513-ai.js
           grep -q "Đang tự thử lại" js/i18n-v0513-ai.js
           grep -q "Nouvelle tentative automatique" js/i18n-v0513-ai.js
-      - name: Check V0.5.13 integration
+      - name: Check current-version integration
         run: |
-          test "$(tr -d '\r\n' < VERSION)" = "v0.5.13"
-          grep -q "version:'v0.5.13'" js/build-version.js
-          grep -q "sync-diagnostics.js?v=0.5.13" js/bootstrap.js
-          grep -q "i18n-v0510-profile.js?v=0.5.13" js/bootstrap.js
-          grep -q "i18n-v0513-ai.js?v=0.5.13" js/bootstrap.js
-          grep -q "build-version.js?v=0.5.13" js/bootstrap.js
-          grep -q "i18n-v0513-ai.js?v=0.5.13" sw.js
+          VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
+          echo "$VERSION_VALUE" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'
+          grep -q "version:'${VERSION_VALUE}'" js/build-version.js
+          grep -q "sync-diagnostics.js?v=${VERSION_VALUE#v}" js/bootstrap.js
+          grep -q "i18n-v0510-profile.js?v=${VERSION_VALUE#v}" js/bootstrap.js
+          grep -q "i18n-v0513-ai.js?v=${VERSION_VALUE#v}" js/bootstrap.js
+          grep -q "build-version.js?v=${VERSION_VALUE#v}" js/bootstrap.js
+          grep -q "i18n-v0513-ai.js?v=${VERSION_VALUE#v}" sw.js
