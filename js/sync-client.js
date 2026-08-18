@@ -1,4 +1,5 @@
 import {getAllMutations,deleteMutation,putMutation,getMeta,setMeta,getAllItems,putItem} from './db.js';
+import {reconcileDeleteResults} from './delete-reconciliation.mjs?v=0.5.14';
 
 const DEFAULT_ENDPOINT='https://tran-closet-sync.jerryquinet.workers.dev';
 const ENDPOINT_KEY='sync-endpoint';
@@ -82,6 +83,30 @@ async function repairOrphanedLocalCreates(){
   return repaired;
 }
 
+async function reconcileFailedDeletes(endpoint,token,mutations,results){
+  const hasFailedDelete=mutations.some(mutation=>
+    mutation.operation==='delete'&&
+    mutation.airtableRecordId&&
+    results.some(result=>result?.mutationId===mutation.id&&!result?.ok)
+  );
+  if(!hasFailedDelete)return results;
+
+  try{
+    const response=await fetch(`${endpoint}/v1/items`,{
+      headers:{'authorization':`Bearer ${token}`,'cache-control':'no-cache'},
+      cache:'no-store'
+    });
+    if(!response.ok)return results;
+    const body=await response.json();
+    if(!body?.ok||!Array.isArray(body.items))return results;
+    const canonicalIds=new Set(body.items.map(item=>item?.airtableRecordId).filter(Boolean));
+    return reconcileDeleteResults(mutations,results,canonicalIds);
+  }catch(error){
+    console.warn('Delete reconciliation reread failed; keeping mutation pending.',error);
+    return results;
+  }
+}
+
 export async function pendingMutationCount(){return (await getAllMutations()).length;}
 
 export async function flushMutationQueue(){
@@ -106,7 +131,8 @@ export async function flushMutationQueue(){
 
     if(!response.ok)return {ok:false,status:response.status,pending:mutations.length,repaired};
     const body=await response.json();
-    const results=Array.isArray(body.results)?body.results:[];
+    let results=Array.isArray(body.results)?body.results:[];
+    results=await reconcileFailedDeletes(endpoint,token,mutations,results);
     const items=await getAllItems();
     const byId=new Map(items.map(item=>[item.id,item]));
     const tombstones={...(await getMeta(DELETE_TOMBSTONES_KEY)||{})};

@@ -1,0 +1,62 @@
+name: Validate V0.5.14 delete reconciliation
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-v0514:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          node --check js/delete-reconciliation.mjs
+          node --check js/sync-client.js
+          node --check js/sync-diagnostics.js
+          node --check js/bootstrap.js
+          node --check js/build-version.js
+          node --check sw.js
+      - name: Test delete reconciliation semantics
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {reconcileDeleteResults} from './js/delete-reconciliation.mjs';
+          const mutations=[
+            {id:'m-delete',operation:'delete',airtableRecordId:'recGone'},
+            {id:'m-update',operation:'update',airtableRecordId:'recGone'}
+          ];
+          const failed=[
+            {mutationId:'m-delete',ok:false,error:'Airtable 403'},
+            {mutationId:'m-update',ok:false,error:'Airtable 403'}
+          ];
+          const absent=reconcileDeleteResults(mutations,failed,new Set(['recOther']));
+          assert.equal(absent[0].ok,true);
+          assert.equal(absent[0].reconciled,true);
+          assert.equal(absent[0].reconciliation,'canonical-absent');
+          assert.equal(absent[1].ok,false);
+          const present=reconcileDeleteResults(mutations,failed,new Set(['recGone']));
+          assert.equal(present[0].ok,false);
+          console.log('delete reconciliation semantics PASS');
+          NODE
+      - name: Check live canonical reread integration
+        run: |
+          grep -q "reconcileFailedDeletes" js/sync-client.js
+          grep -q "/v1/items" js/sync-client.js
+          grep -q "reconcileDeleteResults" js/sync-client.js
+          grep -q "mutationStates" js/sync-diagnostics.js
+          grep -q "delete-reconciliation.mjs?v=0.5.14" sw.js
+      - name: Check version alignment
+        run: |
+          test "$(tr -d '\r\n' < VERSION)" = "v0.5.14"
+          grep -q "version:'v0.5.14'" js/build-version.js
+          grep -q "sync-diagnostics.js?v=0.5.14" js/bootstrap.js
+          grep -q "build-version.js?v=0.5.14" js/bootstrap.js
