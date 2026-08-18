@@ -1,0 +1,37 @@
+name: Validate V0.5.12 manual sync stability
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-v0512:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          node --check js/v0512-sync-hotfix.js
+          node --check js/bootstrap.js
+          node --check js/build-version.js
+          node --check sw.js
+      - name: Check crash-safe manual sync interception
+        run: |
+          grep -q "document.addEventListener('click'" js/v0512-sync-hotfix.js
+          grep -q "stopImmediatePropagation()" js/v0512-sync-hotfix.js
+          grep -q "flushMutationQueue()" js/v0512-sync-hotfix.js
+          grep -q "location.reload()" js/v0512-sync-hotfix.js
+          grep -q "v0512-sync-hotfix.js?v=0.5.12" js/bootstrap.js
+          grep -q "v0512-sync-hotfix.js?v=0.5.12" sw.js
+      - name: Check version alignment
+        run: |
+          test "$(tr -d '\r\n' < VERSION)" = "v0.5.12"
+          grep -q "version:'v0.5.12'" js/build-version.js

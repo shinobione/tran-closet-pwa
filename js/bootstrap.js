@@ -23,6 +23,7 @@ try{
 // Legacy CI markers only: photo-picker-mobile.js?v=0.5.8 · sync-diagnostics.js?v=0.5.1
 await import('./photo-picker-mobile.js?v=0.5.10');
 await import('./app.js?v=0.5.1');
+await import('./v0512-sync-hotfix.js?v=0.5.12');
 await import('./v059-ux-fixes.js?v=0.5.9');
 await import('./v0510-search.js?v=0.5.10');
 await import('./outfit-picker.js?v=0.5.1');
@@ -35,7 +36,7 @@ await import('./sync-diagnostics.js?v=0.5.11');
 await import('./i18n.js?v=0.5.1');
 await import('./i18n-v059-hotfix.js?v=0.5.9');
 await import('./i18n-v0510-profile.js?v=0.5.10');
-await import('./build-version.js?v=0.5.11');
+await import('./build-version.js?v=0.5.12');
 await import('./assistant-ui-hotfix.js?v=0.5.2');
 
 startLiveSyncWatch();
