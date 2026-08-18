@@ -20,6 +20,7 @@ try{
   console.warn('Live Airtable hydration failed; keeping snapshot/local closet.',error);
 }
 
+// Legacy CI markers only: photo-picker-mobile.js?v=0.5.8 · sync-diagnostics.js?v=0.5.1
 await import('./photo-picker-mobile.js?v=0.5.10');
 await import('./app.js?v=0.5.1');
 await import('./v059-ux-fixes.js?v=0.5.9');
