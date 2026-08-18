@@ -1,0 +1,13 @@
+.photo-source-actions {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin:10px 0 2px;
+}
+.photo-source-actions button {
+  min-height:48px;
+  padding-inline:10px;
+}
+@media (max-width:390px) {
+  .photo-source-actions { grid-template-columns:1fr; }
+}
