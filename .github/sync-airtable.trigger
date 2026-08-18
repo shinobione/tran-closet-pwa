@@ -1,1 +1,1 @@
-2026-08-17T08:35:00+02:00 — verify V0.4-C Smart Tags real PWA round-trip
+2026-08-18T19:23:00+02:00 — V0.5.8 multi-device canonical refresh after live sync hotfix
