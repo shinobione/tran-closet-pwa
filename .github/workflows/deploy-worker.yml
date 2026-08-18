@@ -6,6 +6,8 @@ on:
     branches: [main]
     paths:
       - '.github/worker-deploy.trigger'
+      - 'worker/**'
+      - '.github/workflows/deploy-worker.yml'
 
 permissions:
   contents: read
@@ -28,9 +30,11 @@ jobs:
           command: deploy
           secrets: |
             AIRTABLE_PAT
+            AIRTABLE_READ_PAT
             CLOSET_SYNC_KEY
         env:
           AIRTABLE_PAT: ${{ secrets.AIRTABLE_PAT_WRITE }}
+          AIRTABLE_READ_PAT: ${{ secrets.AIRTABLE_PAT }}
           CLOSET_SYNC_KEY: ${{ secrets.CLOSET_SYNC_KEY }}
 
       - name: Verify authenticated Worker health
