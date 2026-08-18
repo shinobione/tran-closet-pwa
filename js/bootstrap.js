@@ -23,6 +23,7 @@ try{
 // Legacy CI markers only: photo-picker-mobile.js?v=0.5.8 · sync-diagnostics.js?v=0.5.1
 await import('./photo-picker-mobile.js?v=0.5.10');
 await import('./app.js?v=0.5.1');
+await import('./v0512-sync-hotfix.js?v=0.5.12');
 await import('./v059-ux-fixes.js?v=0.5.9');
 await import('./v0510-search.js?v=0.5.10');
 await import('./outfit-picker.js?v=0.5.1');
