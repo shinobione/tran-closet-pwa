@@ -3,7 +3,7 @@ import {flushOutfitQueue,pendingOutfitMutationCount} from './outfit-sync-client.
 import {getAllItems,getAllMutations,getAllOutfits,getAllOutfitMutations} from './db.js';
 
 // Legacy CI marker only: const VERSION='v0.5.1'
-const FALLBACK_VERSION='v0.5.13';
+const FALLBACK_VERSION='v0.5.14';
 let running=false;
 
 function fr(){return document.documentElement.lang==='fr';}
@@ -68,6 +68,20 @@ async function snapshot(){
     orphanedLocalOutfits:orphanCount(outfits,outfitMutations,'localOutfitId'),
     mutationOps:mutations.map(m=>m.operation),
     outfitMutationOps:outfitMutations.map(m=>m.operation),
+    mutationStates:mutations.map(m=>({
+      id:m.id,
+      operation:m.operation,
+      localItemId:m.localItemId||null,
+      airtableRecordId:m.airtableRecordId||null,
+      createdAt:m.createdAt||null
+    })),
+    outfitMutationStates:outfitMutations.map(m=>({
+      id:m.id,
+      operation:m.operation,
+      localOutfitId:m.localOutfitId||null,
+      airtableRecordId:m.airtableRecordId||null,
+      createdAt:m.createdAt||null
+    })),
     itemStates:items.map(i=>({
       name:i.name,
       airtableRecordId:i.airtableRecordId||null,
