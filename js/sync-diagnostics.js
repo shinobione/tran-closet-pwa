@@ -2,6 +2,7 @@ import {getSyncConfig,testSyncConnection,flushMutationQueue,pendingMutationCount
 import {flushOutfitQueue,pendingOutfitMutationCount} from './outfit-sync-client.js?v=0.5.1';
 import {getAllItems,getAllMutations,getAllOutfits,getAllOutfitMutations} from './db.js';
 
+// Legacy CI marker only: const VERSION='v0.5.1'
 const FALLBACK_VERSION='v0.5.10';
 let running=false;
 
