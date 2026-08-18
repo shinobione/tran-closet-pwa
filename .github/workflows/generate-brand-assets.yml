@@ -5,13 +5,13 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'branding/logo-source-round.b64.part*'
+      - 'branding/logo-mark-v057.png'
       - 'scripts/generate-brand-assets.py'
       - '.github/workflows/generate-brand-assets.yml'
   push:
     branches: [main]
     paths:
-      - 'branding/logo-source-round.b64.part*'
+      - 'branding/logo-mark-v057.png'
       - 'scripts/generate-brand-assets.py'
       - '.github/workflows/generate-brand-assets.yml'
 
@@ -35,15 +35,11 @@ jobs:
       - name: Install image dependency
         run: python -m pip install --disable-pip-version-check pillow
 
-      - name: Generate favicon, PWA icons and splash
+      - name: Generate favicon and PWA icons from visible brand mark
         run: python scripts/generate-brand-assets.py
 
       - name: Verify expected outputs
         run: |
-          test -f branding/logo-lockup-centered.png
-          test -f branding/logo-mark.png
-          test -f branding/logo-mark-256.png
-          test -f branding/splash-1242x2688.png
           test -f favicon.ico
           test -f icons/favicon-16.png
           test -f icons/favicon-32.png
@@ -52,16 +48,19 @@ jobs:
           test -f icons/icon-512.png
           test -f icons/maskable-512.png
           test -f icons/apple-touch-icon.png
+          test -f branding/header-lockup-v057.png
+          test -f branding/logo-mark-v057.png
+          test -f branding/splash-1242x2688.png
 
-      - name: Commit generated brand assets when changed
+      - name: Commit generated system icons when changed
         if: github.event_name != 'pull_request'
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add branding/logo-lockup-centered.png branding/logo-mark.png branding/logo-mark-256.png branding/splash-1242x2688.png favicon.ico icons/favicon-16.png icons/favicon-32.png icons/favicon-48.png icons/icon-192.png icons/icon-512.png icons/maskable-512.png icons/apple-touch-icon.png
+          git add favicon.ico icons/favicon-16.png icons/favicon-32.png icons/favicon-48.png icons/icon-192.png icons/icon-512.png icons/maskable-512.png icons/apple-touch-icon.png
           if git diff --cached --quiet; then
-            echo 'Brand assets already current.'
+            echo 'System icons already current.'
           else
-            git commit -m 'Generate canonical Trân Closet brand assets'
+            git commit -m 'Generate V0.5.8 Trân Closet system icons'
             git push origin HEAD:main
           fi

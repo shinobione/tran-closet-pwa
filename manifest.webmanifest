@@ -1,7 +1,7 @@
 {
-  "name": "Tủ Đồ của Trân",
-  "short_name": "Trân Closet",
-  "description": "Tủ đồ cá nhân của Trân — offline, nhanh và riêng tư.",
+  "name": "Trân's Closet",
+  "short_name": "Trân's Closet",
+  "description": "Smart Fashion Wardrobe — tủ đồ cá nhân của Trân, offline, nhanh và riêng tư.",
   "lang": "vi",
   "id": "/tran-closet-pwa/",
   "start_url": "/tran-closet-pwa/",
@@ -11,8 +11,8 @@
   "theme_color": "#17131d",
   "orientation": "portrait-primary",
   "icons": [
-    {"src":"./icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
-    {"src":"./icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
-    {"src":"./icons/maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
+    {"src":"./icons/icon-192.png?v=0.5.8","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"./icons/icon-512.png?v=0.5.8","sizes":"512x512","type":"image/png","purpose":"any"},
+    {"src":"./icons/maskable-512.png?v=0.5.8","sizes":"512x512","type":"image/png","purpose":"maskable"}
   ]
 }
