@@ -5,13 +5,13 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'branding/logo-source-round.b64.part*'
+      - 'branding/source-v057/**'
       - 'scripts/generate-brand-assets.py'
       - '.github/workflows/generate-brand-assets.yml'
   push:
     branches: [main]
     paths:
-      - 'branding/logo-source-round.b64.part*'
+      - 'branding/source-v057/**'
       - 'scripts/generate-brand-assets.py'
       - '.github/workflows/generate-brand-assets.yml'
 
@@ -22,10 +22,11 @@ jobs:
   generate:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout candidate
+      - name: Checkout exact candidate branch
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -35,33 +36,35 @@ jobs:
       - name: Install image dependency
         run: python -m pip install --disable-pip-version-check pillow
 
-      - name: Generate favicon, PWA icons and splash
+      - name: Rebuild supplied branding assets
         run: python scripts/generate-brand-assets.py
 
-      - name: Verify expected outputs
+      - name: Verify V0.5.7 outputs
         run: |
-          test -f branding/logo-lockup-centered.png
-          test -f branding/logo-mark.png
-          test -f branding/logo-mark-256.png
-          test -f branding/splash-1242x2688.png
-          test -f favicon.ico
-          test -f icons/favicon-16.png
-          test -f icons/favicon-32.png
-          test -f icons/favicon-48.png
-          test -f icons/icon-192.png
-          test -f icons/icon-512.png
-          test -f icons/maskable-512.png
-          test -f icons/apple-touch-icon.png
+          test -s branding/header-lockup.png
+          test -s branding/logo-mark-v057.png
+          test -s branding/logo-lockup-centered.png
+          test -s branding/logo-mark.png
+          test -s branding/logo-mark-256.png
+          test -s branding/splash-1242x2688.png
+          test -s favicon.ico
+          test -s icons/favicon-16.png
+          test -s icons/favicon-32.png
+          test -s icons/favicon-48.png
+          test -s icons/icon-192.png
+          test -s icons/icon-512.png
+          test -s icons/maskable-512.png
+          test -s icons/apple-touch-icon.png
 
-      - name: Commit generated brand assets when changed
-        if: github.event_name != 'pull_request'
+      - name: Commit generated binaries to the candidate branch
         run: |
+          TARGET_BRANCH="${GITHUB_HEAD_REF:-main}"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add branding/logo-lockup-centered.png branding/logo-mark.png branding/logo-mark-256.png branding/splash-1242x2688.png favicon.ico icons/favicon-16.png icons/favicon-32.png icons/favicon-48.png icons/icon-192.png icons/icon-512.png icons/maskable-512.png icons/apple-touch-icon.png
+          git add branding/header-lockup.png branding/logo-mark-v057.png branding/logo-lockup-centered.png branding/logo-mark.png branding/logo-mark-256.png branding/splash-1242x2688.png favicon.ico icons/favicon-16.png icons/favicon-32.png icons/favicon-48.png icons/icon-192.png icons/icon-512.png icons/maskable-512.png icons/apple-touch-icon.png
           if git diff --cached --quiet; then
-            echo 'Brand assets already current.'
+            echo 'Generated branding already current.'
           else
-            git commit -m 'Generate canonical Trân Closet brand assets'
-            git push origin HEAD:main
+            git commit -m "Generate V0.5.7 Trân's Closet brand assets"
+            git push origin HEAD:"$TARGET_BRANCH"
           fi
