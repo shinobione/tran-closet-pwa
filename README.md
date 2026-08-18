@@ -1,87 +1,73 @@
-# Tủ Đồ của Trân — PWA
+# Trân's Closet — Smart Fashion Wardrobe
 
-PWA mobile-first de la garde-robe de Trân, installable sur iPhone/Android, offline-first et publiée sur GitHub Pages.
+Mobile-first PWA for Trân's wardrobe, installable on iPhone/Android, offline-first, synchronized through a secured Cloudflare Worker and Airtable, with assisted photo analysis, Smart Tags, Outfits and a weather-aware daily assistant.
 
-## État actuel
+## Current status
 
-- **V0.1 Local Closet** ✅
-- **V0.2 Airtable Bridge** ✅ CLOSED / VERIFIED PROD
-- **V0.3 Outfits** ✅ CLOSED / VERIFIED PROD
-- **V0.4 Smart Closet** ✅ CLOSED / VERIFIED PROD — `v0.4.6`
-- **V0.5 Assistant** 🟡 active
-- **V0.5-A `Hôm nay mặc gì?`** 🟡 candidate `v0.5.0`
+- **Current production baseline:** `v0.5.15`
+- **V0.2 Airtable Bridge:** ✅ CLOSED / VERIFIED PROD
+- **V0.3 Outfits:** ✅ CLOSED / VERIFIED PROD
+- **V0.4 Smart Closet:** ✅ CLOSED / VERIFIED PROD
+- **V0.5-A Daily Assistant:** 🟢 deployed / operational
+- **V0.5.16 Consolidation & Hardening:** 🔵 active engineering phase
+- **V0.5-B Wear history & rotation:** ⏭ after V0.5.16
 
-La PWA reste local-first : les ajouts, modifications et suppressions de vêtements et d'outfits sont appliqués immédiatement dans IndexedDB, puis envoyés vers Airtable via des files de mutations séparées lorsque le réseau et le Worker sont disponibles.
+The current product is functional, but v0.5.8→v0.5.15 accumulated runtime, i18n, cache, CI and repository debt. The project is intentionally consolidating before adding the next feature phase.
 
-## Déploiement PWA
+## Start here — every new work session
 
-Chaque push sur `main` déploie automatiquement :
+**Do not reconstruct the project from chat history. Read the repository.**
+
+1. [`VERSION`](./VERSION)
+2. [`docs/PROJECT-STATE.md`](./docs/PROJECT-STATE.md) — current factual checkpoint, blockers and next canonical action
+3. [`docs/ROADMAP.md`](./docs/ROADMAP.md) — ordered master roadmap and cross-session continuation protocol
+
+When chat history and the repo disagree, verify `main` and follow the repo.
+
+## Production
+
+PWA:
 
 `https://shinobione.github.io/tran-closet-pwa/`
 
-Sur iPhone : Safari → Partager → Ajouter à l'écran d'accueil.
+Cloudflare Worker:
 
-## V0.4 — Smart Closet ✅ VERIFIED PROD
+`https://tran-closet-sync.jerryquinet.workers.dev`
 
-Le dressing dispose maintenant d'une analyse photo assistée human-in-the-loop, d'un Duplicate Guard perceptuel et de Smart Tags canoniques. Les flows réels PWA → Worker → Airtable → snapshot ont été vérifiés en production.
+The app is local-first: clothing and Outfit changes are applied immediately in IndexedDB, then synchronized through separate mutation queues when the Worker/network is available.
 
-## V0.5-A — `Hôm nay mặc gì?` 🟡 CANDIDATE v0.5.0
+## Core architecture
 
-Le premier assistant quotidien est une surcouche locale : aucun nouveau secret, aucun nouveau champ Airtable, aucune modification du CRUD vêtements.
+- static PWA deployed by GitHub Pages;
+- IndexedDB local store (`tran-closet`, schema v4);
+- secured Cloudflare Worker for canonical writes/read paths and Workers AI;
+- Airtable canonical clothing + Outfit tables;
+- GitHub-generated Airtable snapshots as fallback/offline artifacts;
+- live canonical clothing reread for cross-device convergence;
+- FR / VI UI;
+- exact deployed build identification through `build-info.json`.
 
-Fonctionnalités candidate :
-- CTA **`Hôm nay mặc gì?`** sur la home du dressing ;
-- météo actuelle, ressenti, max/min, pluie et vent via Open-Meteo ;
-- TP. Hồ Chí Minh comme localisation par défaut ;
-- recherche manuelle d'une ville via Open-Meteo Geocoding ;
-- géolocalisation navigateur uniquement après action explicite ;
-- cache météo local 30 minutes, lié aux coordonnées ;
-- recalcul par occasion : quotidien, travail, date, fête, voyage, sport, formel ;
-- ranking des outfits déjà enregistrés ;
-- création locale de propositions top + bottom ou pièce unique ;
-- ajout contextuel de chaussures, sac, couvre-chef et parapluie ;
-- signaux catégories, couleurs, styles, favoris et Smart Tags ;
-- explication courte de chaque suggestion ;
-- diversité entre les 3 meilleurs looks ;
-- fallback propre si le dressing n'a pas encore assez de pièces de base ;
-- **aucune sauvegarde automatique** : `Lưu thành outfit` reste une action explicite ;
-- minimum 2 pièces pour créer un outfit ;
-- pas de doublon si la même composition existe déjà dans `Phối đồ`.
+## Product capabilities
 
-Le moteur est isolé dans `js/daily-assistant-core.mjs` avec tests unitaires ciblés. Le module UI est `js/daily-assistant.js`.
+- clothing CRUD + photos;
+- search, filters and favorites;
+- Outfit CRUD + scalable picker;
+- full-screen Lookbook + PNG/Web Share;
+- AI-assisted photo classification with human validation;
+- Duplicate Guard;
+- 22 Smart Tags;
+- weather/context-aware `Hôm nay mặc gì?` assistant;
+- PWA branding, app icons and iPhone startup splash;
+- sync diagnostics and recovery paths.
 
-## V0.5 — suite
-
-### V0.5-B — Historique & rotation
-- historique des tenues portées ;
-- dernière utilisation ;
-- rareté / vêtements sous-utilisés ;
-- signal de rotation pour réduire les répétitions.
-
-### V0.5-C — Assistant conversationnel
-- questions simples autour du dressing ;
-- préparation d'une tenue pour une occasion future ;
-- explications détaillées à la demande.
-
-## Infrastructure
-
-`.github/workflows/sync-airtable.yml` génère les snapshots vêtements/outfits avec le PAT read-only. `worker/` contient le backend Cloudflare sécurisé ; `.github/workflows/deploy-worker.yml` le déploie et vérifie `/health`.
-
-Secrets Actions :
-- `CLOUDFLARE_API_TOKEN`
-- `CLOUDFLARE_ACCOUNT_ID`
-- `AIRTABLE_PAT_WRITE`
-- `CLOSET_SYNC_KEY`
-
-## Développement local
+## Development
 
 ```bash
 python3 -m http.server 4173
 ```
 
-Puis ouvrir `http://localhost:4173`.
+Then open `http://localhost:4173`.
 
-## Documentation projet
+## Project discipline
 
-- état canonique : `docs/PROJECT-STATE.md`
-- roadmap : `docs/ROADMAP.md`
+Every merged slice that changes runtime or project status must update `PROJECT-STATE.md`, and any sequencing change must update `ROADMAP.md`. `VERIFIED PROD` is reserved for real production QA, not merely green CI.
