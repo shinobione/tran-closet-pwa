@@ -50,7 +50,7 @@ jobs:
       - name: Check live canonical reread integration
         run: |
           grep -q "reconcileFailedDeletes" js/sync-client.js
-          grep -q "${endpoint}/v1/items" js/sync-client.js
+          grep -q "/v1/items" js/sync-client.js
           grep -q "reconcileDeleteResults" js/sync-client.js
           grep -q "mutationStates" js/sync-diagnostics.js
           grep -q "delete-reconciliation.mjs?v=0.5.14" sw.js
