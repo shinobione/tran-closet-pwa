@@ -36,7 +36,7 @@ function mount(){
 
   card.innerHTML=`<div class="build-version-head"><div><p class="eyebrow">${fr?'VERSION DÉPLOYÉE':'PHIÊN BẢN TRIỂN KHAI'}</p><h3>${info.version} <code>${info.shortSha}</code></h3></div><span class="build-version-dot ${reliable?'is-live':''}" title="${reliable?'Build stamp GitHub Pages':'Fallback local'}"></span></div>
     <p>${reliable?(fr?'Correspond exactement au commit servi par GitHub Pages.':'Khớp chính xác với commit đang được GitHub Pages phục vụ.'):(fr?'Build stamp indisponible · valeur locale de secours.':'Không đọc được build stamp · đang dùng giá trị dự phòng cục bộ.')}</p>
-    ${info.builtAt?`<small>${fr()?'Déployé':'Triển khai'} · ${dateLabel(info.builtAt)}</small>`:''}
+    ${info.builtAt?`<small>${fr?'Déployé':'Triển khai'} · ${dateLabel(info.builtAt)}</small>`:''}
     <button type="button" class="secondary-button build-version-copy">${fr?'Copier les infos de version':'Sao chép thông tin phiên bản'}</button>`;
   card.querySelector('.build-version-copy')?.addEventListener('click',copyText);
 }
