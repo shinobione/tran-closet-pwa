@@ -12,8 +12,9 @@ Last state update: **2026-08-19**
 
 - repository: `shinobione/tran-closet-pwa`
 - canonical branch: `main`
-- version file: **`v0.5.15`**
-- last runtime-changing main SHA: **`f7227e41c439c1053f43e48941314d89ae12efdc`** — V0.5.15 CORS-safe delete reconciliation
+- version file: **`v0.5.16`**
+- current runtime-changing main SHA: **`183a2650f1cfe95320bb6fde9c3d9768ea31f07c`** — V0.5.16 live Outfit sync parity
+- Slice 16.2 PR: **#49**, merged after **10/10 PR workflows SUCCESS**
 - canonical roadmap reset: PR **#46**, state closeout: PR **#47**
 - GitHub hygiene closeout: PR **#48**, one-shot cleanup self-removal commit **`32295711db935cd9947fa361a3503438f3d50526`**
 - PWA: `https://shinobione.github.io/tran-closet-pwa/`
@@ -21,11 +22,11 @@ Last state update: **2026-08-19**
 - IndexedDB: `tran-closet`, schema version **4**
 - Worker entrypoint currently configured by `worker/wrangler.toml`: `src/v059.js`
 
-The documentation and GitHub-hygiene work did **not** change runtime behavior, Worker code, Airtable data, branding assets or `VERSION`.
+**Deployment status for SHA `183a2650…` is not claimed here yet.** The available GitHub connector does not expose `push`-triggered post-merge Actions runs, so Pages + Worker deployment must still be independently confirmed before Slice 16.2 can be called deployed/VERIFIED PROD.
 
-### Last known clean device diagnostic — v0.5.15
+### Last known clean device diagnostic — v0.5.15 baseline
 
-This is the baseline to preserve, not a substitute for re-checking after future changes:
+This is the pre-16.2 baseline to preserve, not a substitute for post-16.2 QA:
 
 - clothing items: **11**
 - outfits: **2**
@@ -38,7 +39,7 @@ This is the baseline to preserve, not a substitute for re-checking after future 
 - all 11 audited clothing items had an `airtableRecordId` and `syncState: "synced"`
 - both audited outfits had an Airtable record and no pending queue entry
 
-The stale clothing DELETE reconciliation bug targeting `rec6sAxfNivkTmiMp` is considered **closed in v0.5.15**.
+The stale clothing DELETE reconciliation bug targeting `rec6sAxfNivkTmiMp` remains considered **closed in v0.5.15+**.
 
 ---
 
@@ -52,7 +53,7 @@ The stale clothing DELETE reconciliation bug targeting `rec6sAxfNivkTmiMp` is co
 - **V0.5.16 — Consolidation & Hardening:** 🔵 active engineering phase
   - **Slice 16.0 — canonical docs / continuation protocol:** ✅ CLOSED
   - **Slice 16.1 — GitHub hygiene:** ✅ CLOSED
-  - **Slice 16.2 — live Outfit sync parity:** 🔵 CURRENT / P1
+  - **Slice 16.2 — live Outfit sync parity:** 🟡 MERGED / DEPLOYMENT + TWO-DEVICE QA PENDING
 - **V0.5-B — Wear history & rotation:** ⏭ blocked until V0.5.16 closeout
 
 Canonical principle remains:
@@ -96,6 +97,7 @@ At the end of every merged slice, update this file and the roadmap if sequencing
 
 ### Outfits
 
+Existing verified foundation:
 - offline-first local storage;
 - scalable picker;
 - separate Outfit mutation queue;
@@ -105,7 +107,17 @@ At the end of every merged slice, update this file and the roadmap if sequencing
 - local PNG 1080×1350 generation and file sharing;
 - snapshot anti-resurrection support.
 
-**Known asymmetry:** Outfit writes are live, but cross-device Outfit reads still need live-sync parity with clothing. This is V0.5.16 Slice 16.2 and is the current highest product-integrity priority.
+Merged in V0.5.16 Slice 16.2 on `main`:
+- authenticated Worker `GET /v1/outfits` using the existing read-only Airtable PAT;
+- live canonical Outfit hydration after clothing hydration;
+- visible/online polling roughly every 30 seconds;
+- pending local Outfit mutations protected from canonical overwrite;
+- remote canonical deletes propagated locally only when no pending local mutation protects the Outfit;
+- pending deletes + Outfit tombstones block read-lag resurrection;
+- live Outfit sync timestamp/count/error exposed in Profile diagnostics;
+- pure behavior tests cover remote create/update/delete, pending update/delete protection and tombstone cleanup.
+
+**Status:** code is merged and PR CI is green, but cross-device production behavior is **not yet VERIFIED PROD** until Worker + Pages deployment and real two-device QA are confirmed.
 
 ### Smart Closet / AI
 
@@ -176,13 +188,18 @@ Two older clothing items (`Melody Bag`, `Tui Xach`) had no Smart Tags during the
 
 ## Known technical debt / blockers
 
-### P1 — Live Outfit read parity
+### Slice 16.2 closure blocker — deployment + real cross-device QA
 
-Clothing has live canonical cross-device reread. Outfits do not yet have equivalent live canonical polling. Until fixed, an Outfit written on one device may require the scheduled snapshot before another device sees the canonical change.
+The implementation is merged, but the slice remains open until all of these are proven on the deployed `183a2650…` build:
+- Pages serves `v0.5.16` / SHA `183a2650…`;
+- Worker live route `/v1/outfits` is deployed and authenticated read succeeds;
+- create/update/delete on device A converges to device B without waiting for the 6-hour snapshot;
+- a pending local Outfit edit is not overwritten by a live reread;
+- diagnostics return a sane live Outfit count and no unexpected pending mutations/orphans.
 
 ### Runtime hotfix stack
 
-`js/bootstrap.js` currently imports a mixture of canonical modules and historical patches/version-specific files, including v0.5.9, v0.5.10, v0.5.12, v0.5.13 and v0.5.15 layers. These fixes are proven useful but must be absorbed into canonical modules.
+`js/bootstrap.js` currently imports a mixture of canonical modules and historical patches/version-specific files, including v0.5.9, v0.5.10, v0.5.12, v0.5.13 and v0.5.16 layers. These fixes are proven useful but must be absorbed into canonical modules.
 
 ### i18n architecture
 
@@ -190,11 +207,11 @@ The FR/VI system still relies heavily on exact DOM-text replacement plus later d
 
 ### PWA cache/version debt
 
-The runtime version is v0.5.15, while the Service Worker cache namespace remains historically labeled `tran-closet-v0.5.1` and the app shell contains mixed query versions. This is not currently a known production failure, but it makes update/debug behavior unnecessarily difficult to reason about.
+The runtime version is v0.5.16, while the Service Worker cache namespace remains historically labeled `tran-closet-v0.5.1` and the app shell contains mixed query versions. This is not currently a known production failure, but it makes update/debug behavior unnecessarily difficult to reason about. Slice 16.6 owns the cleanup.
 
 ### CI fossilization
 
-The repository contains multiple version-specific validation workflows (`validate-v058`, `validate-v059`, `validate-v0510`, `validate-v0512`, `validate-v0513`, `validate-v0514`, `validate-v0515`, etc.). Many are valuable regression guards, but they need consolidation toward behavior-focused tests.
+The repository contains multiple version-specific validation workflows (`validate-v058`, `validate-v059`, `validate-v0510`, `validate-v0512`, `validate-v0513`, `validate-v0514`, `validate-v0515`, `validate-v0516-outfit-live-sync`, etc.). Slice 16.2 added a behavior-focused gate, but the broader suite still needs consolidation in Slice 16.7.
 
 ### No browser-level smoke coverage
 
@@ -210,10 +227,12 @@ Slice 16.1 cleanup completed on 2026-08-19:
 - obsolete branding recovery PR **#33** was closed without merge;
 - cleanup PR **#48** ran a one-shot branch cleanup and was merged only to execute the repository operation;
 - the runner deleted the proven merged/superseded historical branches and then removed itself from `main`;
-- branch inventory now contains **only `main`**;
-- open PR inventory is **empty**.
+- branch inventory was reduced to only `main` at Slice 16.1 closeout;
+- open PR inventory was empty.
 
-Remaining governance debt is deliberately deferred to Slice 16.9:
+After Slice 16.2, the merged head branch `v0.5.16-live-outfit-sync` remains as a non-canonical branch because the available GitHub connector exposes no branch-delete mutation. It carries no unique work; `main` is authoritative. Branch lifecycle automation/protection is owned by Slice 16.9.
+
+Remaining governance debt:
 - `main` is still not protected;
 - some automation workflows can commit generated snapshots/assets directly to `main`.
 
@@ -229,7 +248,7 @@ Full deliverables and exit criteria live in `docs/ROADMAP.md`.
 
 1. 16.0 canonical docs / continuation protocol — ✅ CLOSED
 2. 16.1 GitHub hygiene — ✅ CLOSED
-3. 16.2 live Outfit sync parity — 🔵 CURRENT / P1
+3. 16.2 live Outfit sync parity — 🟡 MERGED / QA PENDING
 4. 16.3 incomplete Outfit integrity
 5. 16.4 runtime hotfix consolidation
 6. 16.5 i18n architecture cleanup
@@ -246,16 +265,21 @@ Full deliverables and exit criteria live in `docs/ROADMAP.md`.
 
 ## Next canonical action
 
-### Slice 16.2 — live Outfit sync parity (P1)
+### Close Slice 16.2 — deployment proof + two-device QA
 
-1. Add authenticated canonical `GET /v1/outfits` in the Worker using the existing read-only Airtable path/credentials.
-2. Add client `syncLiveCanonicalOutfits()` equivalent to clothing live sync.
-3. Preserve outfits protected by pending local Outfit mutations during reconciliation.
-4. Propagate canonical remote deletes locally only when no local pending mutation protects the Outfit.
-5. Add visibility/online polling parity with clothing.
-6. Extend diagnostics with live Outfit record count plus last sync/error state.
-7. Add behavior-focused regression coverage for create/update/delete cross-device reconciliation and pending-write protection.
-8. Merge only after CI is green; then deploy Worker/PWA as required and perform real two-device QA before calling the slice VERIFIED PROD/CLOSED.
+1. Confirm GitHub Pages is actually serving **`v0.5.16 · 183a265`** via the Profile version card / `build-info.json`.
+2. Confirm the deployed Worker accepts authenticated `GET /v1/outfits` and returns the canonical Outfit count.
+3. With both devices online and configured with the same sync key:
+   - create a disposable Outfit on device A and confirm it appears on device B in roughly ≤30 seconds;
+   - update its name or favorite on device B and confirm device A converges without a manual snapshot refresh;
+   - delete it on device A and confirm device B removes it without resurrection.
+4. Run Profile diagnostics after convergence and verify:
+   - `pendingMutations: 0`;
+   - `pendingOutfitMutations: 0`;
+   - no unexpected orphaned local outfits;
+   - `liveOutfits.recordCount` matches canonical cloud state;
+   - `liveOutfits.lastError` is null.
+5. Only after those proofs: mark Slice 16.2 **VERIFIED PROD / CLOSED**, update docs, remove/clean the merged feature branch when tooling permits, then activate Slice 16.3.
 
 ---
 
