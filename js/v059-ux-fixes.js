@@ -8,9 +8,8 @@ function bindSearchFocus(){
     const source=event.currentTarget;
     const start=source.selectionStart;
     const end=source.selectionEnd;
-    // app.js intentionally redraws the closet on each query update. Restore
-    // focus immediately onto the replacement input so mobile keyboards do not
-    // collapse after every character.
+    // app.js redraws the closet on each query update. Restore focus immediately
+    // onto the replacement input so mobile keyboards stay active while typing.
     queueMicrotask(()=>{
       const replacement=document.querySelector('#searchInput');
       if(!replacement||replacement===source)return;
@@ -25,5 +24,21 @@ function bindSearchFocus(){
   },true);
 }
 
-bindSearchFocus();
-if(root)new MutationObserver(bindSearchFocus).observe(root,{childList:true,subtree:true});
+function cleanVietnameseSourceCopy(){
+  if(document.documentElement.lang==='fr')return;
+  const assistantSub=document.querySelector('.daily-assistant-launch small');
+  if(assistantSub&&assistantSub.textContent.includes('Météo'))assistantSub.textContent='Thời tiết + tủ đồ thật + dịp hôm nay';
+  document.querySelectorAll('.privacy-note').forEach(note=>{
+    if(note.textContent.includes('Vêtements')||note.textContent.includes('canonique')){
+      note.textContent='Khóa Airtable không nằm trong PWA. Ứng dụng chỉ lưu khóa đồng bộ riêng của thiết bị và gửi thay đổi tới Worker bảo mật. Quần áo, nhãn và outfit đều đi qua luồng đồng bộ chuẩn.';
+    }
+  });
+}
+
+function patch(){
+  bindSearchFocus();
+  cleanVietnameseSourceCopy();
+}
+
+patch();
+if(root)new MutationObserver(patch).observe(root,{childList:true,subtree:true});
