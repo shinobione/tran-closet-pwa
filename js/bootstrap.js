@@ -22,6 +22,7 @@ try{
 
 await import('./photo-picker-mobile.js?v=0.5.8');
 await import('./app.js?v=0.5.1');
+await import('./v059-ux-fixes.js?v=0.5.9');
 await import('./outfit-picker.js?v=0.5.1');
 await import('./outfit-sync-client.js?v=0.5.1');
 await import('./outfit-presentation.js?v=0.5.1');
@@ -30,6 +31,7 @@ await import('./duplicate-guard.js?v=0.5.1');
 await import('./daily-assistant.js?v=0.5.1');
 await import('./sync-diagnostics.js?v=0.5.1');
 await import('./i18n.js?v=0.5.1');
+await import('./i18n-v059-hotfix.js?v=0.5.9');
 await import('./assistant-ui-hotfix.js?v=0.5.2');
 
 startLiveSyncWatch();
