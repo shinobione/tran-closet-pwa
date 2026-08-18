@@ -5,13 +5,13 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'branding/source-v058/favicon.b64.part*'
+      - 'branding/logo-mark-v057.png'
       - 'scripts/generate-brand-assets.py'
       - '.github/workflows/generate-brand-assets.yml'
   push:
     branches: [main]
     paths:
-      - 'branding/source-v058/favicon.b64.part*'
+      - 'branding/logo-mark-v057.png'
       - 'scripts/generate-brand-assets.py'
       - '.github/workflows/generate-brand-assets.yml'
 
@@ -35,7 +35,7 @@ jobs:
       - name: Install image dependency
         run: python -m pip install --disable-pip-version-check pillow
 
-      - name: Generate favicon and PWA icons from final master
+      - name: Generate favicon and PWA icons from visible brand mark
         run: python scripts/generate-brand-assets.py
 
       - name: Verify expected outputs
