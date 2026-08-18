@@ -13,8 +13,8 @@ Last state update: **2026-08-18**
 - repository: `shinobione/tran-closet-pwa`
 - canonical branch: `main`
 - version file: **`v0.5.15`**
-- current docs-reset main SHA after PR #46: **`d924ed089e25971dfb20f37abbee75d0c8051627`**
 - last runtime-changing main SHA: **`f7227e41c439c1053f43e48941314d89ae12efdc`** — V0.5.15 CORS-safe delete reconciliation
+- canonical roadmap reset: PR **#46**, state closeout: PR **#47**
 - PWA: `https://shinobione.github.io/tran-closet-pwa/`
 - Cloudflare Worker: `https://tran-closet-sync.jerryquinet.workers.dev`
 - IndexedDB: `tran-closet`, schema version **4**
