@@ -14,6 +14,7 @@ def decode_parts(pattern):
     if not parts:
         raise RuntimeError(f'Missing source parts: {pattern}')
     encoded = ''.join(p.read_text(encoding='ascii').strip() for p in parts)
+    encoded += '=' * (-len(encoded) % 4)
     raw = base64.b64decode(encoded, validate=True)
     image = Image.open(io.BytesIO(raw))
     image.load()
@@ -32,7 +33,7 @@ def fit_icon(image, size, safe=None, background=(0, 0, 0, 0)):
     return canvas
 
 
-# These compact sources are visually faithful derivatives of the four user-approved masters.
+# Compact, visually faithful derivatives of the four user-approved masters.
 header = decode_parts('header-v3.b64.part*')
 logo = decode_parts('logo-v3.b64.part*')
 icon = decode_parts('icon-v3.b64.part*')
