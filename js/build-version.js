@@ -1,4 +1,4 @@
-const FALLBACK={version:'v0.5.11',sha:null,shortSha:'local',builtAt:null,runId:null,source:'fallback'};
+const FALLBACK={version:'v0.5.12',sha:null,shortSha:'local',builtAt:null,runId:null,source:'fallback'};
 let info=FALLBACK;
 
 function isValid(value){
