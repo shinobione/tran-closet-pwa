@@ -24,32 +24,36 @@ def save_png(image, path):
     image.save(path, 'PNG', optimize=True)
 
 
-def contain(image, size, background=(17, 3, 20, 255)):
-    canvas = Image.new('RGBA', size, background)
-    fitted = ImageOps.contain(image, size, Image.Resampling.LANCZOS)
-    canvas.alpha_composite(fitted, ((size[0]-fitted.width)//2, (size[1]-fitted.height)//2))
+def fit_icon(image, size, safe=None, background=(0, 0, 0, 0)):
+    canvas = Image.new('RGBA', (size, size), background)
+    target = safe or size
+    fitted = ImageOps.contain(image, (target, target), Image.Resampling.LANCZOS)
+    canvas.alpha_composite(fitted, ((size - fitted.width) // 2, (size - fitted.height) // 2))
     return canvas
 
-header = decode_parts('header.b64.part*')
-logo = decode_parts('logo.b64.part*')
-favicon = decode_parts('favicon-v2.b64.part*')
-splash = decode_parts('splash-v2.b64.part*')
 
-# Hard guards against the old cream branding accidentally returning.
+# These compact sources are visually faithful derivatives of the four user-approved masters.
+header = decode_parts('header-v3.b64.part*')
+logo = decode_parts('logo-v3.b64.part*')
+icon = decode_parts('icon-v3.b64.part*')
+splash = decode_parts('splash-v3.b64.part*')
+
+# Hard guards: never silently fall back to the old cream badge branding.
 if header.width / header.height < 2.2:
     raise RuntimeError(f'Header lockup aspect looks wrong: {header.size}')
-if logo.width / logo.height < 0.85 or logo.width / logo.height > 1.15:
+if not (0.85 < logo.width / logo.height < 1.15):
     raise RuntimeError(f'Logo mark aspect looks wrong: {logo.size}')
-if header.getchannel('A').getextrema()[0] != 0 or logo.getchannel('A').getextrema()[0] != 0:
-    raise RuntimeError('Header/logo sources are not transparent.')
+if header.getchannel('A').getextrema()[0] != 0:
+    raise RuntimeError('Header source is not transparent.')
+if logo.getchannel('A').getextrema()[0] != 0:
+    raise RuntimeError('Logo source is not transparent.')
 
 save_png(header, BRANDING / 'header-lockup-v057.png')
 save_png(logo, BRANDING / 'logo-mark-v057.png')
 
-# iPhone 11 Pro Max startup target used by the existing PWA link.
-if splash.size != (1242, 2688):
-    splash = contain(splash, (1242, 2688))
-save_png(splash, BRANDING / 'splash-1242x2688.png')
+# Existing iPhone 11 Pro Max startup-image target.
+splash = splash.convert('RGB').resize((1242, 2688), Image.Resampling.LANCZOS)
+splash.save(BRANDING / 'splash-1242x2688.png', 'PNG', optimize=True)
 
 for size, name in [
     (16, 'favicon-16.png'),
@@ -59,18 +63,14 @@ for size, name in [
     (192, 'icon-192.png'),
     (512, 'icon-512.png'),
 ]:
-    icon = ImageOps.contain(favicon, (size, size), Image.Resampling.LANCZOS)
-    canvas = Image.new('RGBA', (size, size), (0,0,0,0))
-    canvas.alpha_composite(icon, ((size-icon.width)//2, (size-icon.height)//2))
-    save_png(canvas, ICONS / name)
+    save_png(fit_icon(icon, size), ICONS / name)
 
-# Maskable icon: preserve safe-zone around the supplied square app artwork.
-maskable = Image.new('RGBA', (512,512), (20,4,25,255))
-safe = ImageOps.contain(favicon, (410,410), Image.Resampling.LANCZOS)
-maskable.alpha_composite(safe, ((512-safe.width)//2, (512-safe.height)//2))
-save_png(maskable, ICONS / 'maskable-512.png')
+# Keep the supplied square artwork inside the PWA maskable safe zone.
+save_png(fit_icon(icon, 512, safe=410, background=(20, 4, 25, 255)), ICONS / 'maskable-512.png')
+fit_icon(icon, 256).save(ROOT / 'favicon.ico', format='ICO', sizes=[(16,16), (32,32), (48,48), (64,64)])
 
-favicon_ico = ImageOps.contain(favicon, (256,256), Image.Resampling.LANCZOS)
-favicon_ico.save(ROOT / 'favicon.ico', format='ICO', sizes=[(16,16),(32,32),(48,48),(64,64)])
-
-print('V0.5.7 sources decoded:', 'header', header.size, 'logo', logo.size, 'favicon', favicon.size, 'splash', splash.size)
+print('V0.5.7 exact-brand sources decoded:',
+      'header', header.size,
+      'logo', logo.size,
+      'icon', icon.size,
+      'splash', splash.size)
