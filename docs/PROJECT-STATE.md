@@ -22,7 +22,7 @@ Last state update: **2026-08-19**
 - IndexedDB: `tran-closet`, schema version **4**
 - Worker entrypoint currently configured by `worker/wrangler.toml`: `src/v059.js`
 
-**Deployment status for SHA `183a2650…` is not claimed here yet.** The available GitHub connector does not expose `push`-triggered post-merge Actions runs, so Pages + Worker deployment must still be independently confirmed before Slice 16.2 can be called deployed/VERIFIED PROD.
+**Post-merge deployment is not claimed here yet.** The available GitHub connector does not expose `push`-triggered post-merge Actions runs. Also, docs-only commits after `183a2650…` may legitimately make GitHub Pages report a newer `main` SHA while still containing the exact V0.5.16 runtime from `183a2650…`. Pages + Worker deployment must therefore be independently confirmed before Slice 16.2 can be called deployed/VERIFIED PROD.
 
 ### Last known clean device diagnostic — v0.5.15 baseline
 
@@ -190,8 +190,8 @@ Two older clothing items (`Melody Bag`, `Tui Xach`) had no Smart Tags during the
 
 ### Slice 16.2 closure blocker — deployment + real cross-device QA
 
-The implementation is merged, but the slice remains open until all of these are proven on the deployed `183a2650…` build:
-- Pages serves `v0.5.16` / SHA `183a2650…`;
+The implementation is merged, but the slice remains open until all of these are proven on a deployed `main` build that contains runtime commit `183a2650…`:
+- Pages reports `v0.5.16` and a deployed `main` SHA containing `183a2650…` (it may be a newer docs-only descendant);
 - Worker live route `/v1/outfits` is deployed and authenticated read succeeds;
 - create/update/delete on device A converges to device B without waiting for the 6-hour snapshot;
 - a pending local Outfit edit is not overwritten by a live reread;
@@ -267,7 +267,7 @@ Full deliverables and exit criteria live in `docs/ROADMAP.md`.
 
 ### Close Slice 16.2 — deployment proof + two-device QA
 
-1. Confirm GitHub Pages is actually serving **`v0.5.16 · 183a265`** via the Profile version card / `build-info.json`.
+1. Confirm GitHub Pages is serving **`v0.5.16`** via the Profile version card / `build-info.json`. The short SHA may be a docs-only `main` descendant newer than `183a265`; it only needs to contain the runtime commit `183a2650…`.
 2. Confirm the deployed Worker accepts authenticated `GET /v1/outfits` and returns the canonical Outfit count.
 3. With both devices online and configured with the same sync key:
    - create a disposable Outfit on device A and confirm it appears on device B in roughly ≤30 seconds;
