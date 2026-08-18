@@ -1,9 +1,9 @@
 export const AIRTABLE_SNAPSHOT = {
-  "syncedAt": "2026-08-18T13:10:16.323Z",
+  "syncedAt": "2026-08-18T17:24:17.222Z",
   "source": "airtable",
   "baseId": "appw8WNvdDuXUgYvN",
   "tableId": "tblKdCi4MI4AH26y8",
-  "recordCount": 7,
+  "recordCount": 9,
   "items": [
     {
       "id": "airtable-rec1rhHLdY61btiZz",
@@ -27,9 +27,24 @@ export const AIRTABLE_SNAPSHOT = {
       "updatedAt": "2026-08-17T18:55:32.000Z"
     },
     {
+      "id": "airtable-rec6sAxfNivkTmiMp",
+      "airtableRecordId": "rec6sAxfNivkTmiMp",
+      "name": "Celling",
+      "category": "Shirt",
+      "colors": [],
+      "styles": [],
+      "tags": [],
+      "photo": "./assets/items/rec6sAxfNivkTmiMp.jpg",
+      "favorite": false,
+      "source": "airtable",
+      "syncState": "synced",
+      "createdAt": "2026-08-18T16:53:37.000Z",
+      "updatedAt": "2026-08-18T16:53:37.000Z"
+    },
+    {
       "id": "airtable-recKr0w0g9A6viuwj",
       "airtableRecordId": "recKr0w0g9A6viuwj",
-      "name": "Jerry's Panty",
+      "name": "Jerry’s hard KuKu cover",
       "category": "Underwear",
       "colors": [
         "Green"
@@ -128,6 +143,31 @@ export const AIRTABLE_SNAPSHOT = {
       "syncState": "synced",
       "createdAt": "2026-08-17T18:54:34.000Z",
       "updatedAt": "2026-08-17T18:54:34.000Z"
+    },
+    {
+      "id": "airtable-recnRlYbNVFoEbl2A",
+      "airtableRecordId": "recnRlYbNVFoEbl2A",
+      "name": "Hello Kitty Pants",
+      "category": "Pant",
+      "colors": [
+        "Pink",
+        "White"
+      ],
+      "styles": [
+        "Casual",
+        "Cartoon"
+      ],
+      "tags": [
+        "Character",
+        "Colorful",
+        "Cozy"
+      ],
+      "photo": "./assets/items/recnRlYbNVFoEbl2A.jpg",
+      "favorite": false,
+      "source": "airtable",
+      "syncState": "synced",
+      "createdAt": "2026-08-18T16:58:40.000Z",
+      "updatedAt": "2026-08-18T16:58:40.000Z"
     },
     {
       "id": "airtable-recrtzfBVgQOYfAQN",
