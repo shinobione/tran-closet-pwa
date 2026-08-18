@@ -37,25 +37,47 @@ jobs:
           AIRTABLE_READ_PAT: ${{ secrets.AIRTABLE_PAT }}
           CLOSET_SYNC_KEY: ${{ secrets.CLOSET_SYNC_KEY }}
 
-      - name: Verify authenticated Worker health
+      - name: Verify authenticated Worker health and canonical read
         env:
           WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
           CLOSET_SYNC_KEY: ${{ secrets.CLOSET_SYNC_KEY }}
         run: |
           set -euo pipefail
           test -n "$WORKER_URL"
-          HEALTH_URL="${WORKER_URL%/}/health"
+          BASE_URL="${WORKER_URL%/}"
+          HEALTH_URL="$BASE_URL/health"
+          ITEMS_URL="$BASE_URL/v1/items"
+
           for attempt in $(seq 1 12); do
             STATUS="$(curl --silent --show-error --output /tmp/worker-health.json --write-out '%{http_code}' \
               -H "Authorization: Bearer $CLOSET_SYNC_KEY" \
               "$HEALTH_URL" || true)"
             if [ "$STATUS" = "200" ] && grep -q '"ok":true' /tmp/worker-health.json; then
               echo "Worker health verified at $HEALTH_URL on attempt $attempt"
-              exit 0
+              break
+            fi
+            if [ "$attempt" = "12" ]; then
+              echo "Worker health verification failed after 12 attempts."
+              cat /tmp/worker-health.json || true
+              exit 1
             fi
             echo "Worker health not ready yet (HTTP $STATUS, attempt $attempt/12); retrying in 5s..."
             sleep 5
           done
-          echo "Worker health verification failed after 12 attempts."
-          cat /tmp/worker-health.json || true
-          exit 1
+
+          STATUS="$(curl --silent --show-error --output /tmp/worker-items.json --write-out '%{http_code}' \
+            -H "Authorization: Bearer $CLOSET_SYNC_KEY" \
+            -H 'Cache-Control: no-cache' \
+            "$ITEMS_URL" || true)"
+          test "$STATUS" = "200"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          body=json.loads(Path('/tmp/worker-items.json').read_text())
+          assert body.get('ok') is True, body
+          items=body.get('items')
+          assert isinstance(items,list) and len(items)>=1, body
+          assert body.get('recordCount')==len(items), body
+          assert all(item.get('airtableRecordId') for item in items), body
+          print(f"Canonical Worker read verified: {len(items)} Airtable items")
+          PY
