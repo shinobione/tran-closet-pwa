@@ -35,8 +35,8 @@ await import('./daily-assistant.js?v=0.5.1');
 await import('./sync-diagnostics.js?v=0.5.14');
 await import('./i18n.js?v=0.5.1');
 await import('./i18n-v059-hotfix.js?v=0.5.9');
-await import('./i18n-v0510-profile.js?v=0.5.13');
-await import('./i18n-v0513-ai.js?v=0.5.13');
+await import('./i18n-v0510-profile.js?v=0.5.14');
+await import('./i18n-v0513-ai.js?v=0.5.14');
 await import('./build-version.js?v=0.5.14');
 await import('./assistant-ui-hotfix.js?v=0.5.2');
 
