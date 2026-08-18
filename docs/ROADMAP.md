@@ -4,8 +4,8 @@
 >
 > Current factual runtime state lives in [`PROJECT-STATE.md`](./PROJECT-STATE.md). When chat history and the repository disagree, **verify `main` and follow the repository**.
 
-Last roadmap reset: **2026-08-18**  
-Current slice: **V0.5.16 · Slice 16.1 — GitHub hygiene**
+Last roadmap reset: **2026-08-19**  
+Current slice: **V0.5.16 · Slice 16.2 — Live Outfit sync parity (P1)**
 
 ---
 
@@ -131,20 +131,31 @@ Exit criteria met:
 - a new chat can recover the project state from the repo without relying on previous chat transcripts;
 - README / PROJECT-STATE / ROADMAP now share the same continuation model.
 
-## Slice 16.1 — GitHub hygiene 🔵 CURRENT
+## Slice 16.1 — GitHub hygiene ✅ CLOSED
 
-Deliverables:
-- close obsolete PR #33 (old V0.5.7 branding recovery);
-- inventory historical branches;
-- delete merged/abandoned branches in controlled batches;
-- retain only `main` and any genuinely active work branch;
-- document branch/PR convention.
+Completed on **2026-08-19**.
 
-Exit criteria:
+Delivered:
+- obsolete branding recovery PR **#33** closed without merge;
+- repository branch inventory audited against merged/superseded work;
+- one-shot cleanup PR **#48** used only to execute branch cleanup;
+- historical merged/superseded branches deleted in a controlled runner;
+- the one-shot workflow removed itself from `main` after completion;
+- final branch inventory contains **only `main`**;
+- open PR inventory is **empty**.
+
+Branch / PR convention going forward:
+- one active engineering slice at a time;
+- feature/fix work uses a dedicated short-lived branch + PR;
+- merged/superseded branches should not be kept as permanent project state;
+- repository truth lives in `main`, `PROJECT-STATE` and `ROADMAP`, not archival branches;
+- governance/protection rules themselves are handled later in Slice 16.9.
+
+Exit criteria met:
 - no stale open PR;
 - historical branches no longer obscure active work.
 
-## Slice 16.2 — Live Outfit sync parity **P1**
+## Slice 16.2 — Live Outfit sync parity **P1** 🔵 CURRENT
 
 Problem:
 - clothing has live canonical reread/polling;
