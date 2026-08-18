@@ -1,0 +1,81 @@
+name: Validate V0.5.16 live Outfit sync
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-live-outfit-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check js/live-outfit-sync-core.mjs
+          node --check js/live-airtable-outfit-sync.js
+          node --check js/bootstrap.js
+          node --check js/sync-client.js
+          node --check js/sync-diagnostics.js
+          node --check js/build-version.js
+          node --check scripts/test-live-outfit-sync.mjs
+          node --check worker/src/v058.js
+          node --check worker/src/v059.js
+          node --check sw.js
+
+      - name: Test canonical Outfit reconciliation behavior
+        run: node scripts/test-live-outfit-sync.mjs
+
+      - name: Check Worker canonical Outfit read contract
+        run: |
+          grep -q "OUTFITS_TABLE_ID='tblhtL2UlsgCAh6E7'" worker/src/v058.js
+          grep -q "url.pathname==='/v1/outfits'&&request.method==='GET'" worker/src/v058.js
+          grep -q "AIRTABLE_READ_PAT" worker/src/v058.js
+          grep -q "Airtable outfit .* is missing Outfit ID" worker/src/v058.js
+          grep -q "itemRecordIds:arr(fields\[OUTFIT_FIELDS.items\])" worker/src/v058.js
+          grep -q "recordCount:outfits.length,outfits" worker/src/v058.js
+
+      - name: Check client live sync safety contract
+        run: |
+          grep -q "/v1/outfits" js/live-airtable-outfit-sync.js
+          grep -q "cache:'no-store'" js/live-airtable-outfit-sync.js
+          if grep -qi "cache-control" js/live-airtable-outfit-sync.js; then
+            echo 'Live Outfit client must not send a custom Cache-Control cross-origin header.'
+            exit 1
+          fi
+          grep -q "getAllOutfitMutations" js/live-airtable-outfit-sync.js
+          grep -q "pendingLocalIds" js/live-outfit-sync-core.mjs
+          grep -q "pendingDeleteRemoteIds" js/live-outfit-sync-core.mjs
+          grep -q "tombstone remains authoritative" js/live-outfit-sync-core.mjs
+          grep -q "deleteOutfitCloudState" js/live-airtable-outfit-sync.js
+          grep -q "airtable-outfit-live-last-sync" js/live-airtable-outfit-sync.js
+          grep -q "airtable-outfit-live-record-count" js/live-airtable-outfit-sync.js
+          grep -q "airtable-outfit-live-last-error" js/live-airtable-outfit-sync.js
+
+      - name: Check bootstrap, diagnostics and offline wiring
+        run: |
+          test "$(tr -d '\r\n' < VERSION)" = "v0.5.16"
+          grep -q "syncLiveCanonicalOutfits,startLiveOutfitSyncWatch" js/bootstrap.js
+          grep -q "await syncLiveCanonicalOutfits()" js/bootstrap.js
+          grep -q "startLiveOutfitSyncWatch()" js/bootstrap.js
+          grep -q "liveOutfits" js/sync-diagnostics.js
+          grep -q "const outfitLive=await syncLiveCanonicalOutfits()" js/sync-diagnostics.js
+          grep -q "live-airtable-outfit-sync.js?v=0.5.16" sw.js
+          grep -q "live-outfit-sync-core.mjs?v=0.5.16" sw.js
+          grep -q "sync-client.js?v=0.5.16" sw.js
+          grep -q "build-version.js?v=0.5.16" sw.js
+          grep -q "version:'v0.5.16'" js/build-version.js
+
+      - name: Check Worker deploy smoke covers both canonical reads
+        run: |
+          grep -q 'OUTFITS_URL="$BASE_URL/v1/outfits"' .github/workflows/deploy-worker.yml
+          grep -q 'worker-outfits.json' .github/workflows/deploy-worker.yml
+          grep -q "Canonical Worker Outfit read verified" .github/workflows/deploy-worker.yml

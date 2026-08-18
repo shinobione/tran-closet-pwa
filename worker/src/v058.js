@@ -2,6 +2,7 @@ import legacyWorker from './index.js';
 
 const BASE_ID='appw8WNvdDuXUgYvN';
 const CLOTHES_TABLE_ID='tblKdCi4MI4AH26y8';
+const OUTFITS_TABLE_ID='tblhtL2UlsgCAh6E7';
 const FIELDS={
   name:'fldaUBTQHssIqjYJ3',
   category:'fldFgbepFfRYzQiSf',
@@ -10,6 +11,17 @@ const FIELDS={
   tags:'fld9hV9qirpfVfJmM',
   photo:'fldgISbij3vO9IvjM',
   syncMutationId:'flduWxlbNrsksgjNa'
+};
+const OUTFIT_FIELDS={
+  name:'fld8cozGXyHe1WxfF',
+  items:'fldhPBvZmXqpbxZxV',
+  occasion:'fldGN3lR9FhgZEf8G',
+  season:'fldBfddYsS8EdFWfq',
+  note:'fldXR2R6TCR5ugXzi',
+  favorite:'fldiAG6eouQ8fhB7d',
+  outfitId:'fld0mNaoxnTIckVXI',
+  createdAt:'fld1BX75icHbk0s24',
+  updatedAt:'fld91MiD4MayOVZk8'
 };
 
 function cors(origin,env){
@@ -35,14 +47,14 @@ function normalizeCategory(value){
 }
 function arr(value){return Array.isArray(value)?value:[];}
 
-async function readCanonicalItems(env){
+async function readTableRecords(tableId,env){
   if(!env.AIRTABLE_READ_PAT)throw new Error('Worker Airtable read secret not configured');
   const records=[];
   let offset='';
   do{
     const params=new URLSearchParams({pageSize:'100',returnFieldsByFieldId:'true'});
     if(offset)params.set('offset',offset);
-    const response=await fetch(`https://api.airtable.com/v0/${BASE_ID}/${CLOTHES_TABLE_ID}?${params}`,{
+    const response=await fetch(`https://api.airtable.com/v0/${BASE_ID}/${tableId}?${params}`,{
       headers:{'authorization':`Bearer ${env.AIRTABLE_READ_PAT}`,'content-type':'application/json'}
     });
     const text=await response.text();
@@ -51,7 +63,11 @@ async function readCanonicalItems(env){
     records.push(...arr(body?.records));
     offset=String(body?.offset||'');
   }while(offset);
+  return records;
+}
 
+async function readCanonicalItems(env){
+  const records=await readTableRecords(CLOTHES_TABLE_ID,env);
   return records.map(record=>{
     const fields=record?.fields||{};
     const attachment=arr(fields[FIELDS.photo])[0]||null;
@@ -70,6 +86,29 @@ async function readCanonicalItems(env){
       syncState:'synced',
       createdAt:record.createdTime||null,
       updatedAt:record.createdTime||null
+    };
+  });
+}
+
+async function readCanonicalOutfits(env){
+  const records=await readTableRecords(OUTFITS_TABLE_ID,env);
+  return records.map(record=>{
+    const fields=record?.fields||{};
+    const outfitId=String(fields[OUTFIT_FIELDS.outfitId]||'').trim();
+    if(!outfitId)throw new Error(`Airtable outfit ${record.id} is missing Outfit ID`);
+    return {
+      id:outfitId,
+      airtableRecordId:record.id,
+      name:String(fields[OUTFIT_FIELDS.name]||'').trim()||'Outfit',
+      itemRecordIds:arr(fields[OUTFIT_FIELDS.items]).map(String),
+      occasion:String(fields[OUTFIT_FIELDS.occasion]||'Everyday'),
+      season:String(fields[OUTFIT_FIELDS.season]||'All'),
+      note:String(fields[OUTFIT_FIELDS.note]||''),
+      favorite:Boolean(fields[OUTFIT_FIELDS.favorite]),
+      source:'airtable',
+      syncState:'synced',
+      createdAt:String(fields[OUTFIT_FIELDS.createdAt]||record.createdTime||''),
+      updatedAt:String(fields[OUTFIT_FIELDS.updatedAt]||fields[OUTFIT_FIELDS.createdAt]||record.createdTime||'')
     };
   });
 }
@@ -103,6 +142,17 @@ export default {
       try{
         const items=await readCanonicalItems(env);
         return json({ok:true,syncedAt:new Date().toISOString(),recordCount:items.length,items},200,headers);
+      }catch(error){
+        return json({ok:false,error:String(error?.message||error)},502,headers);
+      }
+    }
+
+    if(url.pathname==='/v1/outfits'&&request.method==='GET'){
+      if(!env.CLOSET_SYNC_KEY)return json({error:'Worker sync key not configured'},503,headers);
+      if(bearer(request)!==env.CLOSET_SYNC_KEY)return json({error:'Unauthorized'},401,headers);
+      try{
+        const outfits=await readCanonicalOutfits(env);
+        return json({ok:true,syncedAt:new Date().toISOString(),recordCount:outfits.length,outfits},200,headers);
       }catch(error){
         return json({ok:false,error:String(error?.message||error)},502,headers);
       }
