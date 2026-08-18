@@ -18,8 +18,11 @@ source = Image.open(SOURCE).convert('RGBA')
 def contain_square(image, size, safe_ratio=0.96, background=None):
     canvas = Image.new('RGBA', (size, size), background or (0, 0, 0, 0))
     inner = max(1, round(size * safe_ratio))
-    mark = image.copy()
-    mark.thumbnail((inner, inner), Image.Resampling.LANCZOS)
+    bbox = image.getbbox()
+    mark = image.crop(bbox) if bbox else image.copy()
+    scale = min(inner / max(1, mark.width), inner / max(1, mark.height))
+    target = (max(1, round(mark.width * scale)), max(1, round(mark.height * scale)))
+    mark = mark.resize(target, Image.Resampling.LANCZOS)
     canvas.alpha_composite(mark, ((size - mark.width) // 2, (size - mark.height) // 2))
     return canvas
 
