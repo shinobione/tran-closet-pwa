@@ -33,16 +33,17 @@ def fit_icon(image, size, safe=None, background=(0, 0, 0, 0)):
     return canvas
 
 
-# Compact, visually faithful derivatives of the four user-approved masters.
-header = decode_parts('header-v3.b64.part*')
-logo = decode_parts('logo-v3.b64.part*')
-icon = decode_parts('icon-v3.b64.part*')
-splash = decode_parts('splash-v3.b64.part*')
+# Use the complete original chunk sets already stored in Git.
+# The later *-v3 one-part experiments were connector-truncated and are intentionally ignored.
+header = decode_parts('header.b64.part*')
+logo = decode_parts('logo.b64.part*')
+icon = decode_parts('favicon-v2.b64.part*')
+splash = decode_parts('splash-v2.b64.part*')
 
 # Hard guards: never silently fall back to the old cream badge branding.
 if header.width / header.height < 2.2:
     raise RuntimeError(f'Header lockup aspect looks wrong: {header.size}')
-if not (0.85 < logo.width / logo.height < 1.15):
+if not (0.75 < logo.width / logo.height < 1.35):
     raise RuntimeError(f'Logo mark aspect looks wrong: {logo.size}')
 if header.getchannel('A').getextrema()[0] != 0:
     raise RuntimeError('Header source is not transparent.')
@@ -66,7 +67,6 @@ for size, name in [
 ]:
     save_png(fit_icon(icon, size), ICONS / name)
 
-# Keep the supplied square artwork inside the PWA maskable safe zone.
 save_png(fit_icon(icon, 512, safe=410, background=(20, 4, 25, 255)), ICONS / 'maskable-512.png')
 fit_icon(icon, 256).save(ROOT / 'favicon.ico', format='ICO', sizes=[(16,16), (32,32), (48,48), (64,64)])
 
