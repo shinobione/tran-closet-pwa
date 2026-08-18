@@ -4,7 +4,7 @@
 >
 > This file records the current factual checkpoint. The roadmap records sequencing. If a chat transcript disagrees with the repository, re-verify `main` and follow the repository.
 
-Last state reset: **2026-08-18**
+Last state update: **2026-08-18**
 
 ---
 
@@ -13,11 +13,14 @@ Last state reset: **2026-08-18**
 - repository: `shinobione/tran-closet-pwa`
 - canonical branch: `main`
 - version file: **`v0.5.15`**
-- audited `main` SHA: **`f7227e41c439c1053f43e48941314d89ae12efdc`**
+- current docs-reset main SHA after PR #46: **`d924ed089e25971dfb20f37abbee75d0c8051627`**
+- last runtime-changing main SHA: **`f7227e41c439c1053f43e48941314d89ae12efdc`** — V0.5.15 CORS-safe delete reconciliation
 - PWA: `https://shinobione.github.io/tran-closet-pwa/`
 - Cloudflare Worker: `https://tran-closet-sync.jerryquinet.workers.dev`
 - IndexedDB: `tran-closet`, schema version **4**
 - Worker entrypoint currently configured by `worker/wrangler.toml`: `src/v059.js`
+
+The documentation reset did **not** change runtime behavior, Worker code, Airtable data, branding assets or `VERSION`.
 
 ### Last known clean device diagnostic — v0.5.15
 
@@ -46,11 +49,30 @@ The stale clothing DELETE reconciliation bug targeting `rec6sAxfNivkTmiMp` is co
 - **V0.4 — Smart Closet:** ✅ CLOSED / VERIFIED PROD
 - **V0.5-A — Daily Assistant:** 🟢 deployed / operational; overall V0.5 remains open
 - **V0.5.16 — Consolidation & Hardening:** 🔵 active engineering phase
+  - **Slice 16.0 — canonical docs / continuation protocol:** ✅ CLOSED
+  - **Slice 16.1 — GitHub hygiene:** 🔵 CURRENT
 - **V0.5-B — Wear history & rotation:** ⏭ blocked until V0.5.16 closeout
 
 Canonical principle remains:
 
 > **IA and heuristics propose; Trân decides before any canonical or destructive write.**
+
+---
+
+## Session recovery contract
+
+Every new ChatGPT/Codex window must recover state from the repository in this order:
+
+1. `VERSION`
+2. `docs/PROJECT-STATE.md`
+3. `docs/ROADMAP.md`
+4. current `main` SHA
+5. open PRs / active branch
+6. relevant CI / Pages / Worker state if deployment matters
+
+Do **not** reconstruct status from a previous chat reply when these sources are available.
+
+At the end of every merged slice, update this file and the roadmap if sequencing changed.
 
 ---
 
@@ -81,7 +103,7 @@ Canonical principle remains:
 - local PNG 1080×1350 generation and file sharing;
 - snapshot anti-resurrection support.
 
-**Known asymmetry:** Outfit writes are live, but cross-device Outfit reads still need live-sync parity with clothing. This is V0.5.16 Slice 16.2 and is the highest product-integrity priority after repo/docs cleanup.
+**Known asymmetry:** Outfit writes are live, but cross-device Outfit reads still need live-sync parity with clothing. This is V0.5.16 Slice 16.2 and remains the highest product-integrity priority after GitHub cleanup.
 
 ### Smart Closet / AI
 
@@ -194,39 +216,39 @@ Current identity is correct, but `branding/` still contains current and historic
 
 ---
 
-## V0.5.16 — active objective
+## V0.5.16 ordered plan
 
-**Do not start V0.5-B yet.**
+Full deliverables and exit criteria live in `docs/ROADMAP.md`.
 
-V0.5.16 exists to consolidate the working v0.5.15 product so future work no longer depends on a stack of emergency patches.
+1. 16.0 canonical docs / continuation protocol — ✅ CLOSED
+2. 16.1 GitHub hygiene — 🔵 CURRENT
+3. 16.2 live Outfit sync parity — P1
+4. 16.3 incomplete Outfit integrity
+5. 16.4 runtime hotfix consolidation
+6. 16.5 i18n architecture cleanup
+7. 16.6 version/cache normalization
+8. 16.7 CI consolidation + browser smoke
+9. 16.8 taxonomy unification
+10. 16.9 repo/deployment governance
+11. 16.10 branding source cleanup
+12. 16.11 end-to-end closeout
 
-Ordered slices are defined in `docs/ROADMAP.md`:
-
-1. 16.0 canonical docs / continuation protocol;
-2. 16.1 GitHub hygiene;
-3. 16.2 live Outfit sync parity;
-4. 16.3 incomplete Outfit integrity;
-5. 16.4 runtime hotfix consolidation;
-6. 16.5 i18n architecture cleanup;
-7. 16.6 version/cache normalization;
-8. 16.7 CI consolidation + browser smoke;
-9. 16.8 taxonomy unification;
-10. 16.9 repo/deployment governance;
-11. 16.10 branding source cleanup;
-12. 16.11 end-to-end closeout.
+**Do not start V0.5-B before V0.5.16 is closed.**
 
 ---
 
 ## Next canonical action
 
-**Finish Slice 16.0 by merging the canonical documentation reset.**
+### Slice 16.1 — GitHub hygiene
 
-Immediately after that, proceed to **Slice 16.1 — GitHub hygiene**:
-- close obsolete PR #33 without merging it;
-- inventory and remove abandoned/merged historical branches in controlled batches;
-- then move to **Slice 16.2 — live Outfit sync parity (P1)**.
+1. Verify open PRs on current `main`.
+2. Close obsolete PR **#33** without merging it.
+3. Inventory historical branches and classify them: merged / superseded / active / unknown.
+4. Delete only branches proven merged or superseded, in controlled batches.
+5. Keep `main` plus genuinely active work branches.
+6. Record the resulting branch/PR state here and advance the roadmap to Slice 16.2.
 
-If a new chat starts after this point, do not infer progress from this sentence alone: re-read `main`, `VERSION`, this file and the roadmap first.
+Then begin **Slice 16.2 — live Outfit sync parity (P1)**.
 
 ---
 
