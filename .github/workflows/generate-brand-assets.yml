@@ -5,13 +5,13 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'branding/logo-mark-v057.png'
+      - 'branding/favicon-user-v058.b64'
       - 'scripts/generate-brand-assets.py'
       - '.github/workflows/generate-brand-assets.yml'
   push:
     branches: [main]
     paths:
-      - 'branding/logo-mark-v057.png'
+      - 'branding/favicon-user-v058.b64'
       - 'scripts/generate-brand-assets.py'
       - '.github/workflows/generate-brand-assets.yml'
 
@@ -35,11 +35,12 @@ jobs:
       - name: Install image dependency
         run: python -m pip install --disable-pip-version-check pillow
 
-      - name: Generate favicon and PWA icons from visible brand mark
+      - name: Generate favicon and PWA icons from exact glossy user master
         run: python scripts/generate-brand-assets.py
 
       - name: Verify expected outputs
         run: |
+          test -f branding/favicon-user-v058.b64
           test -f favicon.ico
           test -f icons/favicon-16.png
           test -f icons/favicon-32.png
@@ -61,6 +62,6 @@ jobs:
           if git diff --cached --quiet; then
             echo 'System icons already current.'
           else
-            git commit -m 'Generate V0.5.8 Trân Closet system icons'
+            git commit -m 'Generate exact glossy Trân Closet system icons'
             git push origin HEAD:main
           fi
