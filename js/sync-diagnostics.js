@@ -2,8 +2,18 @@ import {getSyncConfig,testSyncConnection,flushMutationQueue,pendingMutationCount
 import {flushOutfitQueue,pendingOutfitMutationCount} from './outfit-sync-client.js?v=0.5.1';
 import {getAllItems,getAllMutations,getAllOutfits,getAllOutfitMutations} from './db.js';
 
-const VERSION='v0.5.1';
+const FALLBACK_VERSION='v0.5.10';
 let running=false;
+
+function buildInfo(){
+  const info=window.TranClosetBuildInfo;
+  return info&&info.version?info:{version:FALLBACK_VERSION,sha:null,shortSha:'local',builtAt:null,source:'fallback'};
+}
+
+function versionLabel(){
+  const info=buildInfo();
+  return info.shortSha&&info.shortSha!=='local'?`${info.version} · ${info.shortSha}`:info.version;
+}
 
 function orphanCount(items,mutations,idKey='localItemId'){
   const queued=new Set(mutations.map(m=>m[idKey]));
@@ -28,8 +38,10 @@ async function snapshot(){
   const [cfg,items,mutations,outfits,outfitMutations,health]=await Promise.all([
     getSyncConfig(),getAllItems(),getAllMutations(),getAllOutfits(),getAllOutfitMutations(),testSyncConnection()
   ]);
+  const build=buildInfo();
   return {
-    version:VERSION,
+    version:build.version,
+    build:{sha:build.sha||null,shortSha:build.shortSha||null,builtAt:build.builtAt||null,source:build.source||null},
     online:navigator.onLine,
     endpoint:cfg.endpoint,
     syncKeyPresent:Boolean(cfg.token),
@@ -63,16 +75,21 @@ async function snapshot(){
   };
 }
 
+function refreshSummary(){
+  const summary=document.querySelector('#syncDiagnostics summary');
+  if(summary)summary.textContent=`Chẩn đoán đồng bộ · ${versionLabel()}`;
+}
+
 function mount(){
   const card=document.querySelector('.sync-card');
-  if(!card||card.querySelector('#syncDiagnostics'))return;
+  if(!card||card.querySelector('#syncDiagnostics')){refreshSummary();return;}
   const box=document.createElement('details');
   box.id='syncDiagnostics';
   box.style.marginTop='14px';
   box.style.padding='12px';
   box.style.border='1px solid rgba(255,255,255,.12)';
   box.style.borderRadius='14px';
-  box.innerHTML=`<summary style="cursor:pointer;font-weight:700">Chẩn đoán đồng bộ · ${VERSION}</summary>
+  box.innerHTML=`<summary style="cursor:pointer;font-weight:700">Chẩn đoán đồng bộ · ${versionLabel()}</summary>
     <p style="opacity:.72;font-size:.84rem;margin:10px 0">Không hiển thị khóa bí mật. Nút bên dưới chạy cả đồng bộ quần áo và outfit, rồi hiển thị lỗi thật.</p>
     <button type="button" id="runSyncDiagnostics" class="secondary-button">Chạy chẩn đoán + đồng bộ</button>
     <pre id="syncDiagnosticsOutput" style="white-space:pre-wrap;word-break:break-word;font-size:.72rem;line-height:1.45;max-height:420px;overflow:auto;margin-top:10px;padding:10px;border-radius:10px;background:rgba(0,0,0,.24)">Sẵn sàng.</pre>`;
@@ -91,12 +108,13 @@ function mount(){
       const pending={clothing:await pendingMutationCount(),outfits:await pendingOutfitMutationCount()};
       out.textContent=JSON.stringify({before,flush:{clothing:safeResult(clothingFlush),outfits:safeResult(outfitFlush)},after,pending},null,2);
     }catch(error){
-      out.textContent=JSON.stringify({version:VERSION,error:String(error?.message||error)},null,2);
+      out.textContent=JSON.stringify({version:buildInfo().version,build:buildInfo(),error:String(error?.message||error)},null,2);
     }finally{
       running=false;btn.disabled=false;btn.textContent='Chạy chẩn đoán + đồng bộ';
     }
   };
 }
 
+window.addEventListener('tran:build-info',refreshSummary);
 new MutationObserver(mount).observe(document.querySelector('#mainContent'),{childList:true,subtree:true});
 mount();
