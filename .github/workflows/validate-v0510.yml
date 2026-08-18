@@ -22,6 +22,7 @@ jobs:
           node --check js/photo-picker-mobile.js
           node --check js/v0510-search.js
           node --check js/i18n-v0510-profile.js
+          node --check js/i18n-v0513-ai.js
           node --check js/build-version.js
           node --check js/sync-diagnostics.js
           node --check js/bootstrap.js
@@ -53,19 +54,27 @@ jobs:
         run: |
           grep -q "card.dataset.buildSignature===signature" js/build-version.js
           grep -q "if(summary.textContent!==next)summary.textContent=next" js/sync-diagnostics.js
+          grep -q "observe(main,{childList:true})" js/build-version.js
+          grep -q "observe(main,{childList:true})" js/sync-diagnostics.js
+          grep -q "observe(main,{childList:true})" js/i18n-v0510-profile.js
+          if grep -q "subtree:true" js/build-version.js; then exit 1; fi
+          if grep -q "subtree:true" js/sync-diagnostics.js; then exit 1; fi
+          if grep -q "subtree:true" js/i18n-v0510-profile.js; then exit 1; fi
           VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
           grep -q "build-version.js?v=${VERSION_VALUE#v}" js/bootstrap.js
-          grep -q "sync-diagnostics.js?v=0.5.11" js/bootstrap.js
+          grep -q "sync-diagnostics.js?v=${VERSION_VALUE#v}" js/bootstrap.js
       - name: Check integration
         run: |
           test -f css/v0510-ux.css
           grep -q "v0510-ux.css?v=0.5.10" index.html
           grep -q "photo-picker-mobile.js?v=0.5.10" js/bootstrap.js
           grep -q "v0510-search.js?v=0.5.10" js/bootstrap.js
-          grep -q "i18n-v0510-profile.js?v=0.5.10" js/bootstrap.js
-          grep -q "v0510-search.js?v=0.5.10" sw.js
           VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
+          grep -q "i18n-v0510-profile.js?v=${VERSION_VALUE#v}" js/bootstrap.js
+          grep -q "i18n-v0513-ai.js?v=${VERSION_VALUE#v}" js/bootstrap.js
+          grep -q "v0510-search.js?v=0.5.10" sw.js
           grep -q "build-version.js?v=${VERSION_VALUE#v}" sw.js
+          grep -q "i18n-v0513-ai.js?v=${VERSION_VALUE#v}" sw.js
       - name: Check French profile coverage
         run: |
           grep -q "Synchronisation configurée" js/i18n-v0510-profile.js
