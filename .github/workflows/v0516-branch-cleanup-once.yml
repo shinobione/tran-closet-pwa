@@ -107,3 +107,5 @@ jobs:
 
           echo "Deleted: $deleted"
           echo "Already absent: $missing"
+
+# One-shot runner. Never merge this workflow into main.
