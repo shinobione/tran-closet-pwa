@@ -1,8 +1,9 @@
-import {getAllItems,getAllMutations,bulkPutItems,setMeta} from './db.js';
+import {getAllItems,getAllMutations,bulkPutItems,deleteItem,setMeta} from './db.js';
 import {getSyncConfig} from './sync-client.js';
 
 let running=false;
 let lastWatchAt=0;
+let intervalId=null;
 
 const stableLocalPhoto=value=>typeof value==='string'&&(
   value.startsWith('./assets/items/')||
@@ -42,6 +43,7 @@ export async function syncLiveCanonicalItems({reloadOnChange=false}={}){
     const [current,mutations]=await Promise.all([getAllItems(),getAllMutations()]);
     const byRemote=new Map(current.filter(item=>item.airtableRecordId).map(item=>[item.airtableRecordId,item]));
     const pendingLocalIds=new Set(mutations.map(mutation=>mutation.localItemId));
+    const incomingRemoteIds=new Set(incoming.map(item=>item.airtableRecordId).filter(Boolean));
     const before=canonicalSignature(current.filter(item=>item.airtableRecordId));
 
     const merged=incoming.map(item=>{
@@ -63,15 +65,20 @@ export async function syncLiveCanonicalItems({reloadOnChange=false}={}){
     });
 
     await bulkPutItems(merged);
+
+    // Live Airtable is authoritative for already-cloud-backed records.
+    // Preserve anything with a local mutation still pending; remove only truly stale cloud rows.
+    for(const stale of current.filter(item=>item.airtableRecordId&&!incomingRemoteIds.has(item.airtableRecordId))){
+      if(!pendingLocalIds.has(stale.id))await deleteItem(stale.id);
+    }
+
     await setMeta('airtable-live-last-sync',body.syncedAt||new Date().toISOString());
     await setMeta('airtable-live-record-count',incoming.length);
     await setMeta('airtable-live-last-error',null);
 
     const after=canonicalSignature(merged);
     const changed=before!==after;
-    if(reloadOnChange&&changed&&document.visibilityState==='visible'){
-      location.reload();
-    }
+    if(reloadOnChange&&changed&&document.visibilityState==='visible')location.reload();
     return {ok:true,changed,recordCount:incoming.length,syncedAt:body.syncedAt||null};
   }catch(error){
     await setMeta('airtable-live-last-error',{at:new Date().toISOString(),networkError:true,error:String(error?.message||error)});
@@ -83,11 +90,15 @@ export async function syncLiveCanonicalItems({reloadOnChange=false}={}){
 
 export function startLiveSyncWatch(){
   const check=()=>{
+    if(document.visibilityState!=='visible'||!navigator.onLine)return;
     const now=Date.now();
     if(now-lastWatchAt<15000)return;
     lastWatchAt=now;
     syncLiveCanonicalItems({reloadOnChange:true});
   };
+
   window.addEventListener('online',check);
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')check();});
+  if(intervalId)clearInterval(intervalId);
+  intervalId=setInterval(check,30000);
 }
