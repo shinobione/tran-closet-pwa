@@ -50,13 +50,6 @@ if(document.documentElement.lang==='fr'){
     return text;
   }
 
-  function walk(root){
-    if(!root)return;
-    const nodes=[];
-    if(root.nodeType===Node.TEXT_NODE)nodes.push(root);
-    else nodes.push(...document.createTreeWalker(root,NodeFilter.SHOW_TEXT));
-  }
-
   function translateTree(root=document.body){
     if(!root)return;
     const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
@@ -82,15 +75,10 @@ if(document.documentElement.lang==='fr'){
     });
   }
 
-  translateTree(document.body);
-  new MutationObserver(records=>{
-    for(const record of records){
-      for(const node of record.addedNodes){
-        if(node.nodeType===Node.TEXT_NODE){
-          const raw=node.nodeValue||'',trimmed=raw.trim(),next=translate(trimmed);
-          if(trimmed&&next!==trimmed)node.nodeValue=`${raw.match(/^\s*/)?.[0]||''}${next}${raw.match(/\s*$/)?.[0]||''}`;
-        }else if(node instanceof Element)translateTree(node);
-      }
-    }
-  }).observe(document.body,{childList:true,subtree:true});
+  const main=document.querySelector('#mainContent');
+  const translateProfile=()=>{if(main)translateTree(main);};
+  translateProfile();
+  // Observe only top-level route replacement. Do not watch the whole Profile subtree:
+  // version/diagnostic cards mutate inside it and must not create observer feedback.
+  if(main)new MutationObserver(translateProfile).observe(main,{childList:true});
 }

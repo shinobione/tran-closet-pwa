@@ -1,0 +1,50 @@
+name: Validate V0.5.13 profile stability and French AI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-v0513:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          node --check js/build-version.js
+          node --check js/sync-diagnostics.js
+          node --check js/i18n-v0510-profile.js
+          node --check js/i18n-v0513-ai.js
+          node --check js/bootstrap.js
+          node --check sw.js
+      - name: Reject recursive Profile observers
+        run: |
+          grep -q "observe(main,{childList:true})" js/build-version.js
+          grep -q "observe(main,{childList:true})" js/sync-diagnostics.js
+          grep -q "observe(main,{childList:true})" js/i18n-v0510-profile.js
+          ! grep -q "subtree:true" js/build-version.js
+          ! grep -q "subtree:true" js/sync-diagnostics.js
+          ! grep -q "subtree:true" js/i18n-v0510-profile.js
+      - name: Check French dynamic AI retry coverage
+        run: |
+          grep -q "AI đã tự thử lại" js/i18n-v0513-ai.js
+          grep -q "L’IA a réessayé automatiquement" js/i18n-v0513-ai.js
+          grep -q "Đang tự thử lại" js/i18n-v0513-ai.js
+          grep -q "Nouvelle tentative automatique" js/i18n-v0513-ai.js
+      - name: Check V0.5.13 integration
+        run: |
+          test "$(tr -d '\r\n' < VERSION)" = "v0.5.13"
+          grep -q "version:'v0.5.13'" js/build-version.js
+          grep -q "sync-diagnostics.js?v=0.5.13" js/bootstrap.js
+          grep -q "i18n-v0510-profile.js?v=0.5.13" js/bootstrap.js
+          grep -q "i18n-v0513-ai.js?v=0.5.13" js/bootstrap.js
+          grep -q "build-version.js?v=0.5.13" js/bootstrap.js
+          grep -q "i18n-v0513-ai.js?v=0.5.13" sw.js

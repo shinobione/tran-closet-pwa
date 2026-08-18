@@ -1,4 +1,4 @@
-const FALLBACK={version:'v0.5.12',sha:null,shortSha:'local',builtAt:null,runId:null,source:'fallback'};
+const FALLBACK={version:'v0.5.13',sha:null,shortSha:'local',builtAt:null,runId:null,source:'fallback'};
 let info=FALLBACK;
 
 function isValid(value){
@@ -59,5 +59,7 @@ async function load(){
 
 window.addEventListener('tran:build-info',mount);
 const main=document.querySelector('#mainContent');
-if(main)new MutationObserver(mount).observe(main,{childList:true,subtree:true});
+// Profile renders replace main's direct children. Observe only that boundary: never
+// observe subtree mutations created by this card, diagnostics or translations.
+if(main)new MutationObserver(mount).observe(main,{childList:true});
 await load();
