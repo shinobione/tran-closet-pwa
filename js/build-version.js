@@ -1,4 +1,4 @@
-const FALLBACK={version:'v0.5.10',sha:null,shortSha:'local',builtAt:null,runId:null,source:'fallback'};
+const FALLBACK={version:'v0.5.11',sha:null,shortSha:'local',builtAt:null,runId:null,source:'fallback'};
 let info=FALLBACK;
 
 function isValid(value){
@@ -27,8 +27,13 @@ function mount(){
     card.className='build-version-card';
     settings.after(card);
   }
+
   const fr=language()==='fr';
   const reliable=info.source==='deployment';
+  const signature=[fr?'fr':'vi',info.version,info.sha||'',info.shortSha||'',info.builtAt||'',info.source||''].join('|');
+  if(card.dataset.buildSignature===signature)return;
+  card.dataset.buildSignature=signature;
+
   card.innerHTML=`<div class="build-version-head"><div><p class="eyebrow">${fr?'VERSION DÉPLOYÉE':'PHIÊN BẢN TRIỂN KHAI'}</p><h3>${info.version} <code>${info.shortSha}</code></h3></div><span class="build-version-dot ${reliable?'is-live':''}" title="${reliable?'Build stamp GitHub Pages':'Fallback local'}"></span></div>
     <p>${reliable?(fr?'Correspond exactement au commit servi par GitHub Pages.':'Khớp chính xác với commit đang được GitHub Pages phục vụ.'):(fr?'Build stamp indisponible · valeur locale de secours.':'Không đọc được build stamp · đang dùng giá trị dự phòng cục bộ.')}</p>
     ${info.builtAt?`<small>${fr?'Déployé':'Triển khai'} · ${dateLabel(info.builtAt)}</small>`:''}
@@ -53,5 +58,6 @@ async function load(){
 }
 
 window.addEventListener('tran:build-info',mount);
-new MutationObserver(mount).observe(document.querySelector('#mainContent'),{childList:true,subtree:true});
+const main=document.querySelector('#mainContent');
+if(main)new MutationObserver(mount).observe(main,{childList:true,subtree:true});
 await load();

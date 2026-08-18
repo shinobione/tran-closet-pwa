@@ -3,7 +3,7 @@ import {flushOutfitQueue,pendingOutfitMutationCount} from './outfit-sync-client.
 import {getAllItems,getAllMutations,getAllOutfits,getAllOutfitMutations} from './db.js';
 
 // Legacy CI marker only: const VERSION='v0.5.1'
-const FALLBACK_VERSION='v0.5.10';
+const FALLBACK_VERSION='v0.5.11';
 let running=false;
 
 function buildInfo(){
@@ -78,12 +78,17 @@ async function snapshot(){
 
 function refreshSummary(){
   const summary=document.querySelector('#syncDiagnostics summary');
-  if(summary)summary.textContent=`Chẩn đoán đồng bộ · ${versionLabel()}`;
+  if(!summary)return;
+  const next=`Chẩn đoán đồng bộ · ${versionLabel()}`;
+  if(summary.textContent!==next)summary.textContent=next;
 }
 
 function mount(){
   const card=document.querySelector('.sync-card');
-  if(!card||card.querySelector('#syncDiagnostics')){refreshSummary();return;}
+  if(!card)return;
+  const existing=card.querySelector('#syncDiagnostics');
+  if(existing){refreshSummary();return;}
+
   const box=document.createElement('details');
   box.id='syncDiagnostics';
   box.style.marginTop='14px';
@@ -117,5 +122,6 @@ function mount(){
 }
 
 window.addEventListener('tran:build-info',refreshSummary);
-new MutationObserver(mount).observe(document.querySelector('#mainContent'),{childList:true,subtree:true});
+const main=document.querySelector('#mainContent');
+if(main)new MutationObserver(mount).observe(main,{childList:true,subtree:true});
 mount();

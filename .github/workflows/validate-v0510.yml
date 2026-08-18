@@ -1,4 +1,4 @@
-name: Validate V0.5.10 QA UX and build version
+name: Validate V0.5.11 profile stability and QA UX
 
 on:
   pull_request:
@@ -40,13 +40,19 @@ jobs:
           if grep -q "state.query=e.target.value;render()" js/v0510-search.js; then exit 1; fi
       - name: Check reliable deployment version
         run: |
-          test "$(tr -d '\r\n' < VERSION)" = "v0.5.10"
+          test "$(tr -d '\r\n' < VERSION)" = "v0.5.11"
           grep -q "git rev-parse HEAD" .github/workflows/deploy-pages.yml
           grep -q "build-info.json" .github/workflows/deploy-pages.yml
           grep -q "cache:'no-store'" js/build-version.js
           grep -q "TranClosetBuildInfo" js/build-version.js
           grep -q "build-info.json" sw.js
           grep -q "build:{sha:" js/sync-diagnostics.js
+      - name: Check profile observer stability
+        run: |
+          grep -q "card.dataset.buildSignature===signature" js/build-version.js
+          grep -q "if(summary.textContent!==next)summary.textContent=next" js/sync-diagnostics.js
+          grep -q "build-version.js?v=0.5.11" js/bootstrap.js
+          grep -q "sync-diagnostics.js?v=0.5.11" js/bootstrap.js
       - name: Check integration
         run: |
           test -f css/v0510-ux.css
@@ -54,8 +60,6 @@ jobs:
           grep -q "photo-picker-mobile.js?v=0.5.10" js/bootstrap.js
           grep -q "v0510-search.js?v=0.5.10" js/bootstrap.js
           grep -q "i18n-v0510-profile.js?v=0.5.10" js/bootstrap.js
-          grep -q "build-version.js?v=0.5.10" js/bootstrap.js
-          grep -q "sync-diagnostics.js?v=0.5.10" js/bootstrap.js
           grep -q "v0510-search.js?v=0.5.10" sw.js
           grep -q "build-version.js?v=0.5.10" sw.js
       - name: Check French profile coverage
