@@ -84,9 +84,33 @@ async function detectFineColors(image,env){
   return parseColorAnswer(answer);
 }
 
+function canonicalHealth(body){
+  return {
+    ...body,
+    workerRevision:'v059',
+    taxonomy:`canonical-v${TAXONOMY_SCHEMA_VERSION}`,
+    taxonomyCounts:{
+      categories:TAXONOMY.categories.length,
+      colors:TAXONOMY.colors.length,
+      styles:TAXONOMY.styles.length,
+      tags:TAXONOMY.tags.length
+    }
+  };
+}
+
 export default {
   async fetch(request,env){
     const url=new URL(request.url);
+    if(url.pathname==='/health'&&request.method==='GET'){
+      const legacyResponse=await v058.fetch(request,env);
+      if(!legacyResponse.ok)return legacyResponse;
+      let body=null;
+      try{body=await legacyResponse.clone().json();}catch{return legacyResponse;}
+      const headers=new Headers(legacyResponse.headers);
+      headers.set('content-type','application/json; charset=utf-8');
+      return new Response(JSON.stringify(canonicalHealth(body)),{status:legacyResponse.status,headers});
+    }
+
     if(url.pathname!=='/v1/analyze-item'||request.method!=='POST')return v058.fetch(request,env);
 
     let payload=null;
