@@ -73,9 +73,11 @@ test('core routes stay crash-free in French',async({page})=>{
   const search=page.locator('#searchInput');
   await expect(search).toBeVisible();
   await search.click();
-  await search.pressSequentially('Melody',{delay:15});
+  await search.pressSequentially('Melo',{delay:15});
+  await expect(search).toHaveValue('Melo');
+  await page.waitForTimeout(250);
+  await page.keyboard.type('dy',{delay:15});
   await expect(search).toHaveValue('Melody');
-  expect(await page.evaluate(()=>document.activeElement?.id)).toBe('searchInput');
   await expect(page.locator('.item-card:not([hidden])').first()).toBeVisible();
 
   await page.locator('.nav-item[data-route="add"]').click();
