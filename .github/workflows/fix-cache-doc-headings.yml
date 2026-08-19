@@ -1,0 +1,53 @@
+name: Fix cache checkpoint headings
+
+on:
+  push:
+    branches: [v0.5.16-state-after-cache]
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: ${{ !contains(github.event.head_commit.message, '[skip cache-doc-heading-fix]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: v0.5.16-state-after-cache
+          fetch-depth: 0
+      - name: Remove duplicated headings
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          fixes={
+            'docs/PROJECT-STATE.md':[
+              ('### 16.7 — CI fossilization / browser smoke\n### 16.7 — CI fossilization / browser smoke\n','### 16.7 — CI fossilization / browser smoke\n'),
+              ('## Verification vocabulary\n## Verification vocabulary\n','## Verification vocabulary\n'),
+            ],
+            'docs/ROADMAP.md':[
+              ('## Slice 16.7 — CI consolidation + browser smoke 🔵 CURRENT\n## Slice 16.7 — CI consolidation + browser smoke\n','## Slice 16.7 — CI consolidation + browser smoke 🔵 CURRENT\n'),
+            ],
+          }
+          for name,repls in fixes.items():
+            p=Path(name); s=p.read_text()
+            for old,new in repls:
+              if s.count(old)!=1: raise SystemExit(f'{name}: expected one duplicate heading: {old!r}')
+              s=s.replace(old,new)
+            p.write_text(s)
+          PY
+      - name: Validate headings
+        run: |
+          test "$(grep -c '^### 16.7 — CI fossilization / browser smoke$' docs/PROJECT-STATE.md)" -eq 1
+          test "$(grep -c '^## Verification vocabulary$' docs/PROJECT-STATE.md)" -eq 1
+          test "$(grep -c '^## Slice 16.7 — CI consolidation + browser smoke 🔵 CURRENT$' docs/ROADMAP.md)" -eq 1
+          test "$(grep -c '^## Slice 16.7 — CI consolidation + browser smoke$' docs/ROADMAP.md)" -eq 0
+      - name: Remove one-shot workflow
+        run: rm .github/workflows/fix-cache-doc-headings.yml
+      - name: Commit fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Docs · Fix 16.7 checkpoint headings [skip cache-doc-heading-fix]"
+          git push origin HEAD:v0.5.16-state-after-cache
