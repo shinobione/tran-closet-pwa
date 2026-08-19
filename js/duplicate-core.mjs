@@ -92,13 +92,13 @@ export function duplicateReasons(assessment={}){
   const reasons=[];
   const {distance,metadata={}}=assessment;
   if(Number.isFinite(distance)){
-    if(distance<=6)reasons.push(reason('duplicate.reason.imageAlmostSame'));
-    else if(distance<=12)reasons.push(reason('duplicate.reason.imageVerySimilar'));
-    else if(distance<=16)reasons.push(reason('duplicate.reason.imageSimilar'));
+    if(distance<=6)reasons.push(reason('duplicate.reason.nearlyIdentical'));
+    else if(distance<=12)reasons.push(reason('duplicate.reason.verySimilar'));
+    else if(distance<=16)reasons.push(reason('duplicate.reason.fairlySimilar'));
   }
   if(metadata.category===1)reasons.push(reason('duplicate.reason.sameCategory'));
   if(metadata.colors>=.5)reasons.push(reason('duplicate.reason.similarColors'));
   if(metadata.styles>=.5)reasons.push(reason('duplicate.reason.similarStyles'));
-  if(metadata.name>=.86)reasons.push(reason('duplicate.reason.similarName'));
+  if(metadata.name>=.86)reasons.push(reason('duplicate.reason.closeName'));
   return reasons.slice(0,4);
 }
