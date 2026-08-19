@@ -19,18 +19,21 @@ jobs:
           node-version: '22'
       - name: Check JavaScript syntax
         run: |
-          node --check js/v0512-sync-hotfix.js
+          node --check js/manual-sync.js
+          node --check js/app-refresh.js
           node --check js/bootstrap.js
           node --check js/build-version.js
           node --check sw.js
-      - name: Check crash-safe manual sync interception
+      - name: Check crash-safe manual sync controller
         run: |
-          grep -q "document.addEventListener('click'" js/v0512-sync-hotfix.js
-          grep -q "stopImmediatePropagation()" js/v0512-sync-hotfix.js
-          grep -q "flushMutationQueue()" js/v0512-sync-hotfix.js
-          grep -q "location.reload()" js/v0512-sync-hotfix.js
-          grep -q "v0512-sync-hotfix.js?v=0.5.12" js/bootstrap.js
-          grep -q "v0512-sync-hotfix.js?v=0.5.12" sw.js
+          grep -q "document.addEventListener('click'" js/manual-sync.js
+          grep -q "stopImmediatePropagation()" js/manual-sync.js
+          grep -q "flushMutationQueue()" js/manual-sync.js
+          grep -q "flushOutfitQueue()" js/manual-sync.js
+          ! grep -q "location.reload()" js/manual-sync.js
+          grep -q "window.dispatchEvent(new Event('online'))" js/manual-sync.js
+          grep -q "manual-sync.js?v=0.5.16" js/bootstrap.js
+          grep -q "manual-sync.js?v=0.5.16" sw.js
       - name: Check version alignment
         run: |
           VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
