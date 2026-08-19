@@ -1,4 +1,5 @@
 import legacyWorker from './index.js';
+import {fromAirtableCategory} from './taxonomy.generated.mjs';
 
 const BASE_ID='appw8WNvdDuXUgYvN';
 const CLOTHES_TABLE_ID='tblKdCi4MI4AH26y8';
@@ -41,10 +42,7 @@ function bearer(request){
   const value=request.headers.get('authorization')||'';
   return value.startsWith('Bearer ')?value.slice(7):'';
 }
-function normalizeCategory(value){
-  const clean=String(value||'').trim();
-  return clean==='Swimware'?'Swimware':clean;
-}
+function normalizeCategory(value){return fromAirtableCategory(value);}
 function arr(value){return Array.isArray(value)?value:[];}
 
 async function readTableRecords(tableId,env){

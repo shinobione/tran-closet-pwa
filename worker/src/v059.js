@@ -1,7 +1,8 @@
 import v058 from './v058.js';
+import {TAXONOMY,TAXONOMY_SCHEMA_VERSION} from './taxonomy.generated.mjs';
 
 const VISION_MODEL='@cf/llava-hf/llava-1.5-7b-hf';
-const COLORS=['Blue','Navy','Light Blue','Turquoise','Teal','Pink','Yellow','Black','Brown','Camel','Beige','Cream','Green','Olive','Khaki','Mint','Purple','White','Grey','Orange','Red','Burgundy','Gold','Silver'];
+const COLORS=TAXONOMY.colors;
 const COLOR_LOOKUP=new Map(COLORS.map(value=>[value.toLowerCase(),value]));
 
 function base64ToByteArray(value){
@@ -100,7 +101,7 @@ export default {
     try{
       const fineColors=await detectFineColors(payload.image,env);
       if(fineColors.length)body.analysis.colors=fineColors;
-      body.colorTaxonomy='v0.5.9';
+      body.colorTaxonomy=`canonical-v${TAXONOMY_SCHEMA_VERSION}`;
       body.colorVisionModel=VISION_MODEL;
       const headers=new Headers(legacyResponse.headers);
       headers.set('content-type','application/json; charset=utf-8');
