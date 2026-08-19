@@ -1,0 +1,43 @@
+name: Fix branding state retired references
+
+on:
+  push:
+    branches: [v0.5.16-state-after-branding]
+    paths:
+      - '.github/workflows/fix-branding-state-reference.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: v0.5.16-state-after-branding
+          fetch-depth: 0
+      - name: Remove retired branding filenames from canonical state
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          p=Path('docs/PROJECT-STATE.md')
+          s=p.read_text()
+          old='- historical/intermediate `logo-lockup-centered.png`, `logo-mark-256.png`, `logo-mark.png` and `logo-source-round.b64.part1` were removed after dependency audit;'
+          new='- four historical/intermediate branding sources were removed after dependency audit; exact retired filenames remain documented only in `docs/BRANDING-SOURCES.md`, the intentional audit-history allowlist;'
+          if s.count(old)!=1:
+            raise SystemExit(f'expected one retired branding filename sentence, got {s.count(old)}')
+          p.write_text(s.replace(old,new))
+          PY
+          ! grep -q 'branding/logo-lockup-centered.png' docs/PROJECT-STATE.md
+          ! grep -q 'branding/logo-mark-256.png' docs/PROJECT-STATE.md
+          ! grep -q 'branding/logo-mark.png' docs/PROJECT-STATE.md
+          ! grep -q 'branding/logo-source-round.b64.part1' docs/PROJECT-STATE.md
+      - name: Commit docs correction only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/PROJECT-STATE.md
+          git diff --cached --quiet && exit 0
+          git commit -m "Docs · Keep retired branding names out of canonical state"
+          git push origin HEAD:v0.5.16-state-after-branding
