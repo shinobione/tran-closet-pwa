@@ -22,6 +22,7 @@ jobs:
         run: |
           node --check js/live-outfit-sync-core.mjs
           node --check js/live-airtable-outfit-sync.js
+          node --check js/live-outfit-ui-bridge.js
           node --check js/bootstrap.js
           node --check js/sync-client.js
           node --check js/sync-diagnostics.js
@@ -59,6 +60,21 @@ jobs:
           grep -q "airtable-outfit-live-last-sync" js/live-airtable-outfit-sync.js
           grep -q "airtable-outfit-live-record-count" js/live-airtable-outfit-sync.js
           grep -q "airtable-outfit-live-last-error" js/live-airtable-outfit-sync.js
+
+      - name: Check live UI convergence contract
+        run: |
+          grep -q "tran:outfits-live-changed" js/live-airtable-outfit-sync.js
+          grep -q "refreshUiOnChange:true" js/live-airtable-outfit-sync.js
+          grep -q "window.addEventListener('focus',check)" js/live-airtable-outfit-sync.js
+          grep -q "window.addEventListener('pageshow',check)" js/live-airtable-outfit-sync.js
+          if grep -q "location.reload()" js/live-airtable-outfit-sync.js; then
+            echo 'Live Outfit convergence must not depend on a full browser reload.'
+            exit 1
+          fi
+          grep -q "tran:outfits-live-changed" js/live-outfit-ui-bridge.js
+          grep -q "window.dispatchEvent(new Event('online'))" js/live-outfit-ui-bridge.js
+          grep -q "live-outfit-ui-bridge.js?v=0.5.16" js/bootstrap.js
+          grep -q "live-outfit-ui-bridge.js?v=0.5.16" sw.js
 
       - name: Check bootstrap, diagnostics and offline wiring
         run: |
