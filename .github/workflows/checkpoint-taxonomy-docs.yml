@@ -1,0 +1,88 @@
+name: Checkpoint V0.5.16 taxonomy docs
+
+on:
+  push:
+    branches: [v0.5.16-state-after-taxonomy]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  checkpoint:
+    if: ${{ (github.event_name == 'push' && !contains(github.event.head_commit.message, '[skip taxonomy-docs]')) || (github.event_name == 'pull_request' && github.head_ref == 'v0.5.16-state-after-taxonomy') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: v0.5.16-state-after-taxonomy
+          fetch-depth: 0
+      - name: Update canonical state
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          import re
+
+          def once(text,old,new,label):
+            n=text.count(old)
+            if n!=1: raise SystemExit(f'{label}: expected 1 occurrence, got {n}')
+            return text.replace(old,new)
+
+          def section(text,start,end,replacement,label):
+            pattern=re.compile(start+r'.*?(?='+end+r')',re.S|re.M)
+            out,n=pattern.subn(replacement,text,count=1)
+            if n!=1: raise SystemExit(f'{label}: expected 1 section, got {n}')
+            return out
+
+          p=Path('docs/PROJECT-STATE.md'); s=p.read_text()
+          s=once(s,
+            '- current runtime-changing main SHA: **`1bb94d173d6ae1ad7a7833063a0fe45542a7ec80`** — Slice 16.6 version/cache normalization',
+            '- current runtime-changing main SHA: **`f748d0b62bc4f610009eee886d7c5e5689c80477`** — Slice 16.8 canonical taxonomy unification',
+            'runtime sha')
+          lineage='- Slice 16.7 CI consolidation + browser smoke: PR **#60**, tested head **`845ffa7f9aa56f28a7e09160a85dd803dda4a45a`**, squash merge **`19b32a12de6752b5b610e502789c22f27e2a225d`** after **9/9 final PR workflows SUCCESS**; real system-Chrome smoke passed both deterministic browser scenarios.'
+          s=once(s,lineage,lineage+'\n- Slice 16.8 canonical taxonomy unification: PR **#62**, tested head **`35d1711f480d5e711462d442d2dcfd9b44249c78`**, squash merge **`f748d0b62bc4f610009eee886d7c5e5689c80477`** after **9/9 PR workflows SUCCESS**; canonical taxonomy **17 categories / 24 colors / 6 styles / 22 tags**, client=Worker, Airtable alias round-trip and system-Chrome smoke PASS.','lineage')
+          s=once(s,
+            '  - **16.8 taxonomy unification:** 🔵 NEXT ACTIVE ENGINEERING SLICE',
+            '  - **16.8 taxonomy unification:** 🟡 MERGED / 9/9 CI + BROWSER SMOKE GREEN; Worker deployment proof not inferred from merge.\n  - **16.9 repo/deployment governance:** 🔵 NEXT ACTIVE ENGINEERING SLICE',
+            'slice status')
+          taxonomy='''### 16.8 — canonical taxonomy unification — MERGED / 9/9 GREEN\n\nDelivered by PR **#62**:\n- `shared/taxonomy.json` is the single repository source for **17 categories / 24 colors / 6 styles / 22 tags** plus exact VI/FR labels;\n- deterministic generated client + Worker modules are checked for drift;\n- base Worker AI schema now consumes the same 24-color taxonomy exposed by the client/fine-color layer;\n- fine-color Worker consumes canonical colors rather than redefining them;\n- legacy runtime values such as `Accessorie`, `Swimware` and `Eye Lens` remain unchanged;\n- historical Airtable storage alias `Swimware → "Swimware "` is explicit and round-trip tested;\n- snapshot generation fails closed on unknown Airtable category/color/style/tag values before writing the checked-in fallback;\n- Worker deployment validates taxonomy parity before Wrangler deployment and reacts to canonical taxonomy source/generator/test changes;\n- Daily Assistant semantic role/occasion/weather subsets remain policy layers but are tested to reference only canonical categories/colors/styles/tags;\n- generated client taxonomy is part of the Service Worker shell;\n- CI topology remains 9 workflows; global PWA + UI/Profile own taxonomy parity;\n- final tested head **`35d1711f480d5e711462d442d2dcfd9b44249c78`** passed **9/9** PR workflows including system-Chrome smoke before squash merge **`f748d0b62bc4f610009eee886d7c5e5689c80477`**.\n\nNo Airtable record or canonical user data was migrated by the engineering PR. Merge does not prove that the Worker deployment completed; deployment proof remains separate.\n\n'''
+          s=section(s,r'^### 16\.8 — taxonomy drift\n',r'^### 16\.9 — repo / deployment governance\n',taxonomy,'16.8 section')
+          s=once(s,
+            '9. **16.8 taxonomy unification — 🔵 NEXT ACTIVE**\n10. 16.9 repo/deployment governance',
+            '9. 16.8 taxonomy unification — 🟡 merged / 9-of-9 CI + browser smoke green; Worker deploy proof separate\n10. **16.9 repo/deployment governance — 🔵 NEXT ACTIVE**',
+            'ordered plan')
+          governance='''## Next canonical action\n\n### Slice 16.9 — repository / deployment governance\n\n1. audit current branch/rules settings and the full branch list before deleting or protecting anything;\n2. identify every workflow that writes directly to `main` or can race engineering merges (snapshots, branding/assets, generated fallbacks);\n3. establish a documented rule for automation writes versus PR-reviewed engineering writes, with no hidden self-mutating workflow pattern;\n4. configure branch protection / required checks only after proving scheduled snapshot and deployment workflows remain compatible, or document the exact incompatibility rather than breaking them;\n5. enable automatic post-merge branch cleanup where repository settings support it and remove harmless stale/no-op/merged branches through an audited cleanup path;\n6. make merge / deployed Pages / deployed Worker / VERIFIED PROD vocabulary explicit in repository governance docs;\n7. preserve `main` as authoritative and keep snapshot files as fallback/offline artifacts rather than treating scheduled snapshot commits as engineering releases.\n\n---\n\n'''
+          s=section(s,r'^## Next canonical action\n',r'^## Verification vocabulary\n',governance,'next action')
+          s=s.replace('strict product QA for 16.2/16.3/16.4/16.5/16.6 is accumulated','strict product QA for 16.2/16.3/16.4/16.5/16.6 plus deployment proof affected by 16.8 is accumulated')
+          p.write_text(s)
+
+          p=Path('docs/ROADMAP.md'); r=p.read_text()
+          r=once(r,
+            'Current slice: **V0.5.16 · Slice 16.8 — canonical taxonomy unification**',
+            'Current slice: **V0.5.16 · Slice 16.9 — repository / deployment governance**',
+            'roadmap current')
+          taxonomy='''## Slice 16.8 — Canonical taxonomy unification 🟡 MERGED / 9/9 GREEN\n\nPR **#62**, tested head **`35d1711f480d5e711462d442d2dcfd9b44249c78`**, squash merge **`f748d0b62bc4f610009eee886d7c5e5689c80477`**.\n\nDelivered:\n- one canonical repository taxonomy source: **17 categories / 24 colors / 6 styles / 22 tags** + exact VI/FR labels;\n- deterministic generated client + Worker modules and drift detection;\n- base Worker AI schema aligned to the full client/fine-color taxonomy;\n- explicit Airtable `Swimware ` storage compatibility alias with round-trip tests, no destructive rename;\n- snapshot taxonomy validation fails closed on unknown Airtable select/multi-select values;\n- Worker deploy taxonomy preflight;\n- Daily Assistant policy subsets proven to reference canonical values;\n- taxonomy parity owned by existing global + UI/Profile suites, keeping the **9-workflow** CI topology;\n- final **9/9** PR workflows and browser smoke green.\n\n**Status:** engineering merged / CI green. No canonical data migration. Worker deployment state must be independently proven when needed.\n\n'''
+          r=section(r,r'^## Slice 16\.8 — Canonical taxonomy unification 🔵 CURRENT\n',r'^## Slice 16\.9 — Repository / deployment governance\n',taxonomy,'roadmap 16.8')
+          r=r.replace('## Slice 16.9 — Repository / deployment governance\n','## Slice 16.9 — Repository / deployment governance 🔵 CURRENT\n',1)
+          r=r.replace('deferred production/device proof from 16.2–16.6 plus the final consolidated-runtime verification','deferred production/device proof from 16.2–16.6 plus Worker deployment proof affected by 16.8 and the final consolidated-runtime verification')
+          p.write_text(r)
+          PY
+      - name: Validate checkpoint
+        run: |
+          grep -q 'f748d0b62bc4f610009eee886d7c5e5689c80477' docs/PROJECT-STATE.md
+          grep -q '16.8 taxonomy unification:.*MERGED' docs/PROJECT-STATE.md
+          grep -q '16.9 repo/deployment governance:.*NEXT ACTIVE' docs/PROJECT-STATE.md
+          test "$(grep -c '^### 16.8 — canonical taxonomy unification — MERGED / 9/9 GREEN$' docs/PROJECT-STATE.md)" -eq 1
+          test "$(grep -c '^## Verification vocabulary$' docs/PROJECT-STATE.md)" -eq 1
+          grep -q 'Current slice: .*Slice 16.9' docs/ROADMAP.md
+          test "$(grep -c '^## Slice 16.8 — Canonical taxonomy unification 🟡 MERGED / 9/9 GREEN$' docs/ROADMAP.md)" -eq 1
+          test "$(grep -c '^## Slice 16.9 — Repository / deployment governance 🔵 CURRENT$' docs/ROADMAP.md)" -eq 1
+      - name: Commit docs only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/PROJECT-STATE.md docs/ROADMAP.md
+          git diff --cached --quiet && exit 0
+          git commit -m "Docs · Close Slice 16.8 and activate 16.9 [skip taxonomy-docs]"
+          git push origin HEAD:v0.5.16-state-after-taxonomy
