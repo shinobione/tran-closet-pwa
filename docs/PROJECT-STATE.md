@@ -13,7 +13,7 @@ Last state update: **2026-08-19**
 - repository: `shinobione/tran-closet-pwa`
 - canonical branch: `main`
 - version file: **`v0.5.16`**
-- current runtime-changing main SHA: **`f748d0b62bc4f610009eee886d7c5e5689c80477`** — Slice 16.8 canonical taxonomy unification
+- current runtime-changing main SHA: **`a1689d14548c4ecbffe2e4b526d6db655f546ead`** — Slice 16.9 governance + search-safe silent sync
 - PWA: `https://shinobione.github.io/tran-closet-pwa/`
 - Cloudflare Worker: `https://tran-closet-sync.jerryquinet.workers.dev`
 - IndexedDB: `tran-closet`, schema version **4**
@@ -30,6 +30,7 @@ Important recent runtime lineage:
 - Slice 16.6 version/cache normalization: PR **#58**, tested head **`5259ec530988c2ffa6febd6d4666f68fa920216d`**, squash merge **`1bb94d173d6ae1ad7a7833063a0fe45542a7ec80`** after **14/14 PR workflows SUCCESS**.
 - Slice 16.7 CI consolidation + browser smoke: PR **#60**, tested head **`845ffa7f9aa56f28a7e09160a85dd803dda4a45a`**, squash merge **`19b32a12de6752b5b610e502789c22f27e2a225d`** after **9/9 final PR workflows SUCCESS**; real system-Chrome smoke passed both deterministic browser scenarios.
 - Slice 16.8 canonical taxonomy unification: PR **#62**, tested head **`35d1711f480d5e711462d442d2dcfd9b44249c78`**, squash merge **`f748d0b62bc4f610009eee886d7c5e5689c80477`** after **9/9 PR workflows SUCCESS**; canonical taxonomy **17 categories / 24 colors / 6 styles / 22 tags**, client=Worker, Airtable alias round-trip and system-Chrome smoke PASS.
+- Slice 16.9 repository/deployment governance: PR **#64**, tested head **`4927f447227991b23dc48d4e6b8923176dc0a433`**, squash merge **`a1689d14548c4ecbffe2e4b526d6db655f546ead`** after **9/9 PR validations SUCCESS** + branding generator SUCCESS; 17 stale branches removed, generated-main writers hardened, and the startup silent-sync search focus regression fixed with hardened Chrome proof.
 
 **Do not infer deployment from merge.** Post-merge Pages/Worker state must still be independently proven when a claim depends on deployment. The available GitHub connector is reliable for PR-triggered CI but does not consistently expose all push-triggered deployment runs.
 
@@ -68,7 +69,8 @@ The stale clothing DELETE reconciliation bug targeting `rec6sAxfNivkTmiMp` remai
   - **16.6 version/cache normalization:** 🟡 MERGED / 14/14 CI GREEN; installed-device update/cache QA deferred to Slice 16.11.
   - **16.7 CI consolidation + browser smoke:** ✅ MERGED / 9/9 CI + BROWSER SMOKE GREEN.
   - **16.8 taxonomy unification:** 🟡 MERGED / 9/9 CI + BROWSER SMOKE GREEN; Worker deployment proof not inferred from merge.
-  - **16.9 repo/deployment governance:** 🔵 NEXT ACTIVE ENGINEERING SLICE
+  - **16.9 repo/deployment governance:** ✅ MERGED / 9/9 CI + BROWSER SMOKE GREEN; governance contract recorded, `main` protection state remains explicitly unprotected.
+  - **16.10 branding source cleanup:** 🔵 NEXT ACTIVE ENGINEERING SLICE
 - **V0.5-B — Wear history & rotation:** ⏭ blocked until V0.5.16 closeout
 
 Canonical principle:
@@ -245,14 +247,23 @@ Delivered by PR **#62**:
 
 No Airtable record or canonical user data was migrated by the engineering PR. Merge does not prove that the Worker deployment completed; deployment proof remains separate.
 
-### 16.9 — repo / deployment governance
+### 16.9 — repo / deployment governance — MERGED / 9/9 GREEN
 
-- `main` is not protected;
-- snapshot/asset workflows can write to `main`;
-- short-lived merged engineering branches are not automatically deleted by the available connector;
-- two accidental no-op branches, `noop-check` and `noop-check-2`, were created during connector work and contain no canonical work. They must be removed during governance/branch cleanup rather than treated as project state.
+Delivered by PR **#64**:
+- repository governance vocabulary separates MERGED / PAGES DEPLOYED / WORKER DEPLOYED / VERIFIED PROD;
+- current `main` protection state is recorded factually as unprotected rather than falsely claimed enabled;
+- permanent generated-content writers are restricted to Airtable snapshot sync + branding generation;
+- both generated writers share `generated-main-writes` concurrency and use `scripts/commit-generated-artifacts.sh`;
+- generated writes always restart from latest `origin/main`, commit only allowlisted generated paths, never force-push and retry normal push races;
+- governance CI rejects extra `contents: write` writers, direct/force generated pushes and workflow self-mutation;
+- audited fail-closed cleanup removed **17** stale/no-op/merged branches; after cleanup the repo had only `main` + the active governance branch;
+- scheduled Airtable snapshot movement advanced `main` during PR #64 and the candidate was tested successfully against the updated merge ref;
+- hardened Chrome smoke exposed a real pre-existing startup search-focus loss caused by `setTimeout(()=>syncNow(true),700)` rerendering the route while typing;
+- startup and `online` silent sync now use `syncWhenSearchIdle()`, deferring rerender until search blur instead of forced refocus;
+- hardened browser proof types `Melo`, pauses 250 ms, then types `dy` without another click and requires `Melody`;
+- final tested head **`4927f447227991b23dc48d4e6b8923176dc0a433`** passed **9/9** PR validations plus branding generation before squash merge **`a1689d14548c4ecbffe2e4b526d6db655f546ead`**.
 
-`main` is always authoritative.
+Branch protection/ruleset was not enabled: the available connector does not expose a safe mutation while preserving the two legitimate generated-main writers. This is documented governance, not an unverified claim. Final installed-device search/sync behavior remains part of Slice 16.11.
 
 ### 16.10 — branding source clutter
 
@@ -260,7 +271,7 @@ Current visual identity is correct; old/current branding sources still need depe
 
 ### Deferred production proof
 
-Because the user explicitly asked engineering work to continue, strict product QA for 16.2/16.3/16.4/16.5/16.6 plus deployment proof affected by 16.8 is accumulated in **Slice 16.11 end-to-end closeout** rather than falsely marked VERIFIED PROD now.
+Because the user explicitly asked engineering work to continue, strict product QA for 16.2/16.3/16.4/16.5/16.6 plus deployment proof affected by 16.8 and installed-device search/sync proof affected by 16.9 is accumulated in **Slice 16.11 end-to-end closeout** rather than falsely marked VERIFIED PROD now.
 
 ---
 
@@ -275,8 +286,8 @@ Because the user explicitly asked engineering work to continue, strict product Q
 7. 16.6 version/cache normalization — 🟡 merged / 14-of-14 PR CI green, installed-device cache QA deferred to 16.11
 8. 16.7 CI consolidation + browser smoke — ✅ merged / 9-of-9 CI + deterministic browser smoke green
 9. 16.8 taxonomy unification — 🟡 merged / 9-of-9 CI + browser smoke green; Worker deploy proof separate
-10. **16.9 repo/deployment governance — 🔵 NEXT ACTIVE**
-11. 16.10 branding source cleanup
+10. 16.9 repo/deployment governance — ✅ merged / 9-of-9 CI + browser smoke green
+11. **16.10 branding source cleanup — 🔵 NEXT ACTIVE**
 12. 16.11 end-to-end closeout
 
 **Do not start V0.5-B before V0.5.16 is closed.**
@@ -285,15 +296,15 @@ Because the user explicitly asked engineering work to continue, strict product Q
 
 ## Next canonical action
 
-### Slice 16.9 — repository / deployment governance
+### Slice 16.10 — branding source cleanup
 
-1. audit current branch/rules settings and the full branch list before deleting or protecting anything;
-2. identify every workflow that writes directly to `main` or can race engineering merges (snapshots, branding/assets, generated fallbacks);
-3. establish a documented rule for automation writes versus PR-reviewed engineering writes, with no hidden self-mutating workflow pattern;
-4. configure branch protection / required checks only after proving scheduled snapshot and deployment workflows remain compatible, or document the exact incompatibility rather than breaking them;
-5. enable automatic post-merge branch cleanup where repository settings support it and remove harmless stale/no-op/merged branches through an audited cleanup path;
-6. make merge / deployed Pages / deployed Worker / VERIFIED PROD vocabulary explicit in repository governance docs;
-7. preserve `main` as authoritative and keep snapshot files as fallback/offline artifacts rather than treating scheduled snapshot commits as engineering releases.
+1. inventory all branding masters, generated outputs and every runtime/workflow/script reference;
+2. preserve the approved current identity exactly — no redesign, recolor, recrop or artistic regeneration;
+3. identify canonical favicon/header/logo/splash sources and distinguish runtime masters from obsolete historical intermediates;
+4. remove only assets proven dependency-free after repo-wide checks;
+5. keep deterministic favicon/PWA icon generation from the approved source with checksum protection;
+6. add CI/governance guards so retired branding sources cannot silently return and canonical assets cannot disappear;
+7. verify HTML/CSS/manifest/Service Worker/generator wiring plus browser smoke before merge.
 
 ---
 

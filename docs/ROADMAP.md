@@ -5,7 +5,7 @@
 > Current factual runtime state lives in [`PROJECT-STATE.md`](./PROJECT-STATE.md). When chat history and the repository disagree, **verify `main` and follow the repository**.
 
 Last roadmap update: **2026-08-19**  
-Current slice: **V0.5.16 · Slice 16.9 — repository / deployment governance**
+Current slice: **V0.5.16 · Slice 16.10 — branding source cleanup**
 
 ---
 
@@ -273,17 +273,26 @@ Delivered:
 
 **Status:** engineering merged / CI green. No canonical data migration. Worker deployment state must be independently proven when needed.
 
-## Slice 16.9 — Repository / deployment governance 🔵 CURRENT
+## Slice 16.9 — Repository / deployment governance ✅ MERGED / 9/9 GREEN
 
-Deliverables:
-- protect `main` where compatible with project workflow;
-- define required checks;
-- review workflows that commit snapshots/assets directly to `main`;
-- keep snapshots as fallback/offline artifacts without surprising active development;
-- clean harmless leftover branches including `noop-check` / `noop-check-2` created during connector work;
-- document merge / deployed / VERIFIED-PROD boundaries.
+PR **#64**, tested head **`4927f447227991b23dc48d4e6b8923176dc0a433`**, squash merge **`a1689d14548c4ecbffe2e4b526d6db655f546ead`**.
 
-## Slice 16.10 — Branding source cleanup
+Delivered:
+- explicit repository governance and deployment vocabulary;
+- factual `main` protection state documented as unprotected;
+- only Airtable snapshot + branding generation retain permanent generated-content write authority;
+- shared generated-main concurrency and collision-safe latest-main regeneration helper;
+- no force-push or workflow self-mutation allowed by governance tests;
+- **17** stale/no-op/merged branches removed through exact-head fail-closed audit;
+- snapshot automation moved `main` during the PR and the candidate still validated against the updated merge ref;
+- browser smoke was strengthened and exposed the real startup `syncNow(true)` search-focus regression;
+- silent startup/online sync now defers route rerender while the search field is focused, resuming on blur;
+- final hardened Chrome proof validates two-batch typing without refocus;
+- final **9/9** PR validation workflows + branding generator SUCCESS.
+
+**Status:** engineering/governance merged. `main` branch protection is not claimed enabled; Pages/Worker/installed-device VERIFIED PROD remain separate.
+
+## Slice 16.10 — Branding source cleanup 🔵 CURRENT
 
 Deliverables:
 - identify canonical favicon/header/logo/splash masters;
@@ -295,7 +304,7 @@ Current visual identity must not change during this cleanup.
 
 ## Slice 16.11 — V0.5.16 end-to-end closeout
 
-Required QA accumulates deferred production/device proof from 16.2–16.6 plus Worker deployment proof affected by 16.8 and the final consolidated-runtime verification:
+Required QA accumulates deferred production/device proof from 16.2–16.6 plus Worker deployment proof affected by 16.8, installed-device search/sync proof affected by 16.9, and the final consolidated-runtime verification:
 - Android + iPhone install/open/update sanity;
 - clothing CREATE / UPDATE / DELETE / live cross-device reread;
 - Outfit CREATE / UPDATE / DELETE / live cross-device reread **without manual refresh**;
