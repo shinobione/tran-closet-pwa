@@ -23,6 +23,7 @@ jobs:
           node --check js/outfit-integrity.mjs
           node --check js/outfit-integrity-ui.js
           node --check js/daily-assistant-core.mjs
+          node --check js/i18n-keyed.mjs
           node --check js/bootstrap.js
           node --check scripts/test-outfit-integrity.mjs
           node --check sw.js
@@ -39,10 +40,12 @@ jobs:
             exit 1
           fi
 
-      - name: Check incomplete UI and repair path
+      - name: Check incomplete keyed UI and repair path
         run: |
-          grep -q "Outfit chưa hoàn chỉnh" js/outfit-integrity-ui.js
-          grep -q "Tenue incomplète" js/outfit-integrity-ui.js
+          grep -q "t('outfit.incomplete.card')" js/outfit-integrity-ui.js
+          grep -q "t('outfit.incomplete.title')" js/outfit-integrity-ui.js
+          grep -q "'outfit.incomplete.title':'Outfit chưa hoàn chỉnh'" js/i18n-keyed.mjs
+          grep -q "'outfit.incomplete.title':'Tenue incomplète'" js/i18n-keyed.mjs
           grep -q "outfit-integrity-incomplete" js/outfit-integrity-ui.js
           grep -q "outfit-presentation-actions" js/outfit-integrity-ui.js
           grep -q "outfit-integrity-ui.js?v=0.5.16" js/bootstrap.js
@@ -57,3 +60,4 @@ jobs:
           test "$(tr -d '\r\n' < VERSION)" = "v0.5.16"
           grep -q "outfit-integrity.mjs?v=0.5.16" sw.js
           grep -q "outfit-integrity-ui.js?v=0.5.16" sw.js
+          grep -q "i18n-keyed.mjs?v=0.5.16" sw.js

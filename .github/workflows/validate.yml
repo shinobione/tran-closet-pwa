@@ -38,11 +38,13 @@ jobs:
           node --check js/daily-assistant-core.mjs
           node --check js/daily-assistant.js
           node --check js/i18n.js
+          node --check js/i18n-keyed.mjs
           node --check scripts/sync-airtable.mjs
           node --check scripts/sync-outfits.mjs
           node --check scripts/test-duplicate-core.mjs
           node --check scripts/test-smart-tags.mjs
           node --check scripts/test-daily-assistant.mjs
+          node --check scripts/test-keyed-i18n.mjs
           node --check worker/src/index.js
           node --check sw.js
       - name: Run focused unit tests
@@ -50,6 +52,7 @@ jobs:
           node scripts/test-duplicate-core.mjs
           node scripts/test-smart-tags.mjs
           node scripts/test-daily-assistant.mjs
+          node scripts/test-keyed-i18n.mjs
       - name: Check JSON and manifest
         run: |
           python -m json.tool manifest.webmanifest > /dev/null
@@ -81,9 +84,11 @@ jobs:
           test -f js/daily-assistant-core.mjs
           test -f js/daily-assistant.js
           test -f js/i18n.js
+          test -f js/i18n-keyed.mjs
           test -f scripts/test-duplicate-core.mjs
           test -f scripts/test-smart-tags.mjs
           test -f scripts/test-daily-assistant.mjs
+          test -f scripts/test-keyed-i18n.mjs
           test -f scripts/sync-airtable.mjs
           test -f scripts/sync-outfits.mjs
           test -f worker/src/index.js
@@ -97,8 +102,8 @@ jobs:
           grep -q 'outfit-picker.js?v=0.5.1' js/bootstrap.js
           grep -q 'item-ai-assistant.js?v=0.5.1' js/bootstrap.js
           grep -q 'duplicate-guard.js?v=0.5.1' js/bootstrap.js
-          grep -q 'daily-assistant.js?v=0.5.1' js/bootstrap.js
-          grep -q 'sync-diagnostics.js?v=0.5.1' js/bootstrap.js
+          grep -q 'daily-assistant.js?v=0.5.16' js/bootstrap.js
+          grep -q 'sync-diagnostics.js?v=0.5.16' js/bootstrap.js
           grep -q 'i18n.js?v=0.5.1' js/bootstrap.js
           grep -q 'serviceWorker' js/app.js
           grep -q 'queueMutation' js/app.js
@@ -122,9 +127,11 @@ jobs:
           grep -q 'hammingDistance' js/duplicate-core.mjs
           grep -q 'duplicateAssessment' js/duplicate-core.mjs
           grep -q 'tran-closet-v0.5.1' sw.js
-          grep -q 'daily-assistant-core.mjs?v=0.5.1' sw.js
+          grep -q 'daily-assistant-core.mjs?v=0.5.16' sw.js
+          grep -q 'daily-assistant.js?v=0.5.16' sw.js
+          grep -q 'i18n-keyed.mjs?v=0.5.16' sw.js
           grep -q 'i18n.js?v=0.5.1' sw.js
-          grep -q "const VERSION='v0.5.1'" js/sync-diagnostics.js
+          grep -q "FALLBACK_VERSION='v0.5.16'" js/sync-diagnostics.js
           grep -q 'navigator.share' js/outfit-presentation.js
           grep -q '1080' js/outfit-presentation.js
           grep -q '1350' js/outfit-presentation.js
@@ -155,7 +162,8 @@ jobs:
           grep -q 'taggedItemCount' js/sync-diagnostics.js
       - name: Check V0.5-A Daily Assistant contract
         run: |
-          grep -q 'Hôm nay mặc gì?' js/daily-assistant.js
+          grep -q "'daily.header.title':'Hôm nay mặc gì?'" js/i18n-keyed.mjs
+          grep -q "'daily.header.title':'Que porter aujourd’hui ?'" js/i18n-keyed.mjs
           grep -q 'api.open-meteo.com/v1/forecast' js/daily-assistant.js
           grep -q 'geocoding-api.open-meteo.com/v1/search' js/daily-assistant.js
           grep -q "DEFAULT_LOCATION={name:'TP. Hồ Chí Minh'" js/daily-assistant.js
@@ -169,18 +177,19 @@ jobs:
           grep -q "Underwear" js/daily-assistant-core.mjs
           grep -q "Rain-ready" js/daily-assistant-core.mjs
           grep -q 'sameItemSet' js/daily-assistant-core.mjs
+          grep -q "daily.reason.rainReady" js/daily-assistant-core.mjs
           grep -q 'daily assistant core: PASS' scripts/test-daily-assistant.mjs
-      - name: Check V0.5.1 bilingual UI contract
+      - name: Check bilingual UI bridge and keyed foundation
         run: |
           grep -q "LANGUAGE_KEY='tran-closet-language'" js/i18n.js
           grep -q "SUPPORTED=new Set(\['vi','fr'\])" js/i18n.js
           grep -q "searchParams.get('lang')" js/i18n.js
           grep -q "localStorage.setItem(LANGUAGE_KEY" js/i18n.js
-          grep -q "Qu’est-ce que je mets aujourd’hui ?" js/i18n.js
-          grep -q "VÉRIFICATION DES DOUBLONS" js/i18n.js
-          grep -q "Analyser avec l’IA" js/i18n.js
-          grep -q "Diagnostic de synchronisation" js/i18n.js
           grep -q "window.confirm=message=>nativeConfirm(translateRaw(message))" js/i18n.js
+          grep -q "export function t(key" js/i18n-keyed.mjs
+          grep -q "SUPPORTED_LANGUAGES=new Set(\['vi','fr'\])" js/i18n-keyed.mjs
+          grep -q "'photo.take':'Prendre une photo'" js/i18n-keyed.mjs
+          grep -q "'diagnostics.title':'Diagnostic de synchronisation'" js/i18n-keyed.mjs
           grep -q 'language-switch' css/i18n.css
       - name: Guard against committed secrets
         run: |

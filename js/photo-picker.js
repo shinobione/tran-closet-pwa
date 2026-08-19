@@ -1,3 +1,5 @@
+import {t} from './i18n-keyed.mjs?v=0.5.16';
+
 const root=document.querySelector('#mainContent');
 
 async function compressPhoto(file){
@@ -16,16 +18,15 @@ async function compressPhoto(file){
   return canvas.toDataURL('image/jpeg',.78);
 }
 
-function fr(){return document.documentElement.lang==='fr';}
 function sourceMarkup(){
   return `<div class="photo-source-actions" data-photo-source-actions>
-    <button type="button" class="secondary-button" data-photo-camera><span>📷</span><b>${fr()?'Prendre une photo':'Chụp ảnh'}</b></button>
-    <button type="button" class="secondary-button" data-photo-gallery><span>▧</span><b>${fr()?'Choisir dans la galerie':'Chọn từ thư viện'}</b></button>
+    <button type="button" class="secondary-button" data-photo-camera><span>📷</span><b>${t('photo.take')}</b></button>
+    <button type="button" class="secondary-button" data-photo-gallery><span>▧</span><b>${t('photo.gallery')}</b></button>
   </div>`;
 }
 
 function introMarkup(){
-  return `<div data-photo-picker-intro class="photo-picker-intro"><span>＋</span><strong>${fr()?'Ajouter une photo':'Thêm ảnh'}</strong><small>${fr()?'Prendre une photo ou choisir dans la galerie':'Chụp ảnh hoặc chọn từ thư viện'}</small></div>`;
+  return `<div data-photo-picker-intro class="photo-picker-intro"><span>＋</span><strong>${t('photo.add')}</strong><small>${t('photo.intro')}</small></div>`;
 }
 
 function ensurePickerIntro(preview){
@@ -63,7 +64,7 @@ function bindSourceButtons(input,camera,preview,form){
         const photo=await compressPhoto(file);
         input.value='';
         input.dataset.photo=photo;
-        preview.innerHTML=`<img src="${photo}" alt="${fr()?'Aperçu':'Xem trước'}">${sourceMarkup()}`;
+        preview.innerHTML=`<img src="${photo}" alt="${t('photo.preview')}">${sourceMarkup()}`;
         preview.dataset.photoSourceBound='';
         mountPhotoPicker();
         input.dispatchEvent(new Event('change',{bubbles:true}));

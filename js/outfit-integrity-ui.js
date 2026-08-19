@@ -1,28 +1,11 @@
 import {getAllItems,getAllOutfits} from './db.js';
 import {outfitIntegrity,OUTFIT_MIN_ITEMS} from './outfit-integrity.mjs?v=0.5.16';
+import {t} from './i18n-keyed.mjs?v=0.5.16';
 
 const root=document.querySelector('#mainContent');
 const dialog=document.querySelector('#itemDialog');
-const LANGUAGE_KEY='tran-closet-language';
 let activeOutfitId=null;
 let scheduled=false;
-
-function copy(){
-  const fr=localStorage.getItem(LANGUAGE_KEY)==='fr';
-  return fr?{
-    title:'Tenue incomplète',
-    card:'Tenue incomplète',
-    count:n=>`${n}/${OUTFIT_MIN_ITEMS} articles disponibles`,
-    detail:n=>`Cette tenue ne contient plus que ${n} article${n===1?'':'s'} disponible${n===1?'':'s'}. Modifie-la pour ajouter au moins ${OUTFIT_MIN_ITEMS-n} article${OUTFIT_MIN_ITEMS-n===1?'':'s'}, ou supprime-la si elle n’est plus utile.`,
-    share:'Répare la tenue avant de la partager.'
-  }:{
-    title:'Outfit chưa hoàn chỉnh',
-    card:'Outfit chưa hoàn chỉnh',
-    count:n=>`${n}/${OUTFIT_MIN_ITEMS} món còn sẵn`,
-    detail:n=>`Outfit này chỉ còn ${n} món khả dụng. Hãy chỉnh sửa để thêm ít nhất ${OUTFIT_MIN_ITEMS-n} món nữa, hoặc xóa outfit nếu không còn cần.`,
-    share:'Hãy sửa outfit trước khi chia sẻ.'
-  };
-}
 
 function ensureStyle(){
   if(document.querySelector('#outfitIntegrityStyle'))return;
@@ -47,7 +30,6 @@ async function snapshot(){
 async function decorateCards(data=null){
   if(!root)return;
   const state=data||await snapshot();
-  const text=copy();
   root.querySelectorAll('[data-outfit-open]').forEach(card=>{
     const outfit=state.byOutfit.get(String(card.dataset.outfitOpen));
     if(!outfit)return;
@@ -59,7 +41,7 @@ async function decorateCards(data=null){
     const body=card.querySelector('.outfit-card-body')||card;
     const warning=document.createElement('div');
     warning.className='outfit-integrity-card';
-    warning.innerHTML=`<strong>⚠ ${text.card}</strong><span>${text.count(integrity.itemCount)}</span>`;
+    warning.innerHTML=`<strong>⚠ ${t('outfit.incomplete.card')}</strong><span>${t('outfit.incomplete.count',{count:integrity.itemCount,minimum:OUTFIT_MIN_ITEMS})}</span>`;
     body.prepend(warning);
   });
 }
@@ -76,13 +58,12 @@ async function decorateDialog(data=null){
   detail.dataset.outfitIntegrity=integrity.state;
   detail.querySelector('.outfit-integrity-warning')?.remove();
   if(!integrity.incomplete)return;
-  const text=copy();
   const body=detail.querySelector('.detail-body');
   if(!body)return;
   const warning=document.createElement('div');
   warning.className='outfit-integrity-warning';
   warning.setAttribute('role','status');
-  warning.innerHTML=`<strong>⚠ ${text.title}</strong><p>${text.detail(integrity.itemCount)}</p><small>${text.share}</small>`;
+  warning.innerHTML=`<strong>⚠ ${t('outfit.incomplete.title')}</strong><p>${t('outfit.incomplete.detail',{count:integrity.itemCount,minimum:OUTFIT_MIN_ITEMS})}</p><small>${t('outfit.incomplete.share')}</small>`;
   const items=body.querySelector('.outfit-detail-items');
   if(items)body.insertBefore(warning,items);else body.prepend(warning);
 }
@@ -93,16 +74,10 @@ async function decorate(){
     const data=await snapshot();
     await decorateCards(data);
     await decorateDialog(data);
-  }catch(error){
-    console.warn('Outfit integrity UI decoration failed',error);
-  }
+  }catch(error){console.warn('Outfit integrity UI decoration failed',error);}
 }
 
-function schedule(){
-  if(scheduled)return;
-  scheduled=true;
-  queueMicrotask(decorate);
-}
+function schedule(){if(scheduled)return;scheduled=true;queueMicrotask(decorate);}
 
 document.addEventListener('click',event=>{
   const card=event.target?.closest?.('[data-outfit-open]');
