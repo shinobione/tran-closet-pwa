@@ -13,7 +13,7 @@ Last state update: **2026-08-19**
 - repository: `shinobione/tran-closet-pwa`
 - canonical branch: `main`
 - version file: **`v0.5.16`**
-- current runtime-changing main SHA: **`1bb94d173d6ae1ad7a7833063a0fe45542a7ec80`** — Slice 16.6 version/cache normalization
+- current runtime-changing main SHA: **`f748d0b62bc4f610009eee886d7c5e5689c80477`** — Slice 16.8 canonical taxonomy unification
 - PWA: `https://shinobione.github.io/tran-closet-pwa/`
 - Cloudflare Worker: `https://tran-closet-sync.jerryquinet.workers.dev`
 - IndexedDB: `tran-closet`, schema version **4**
@@ -29,6 +29,7 @@ Important recent runtime lineage:
 - Slice 16.5C dynamic i18n closeout: PR **#56**, squash merge **`536e7157793e2fc5d237656fc98ebd98ba633b7f`** after **12/12 final PR workflows SUCCESS**;
 - Slice 16.6 version/cache normalization: PR **#58**, tested head **`5259ec530988c2ffa6febd6d4666f68fa920216d`**, squash merge **`1bb94d173d6ae1ad7a7833063a0fe45542a7ec80`** after **14/14 PR workflows SUCCESS**.
 - Slice 16.7 CI consolidation + browser smoke: PR **#60**, tested head **`845ffa7f9aa56f28a7e09160a85dd803dda4a45a`**, squash merge **`19b32a12de6752b5b610e502789c22f27e2a225d`** after **9/9 final PR workflows SUCCESS**; real system-Chrome smoke passed both deterministic browser scenarios.
+- Slice 16.8 canonical taxonomy unification: PR **#62**, tested head **`35d1711f480d5e711462d442d2dcfd9b44249c78`**, squash merge **`f748d0b62bc4f610009eee886d7c5e5689c80477`** after **9/9 PR workflows SUCCESS**; canonical taxonomy **17 categories / 24 colors / 6 styles / 22 tags**, client=Worker, Airtable alias round-trip and system-Chrome smoke PASS.
 
 **Do not infer deployment from merge.** Post-merge Pages/Worker state must still be independently proven when a claim depends on deployment. The available GitHub connector is reliable for PR-triggered CI but does not consistently expose all push-triggered deployment runs.
 
@@ -66,7 +67,8 @@ The stale clothing DELETE reconciliation bug targeting `rec6sAxfNivkTmiMp` remai
   - **16.5 i18n architecture cleanup:** 🟡 MERGED / CI GREEN; final FR↔VI browser/device QA deferred to Slice 16.11.
   - **16.6 version/cache normalization:** 🟡 MERGED / 14/14 CI GREEN; installed-device update/cache QA deferred to Slice 16.11.
   - **16.7 CI consolidation + browser smoke:** ✅ MERGED / 9/9 CI + BROWSER SMOKE GREEN.
-  - **16.8 taxonomy unification:** 🔵 NEXT ACTIVE ENGINEERING SLICE
+  - **16.8 taxonomy unification:** 🟡 MERGED / 9/9 CI + BROWSER SMOKE GREEN; Worker deployment proof not inferred from merge.
+  - **16.9 repo/deployment governance:** 🔵 NEXT ACTIVE ENGINEERING SLICE
 - **V0.5-B — Wear history & rotation:** ⏭ blocked until V0.5.16 closeout
 
 Canonical principle:
@@ -225,9 +227,23 @@ Delivered by PR **#60**:
 
 This is deterministic browser regression proof, not Pages deployment or installed-device VERIFIED PROD. Device/deployment proof remains in Slice 16.11.
 
-### 16.8 — taxonomy drift
+### 16.8 — canonical taxonomy unification — MERGED / 9/9 GREEN
 
-Category/color/style/tag definitions still exist in multiple client, Worker and Airtable layers.
+Delivered by PR **#62**:
+- `shared/taxonomy.json` is the single repository source for **17 categories / 24 colors / 6 styles / 22 tags** plus exact VI/FR labels;
+- deterministic generated client + Worker modules are checked for drift;
+- base Worker AI schema now consumes the same 24-color taxonomy exposed by the client/fine-color layer;
+- fine-color Worker consumes canonical colors rather than redefining them;
+- legacy runtime values such as `Accessorie`, `Swimware` and `Eye Lens` remain unchanged;
+- historical Airtable storage alias `Swimware → "Swimware "` is explicit and round-trip tested;
+- snapshot generation fails closed on unknown Airtable category/color/style/tag values before writing the checked-in fallback;
+- Worker deployment validates taxonomy parity before Wrangler deployment and reacts to canonical taxonomy source/generator/test changes;
+- Daily Assistant semantic role/occasion/weather subsets remain policy layers but are tested to reference only canonical categories/colors/styles/tags;
+- generated client taxonomy is part of the Service Worker shell;
+- CI topology remains 9 workflows; global PWA + UI/Profile own taxonomy parity;
+- final tested head **`35d1711f480d5e711462d442d2dcfd9b44249c78`** passed **9/9** PR workflows including system-Chrome smoke before squash merge **`f748d0b62bc4f610009eee886d7c5e5689c80477`**.
+
+No Airtable record or canonical user data was migrated by the engineering PR. Merge does not prove that the Worker deployment completed; deployment proof remains separate.
 
 ### 16.9 — repo / deployment governance
 
@@ -244,7 +260,7 @@ Current visual identity is correct; old/current branding sources still need depe
 
 ### Deferred production proof
 
-Because the user explicitly asked engineering work to continue, strict product QA for 16.2/16.3/16.4/16.5/16.6 is accumulated in **Slice 16.11 end-to-end closeout** rather than falsely marked VERIFIED PROD now.
+Because the user explicitly asked engineering work to continue, strict product QA for 16.2/16.3/16.4/16.5/16.6 plus deployment proof affected by 16.8 is accumulated in **Slice 16.11 end-to-end closeout** rather than falsely marked VERIFIED PROD now.
 
 ---
 
@@ -258,8 +274,8 @@ Because the user explicitly asked engineering work to continue, strict product Q
 6. 16.5 i18n architecture cleanup — 🟡 merged / CI green, final browser-device QA deferred to 16.11
 7. 16.6 version/cache normalization — 🟡 merged / 14-of-14 PR CI green, installed-device cache QA deferred to 16.11
 8. 16.7 CI consolidation + browser smoke — ✅ merged / 9-of-9 CI + deterministic browser smoke green
-9. **16.8 taxonomy unification — 🔵 NEXT ACTIVE**
-10. 16.9 repo/deployment governance
+9. 16.8 taxonomy unification — 🟡 merged / 9-of-9 CI + browser smoke green; Worker deploy proof separate
+10. **16.9 repo/deployment governance — 🔵 NEXT ACTIVE**
 11. 16.10 branding source cleanup
 12. 16.11 end-to-end closeout
 
@@ -269,15 +285,15 @@ Because the user explicitly asked engineering work to continue, strict product Q
 
 ## Next canonical action
 
-### Slice 16.8 — canonical taxonomy unification
+### Slice 16.9 — repository / deployment governance
 
-1. inventory category/color/style/tag definitions across client, Worker, AI schema/fine-color wrapper and recommendation logic;
-2. preserve existing canonical values — including legacy spellings such as `Accessorie`, `Swimware` and `Eye Lens` — unless a separate explicit data migration is approved;
-3. establish one repository-level canonical taxonomy source and make client/Worker definitions consume or be deterministically generated from it;
-4. remove the current color drift where the client/fine-color layer exposes 24 colors while the base Worker classifier schema still exposes only the older subset;
-5. add parity tests for category/color/style/tag values and VI/FR label coverage;
-6. validate Airtable-compatible values without mutating existing records;
-7. keep Daily Assistant role/occasion heuristics as semantic policy layers that reference canonical taxonomy values rather than redefining the taxonomy.
+1. audit current branch/rules settings and the full branch list before deleting or protecting anything;
+2. identify every workflow that writes directly to `main` or can race engineering merges (snapshots, branding/assets, generated fallbacks);
+3. establish a documented rule for automation writes versus PR-reviewed engineering writes, with no hidden self-mutating workflow pattern;
+4. configure branch protection / required checks only after proving scheduled snapshot and deployment workflows remain compatible, or document the exact incompatibility rather than breaking them;
+5. enable automatic post-merge branch cleanup where repository settings support it and remove harmless stale/no-op/merged branches through an audited cleanup path;
+6. make merge / deployed Pages / deployed Worker / VERIFIED PROD vocabulary explicit in repository governance docs;
+7. preserve `main` as authoritative and keep snapshot files as fallback/offline artifacts rather than treating scheduled snapshot commits as engineering releases.
 
 ---
 
