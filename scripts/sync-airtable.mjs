@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
+import {TAXONOMY,fromAirtableCategory} from '../js/taxonomy.generated.mjs';
 
 const TOKEN = process.env.AIRTABLE_PAT;
 const BASE_ID = 'appw8WNvdDuXUgYvN';
@@ -40,7 +41,15 @@ async function listAllRecords() {
 }
 
 const cleanSelect = value => typeof value === 'string' ? value.trim() : '';
-const cleanMulti = value => Array.isArray(value) ? value.map(cleanSelect).filter(Boolean) : [];
+const cleanCategory = value => {
+  const canonical=fromAirtableCategory(value)||'Accessorie';
+  if(!TAXONOMY.categories.includes(canonical))throw new Error(`Unknown Airtable category outside canonical taxonomy: ${canonical}`);
+  return canonical;
+};
+const cleanMulti = (group,value) => Array.isArray(value) ? value.map(cleanSelect).filter(Boolean).map(entry=>{
+  if(!TAXONOMY[group].includes(entry))throw new Error(`Unknown Airtable ${group} value outside canonical taxonomy: ${entry}`);
+  return entry;
+}) : [];
 
 async function downloadPhoto(recordId, attachment) {
   const source = attachment?.thumbnails?.large?.url || attachment?.url;
@@ -82,10 +91,10 @@ for (const record of records) {
     id: `airtable-${record.id}`,
     airtableRecordId: record.id,
     name: String(fields[FIELDS.name] || 'Sans nom').trim(),
-    category: cleanSelect(fields[FIELDS.category]) || 'Accessorie',
-    colors: cleanMulti(fields[FIELDS.colors]),
-    styles: cleanMulti(fields[FIELDS.styles]),
-    tags: cleanMulti(fields[FIELDS.tags]),
+    category: cleanCategory(fields[FIELDS.category]),
+    colors: cleanMulti('colors',fields[FIELDS.colors]),
+    styles: cleanMulti('styles',fields[FIELDS.styles]),
+    tags: cleanMulti('tags',fields[FIELDS.tags]),
     photo,
     favorite: false,
     source: 'airtable',

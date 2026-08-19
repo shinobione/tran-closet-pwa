@@ -21,6 +21,7 @@ jobs:
       - name: Check relevant JavaScript syntax
         run: |
           node --check js/data.js
+          node --check js/taxonomy.generated.mjs
           node --check js/live-airtable-sync.js
           node --check js/photo-picker.js
           node --check js/closet-search-core.mjs
@@ -30,8 +31,11 @@ jobs:
           node --check js/build-version.js
           node --check js/sync-diagnostics.js
           node --check js/bootstrap.js
+          node --check worker/src/taxonomy.generated.mjs
           node --check worker/src/v058.js
           node --check worker/src/v059.js
+          node --check scripts/generate-taxonomy.mjs
+          node --check scripts/test-taxonomy.mjs
           node --check scripts/test-ci-topology.mjs
           node --check sw.js
 
@@ -63,22 +67,21 @@ jobs:
           ! grep -q "focus({preventScroll:true})" js/closet-search.js
           ! grep -q "state.query=e.target.value;render()" js/closet-search.js
 
-      - name: Check color taxonomy and fine-color Worker
+      - name: Check canonical taxonomy and fine-color Worker
         run: |
-          grep -q "'Navy','Light Blue','Turquoise','Teal'" js/data.js
-          grep -q "'Camel','Beige','Cream'" js/data.js
-          grep -q "'Olive','Khaki','Mint'" js/data.js
-          grep -q "'Burgundy','Gold','Silver'" js/data.js
-          grep -q "Navy:'Bleu marine'" js/data.js
-          grep -q "Cream:'Crème'" js/data.js
-          grep -q "Burgundy:'Bordeaux'" js/data.js
-          grep -q "Gold:'Doré'" js/data.js
-          grep -q "Silver:'Argenté'" js/data.js
+          node scripts/generate-taxonomy.mjs
+          node scripts/test-taxonomy.mjs
+          grep -q "taxonomy.generated.mjs?v=0.5.16" js/data.js
+          grep -q "from './taxonomy.generated.mjs'" worker/src/index.js
+          grep -q "from './taxonomy.generated.mjs'" worker/src/v059.js
+          grep -q "const COLORS=TAXONOMY.colors" worker/src/v059.js
+          grep -q 'canonical-v${TAXONOMY_SCHEMA_VERSION}' worker/src/v059.js
           grep -q "main = \"src/v059.js\"" worker/wrangler.toml
           grep -q "detectFineColors" worker/src/v059.js
           grep -q "Use Navy for very dark blue" worker/src/v059.js
           grep -q "Distinguish Beige, Cream and White" worker/src/v059.js
-          grep -q "colorTaxonomy='v0.5.9'" worker/src/v059.js
+          grep -q "Verify canonical taxonomy parity" .github/workflows/deploy-worker.yml
+          grep -q "node scripts/test-taxonomy.mjs" .github/workflows/deploy-worker.yml
 
       - name: Check deployment version and Profile observer stability
         run: |

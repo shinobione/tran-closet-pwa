@@ -1,13 +1,13 @@
 # CI coverage map
 
-Canonical validation topology after V0.5.16 Slice 16.7.
+Canonical validation topology after V0.5.16 Slice 16.7, with taxonomy ownership clarified in Slice 16.8.
 
 ## Pull-request validation workflows
 
 | Workflow | Primary contract |
 | --- | --- |
-| `validate.yml` | Broad PWA shell, syntax, focused unit tests, Smart Tags, Daily Assistant, keyed i18n, secrets guard |
-| `validate-ui-profile-contracts.yml` | Mobile live wiring, Camera/Gallery, search stability, color taxonomy, fine-color Worker, Profile/build diagnostics, French legacy coverage, CI topology |
+| `validate.yml` | Broad PWA shell, syntax, focused unit tests, canonical taxonomy parity, Smart Tags, Daily Assistant, keyed i18n, secrets guard |
+| `validate-ui-profile-contracts.yml` | Mobile live wiring, Camera/Gallery, search stability, canonical taxonomy/fine-color Worker parity, Profile/build diagnostics, French legacy coverage, CI topology |
 | `validate-sync-delete-contracts.yml` | Manual sync, clothing + Outfit flush behavior, delete reconciliation semantics, canonical reread, CORS-safe no-store behavior |
 | `validate-v0516-browser-smoke.yml` | Real Chromium boot/routes/search/Add/Profile/Outfits/Daily Assistant and FR↔VI crash smoke with external network stubs |
 | `validate-v0516-keyed-i18n.yml` | Keyed translation catalog and migrated dynamic-surface contracts |
@@ -17,6 +17,19 @@ Canonical validation topology after V0.5.16 Slice 16.7.
 | `validate-v0516-version-cache.yml` | VERSION-driven refs, exact build cache identity, app-shell coherence and Pages deployment proof |
 
 `pwa-isolation.yml` was retired because `scripts/test-pwa-isolation.mjs` is already executed by both `validate.yml` and the version/cache gate.
+
+## Canonical taxonomy coverage
+
+Slice 16.8 keeps taxonomy parity inside the existing nine-workflow topology rather than adding another PR workflow.
+
+- `shared/taxonomy.json` is the source of truth for categories, colors, styles, tags and VI/FR labels.
+- `scripts/generate-taxonomy.mjs` deterministically generates both client and Worker modules and fails on drift.
+- `scripts/test-taxonomy.mjs` verifies client/Worker equality, label completeness, Airtable category alias round-trip and Daily Assistant semantic-subset membership.
+- `validate.yml` runs generation drift + taxonomy tests as part of broad product validation.
+- `validate-ui-profile-contracts.yml` owns the Worker/fine-color integration checks against the generated taxonomy.
+- `deploy-worker.yml` runs taxonomy parity before any Worker deployment and is triggered when the canonical taxonomy source or generator/tests change.
+
+The historical Airtable storage value `Swimware ` remains an explicit compatibility alias for canonical runtime value `Swimware`; this is compatibility behavior, not a data migration.
 
 ## Historical workflows absorbed in Slice 16.7
 
@@ -55,4 +68,4 @@ Deployment/snapshot/asset-generation workflows are not part of the PR-validation
 - `sync-airtable.yml`
 - `generate-brand-assets.yml`
 
-Pages still runs the VERSION/cache preflight before producing the exact `build-info.json` stamp.
+Pages still runs the VERSION/cache preflight before producing the exact `build-info.json` stamp. Worker deploy now additionally runs canonical taxonomy parity before Wrangler deployment.

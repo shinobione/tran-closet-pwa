@@ -1,3 +1,5 @@
+import {TAXONOMY,toAirtableCategory} from './taxonomy.generated.mjs';
+
 const BASE_ID='appw8WNvdDuXUgYvN';
 const CLOTHES_TABLE_ID='tblKdCi4MI4AH26y8';
 const OUTFITS_TABLE_ID='tblhtL2UlsgCAh6E7';
@@ -5,13 +7,6 @@ const MAX_ATTACHMENT_BYTES=5_000_000;
 const MAX_AI_IMAGE_BYTES=2_500_000;
 const VISION_MODEL='@cf/llava-hf/llava-1.5-7b-hf';
 const AI_MODEL='@cf/meta/llama-4-scout-17b-16e-instruct';
-
-const TAXONOMY={
-  categories:['Shirt','Pant','Skirt','Dress','Combo','Coat','Bag','Shoes','Accessorie','Belt','Swimware','Eye Lens','Socks','Jumpsuit','Underwear','Headwear','Umbrella'],
-  colors:['Blue','Pink','Yellow','Black','Brown','Green','Purple','White','Grey','Orange','Red'],
-  styles:['Hip-Hop','Sport','Casual','Classy','Cartoon','Old'],
-  tags:['Minimal','Statement','Graphic','Character','Patterned','Logo','Text','Neutral','Colorful','Oversized','Cropped','Fitted','Relaxed','Layering','Lightweight','Warm','Rain-ready','Summer','Winter','Travel-friendly','Compact','Cozy']
-};
 
 const AI_SCHEMA={
   type:'object',
@@ -62,7 +57,7 @@ function cors(origin,env){
 }
 function json(body,status=200,headers={}){return new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8',...headers}});}
 function bearer(request){const value=request.headers.get('authorization')||'';return value.startsWith('Bearer ')?value.slice(7):'';}
-function normalizeCategory(value){return value==='Swimware'?'Swimware ':value;}
+function normalizeCategory(value){return toAirtableCategory(value);}
 
 function fieldsFromPayload(payload={}){
   const fields={
