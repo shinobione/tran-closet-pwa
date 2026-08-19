@@ -18,6 +18,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: generated-main-writes
+  cancel-in-progress: false
+
 jobs:
   generate:
     runs-on: ubuntu-latest
@@ -53,15 +57,11 @@ jobs:
           test -f branding/logo-mark-v057.png
           test -f branding/splash-1242x2688.png
 
-      - name: Commit generated system icons when changed
+      - name: Commit generated system icons safely when changed
         if: github.event_name != 'pull_request'
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add favicon.ico icons/favicon-16.png icons/favicon-32.png icons/favicon-48.png icons/icon-192.png icons/icon-512.png icons/maskable-512.png icons/apple-touch-icon.png
-          if git diff --cached --quiet; then
-            echo 'System icons already current.'
-          else
-            git commit -m 'Generate exact glossy Trân Closet system icons'
-            git push origin HEAD:main
-          fi
+        env:
+          TARGET_BRANCH: main
+          GENERATED_COMMIT_MESSAGE: Generate exact glossy Trân Closet system icons
+          GENERATED_FILES: favicon.ico icons/favicon-16.png icons/favicon-32.png icons/favicon-48.png icons/icon-192.png icons/icon-512.png icons/maskable-512.png icons/apple-touch-icon.png
+          GENERATE_COMMAND: python scripts/generate-brand-assets.py
+        run: bash scripts/commit-generated-artifacts.sh
