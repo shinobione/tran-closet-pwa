@@ -1,4 +1,5 @@
 import {TAXONOMY,LABELS,SEED_ITEMS} from './data.js';
+import {t} from './i18n-keyed.mjs?v=0.5.16';
 import {getAllItems,putItem,deleteItem,bulkPutItems,getMeta,setMeta,clearItems,clearMutations,getAllOutfits,putOutfit,deleteOutfit,clearOutfits,bulkPutOutfits} from './db.js';
 import {queueMutation,flushMutationQueue,pendingMutationCount,getSyncConfig,saveSyncConfig,testSyncConnection} from './sync-client.js';
 
@@ -243,7 +244,7 @@ function profile(){
     <button id="importBackup"><span>⇧</span><div><strong>Khôi phục dữ liệu</strong><small>Nhập file JSON</small></div><b>›</b></button>
     <button id="resetDemo" class="danger-row"><span>↺</span><div><strong>Tải lại dữ liệu cục bộ</strong><small>Xóa bản cục bộ rồi nạp lại dữ liệu chuẩn</small></div><b>›</b></button>
     <input id="backupInput" type="file" accept="application/json" hidden></section>
-    <p class="privacy-note">Khóa Airtable không nằm trong PWA. Ứng dụng chỉ lưu khóa đồng bộ riêng của thiết bị và gửi thay đổi tới Worker bảo mật. Vêtements, nhãn và outfits đều đi qua luồng đồng bộ canonique.</p>`;
+    <p class="privacy-note">${t('app.privacy')}</p>`;
 }
 
 function render(){
@@ -295,7 +296,7 @@ function bind(){
       const f=pi.files?.[0];
       if(!f)return;
       pi.dataset.photo=await compress(f);
-      pp.innerHTML=`<img src="${pi.dataset.photo}" alt="Xem trước">`;
+      pp.innerHTML=`<img src="${pi.dataset.photo}" alt="${t('app.photo.preview')}">`;
     };
   }
   $('#itemForm')?.addEventListener('submit',saveItem);
@@ -356,7 +357,7 @@ function openItem(id){
     await pruneOutfitsForItem(i.id);
     itemDialog.close();
     await refresh();
-    say(navigator.onLine?'Đã xóa · đang đồng bộ':'Đã xóa · sẽ đồng bộ khi có mạng');
+    say(t(navigator.onLine?'app.delete.syncing':'app.delete.offline'));
     render();syncNow(true);
   };
 }
@@ -365,8 +366,8 @@ function openEdit(id){
   const i=state.items.find(x=>x.id===id);
   if(!i)return;
   itemDialog.innerHTML=`<div class="sheet-content edit-sheet"><button class="sheet-close" data-close>×</button><div class="detail-body">
-    <p class="eyebrow">CHỈNH SỬA</p><h2>${esc(i.name)}</h2>${i.photo?`<img class="edit-photo" src="${i.photo}" alt="${esc(i.name)}">`:''}
-    <form id="editItemForm" class="item-form">${itemFields(i)}<p class="form-note">Thay ảnh sẽ được thêm trong bản cập nhật tiếp theo. Ảnh hiện tại được giữ nguyên.</p><button class="primary-button" type="submit">Lưu thay đổi</button></form>
+    <p class="eyebrow">${t('app.edit.eyebrow')}</p><h2>${esc(i.name)}</h2>${i.photo?`<img class="edit-photo" src="${i.photo}" alt="${esc(i.name)}">`:''}
+    <form id="editItemForm" class="item-form">${itemFields(i)}<p class="form-note">${t('app.edit.photoLater')}</p><button class="primary-button" type="submit">Lưu thay đổi</button></form>
     </div></div>`;
   itemDialog.querySelector('[data-close]').onclick=()=>itemDialog.close();
   itemDialog.querySelector('#editItemForm').onsubmit=async e=>{
@@ -398,11 +399,11 @@ async function syncNow(silent=true){
 }
 
 function installHelp(){
-  if(standalone())return say('Ứng dụng đã được cài ✓');
+  if(standalone())return say(t('app.install.installed'));
   if(state.installPrompt)return state.installPrompt.prompt();
   const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
   installDialog.innerHTML=`<div class="sheet-content install-sheet"><button class="sheet-close" data-close>×</button><div class="coming-icon">⌄</div>
-    <h2>${ios?'Cài trên iPhone':'Cài ứng dụng'}</h2>${ios?'<ol><li>Mở bằng <strong>Safari</strong>.</li><li>Chạm <strong>Chia sẻ</strong>.</li><li>Chọn <strong>Thêm vào Màn hình chính</strong>.</li><li>Chạm <strong>Thêm</strong>.</li></ol>':'<p>Mở menu trình duyệt và chọn <strong>Cài ứng dụng</strong>.</p>'}</div>`;
+    <h2>${t(ios?'app.install.iphoneTitle':'app.install.appTitle')}</h2>${t(ios?'app.install.iosHtml':'app.install.browserHtml')}</div>`;
   installDialog.showModal();
   installDialog.querySelector('[data-close]').onclick=()=>installDialog.close();
 }
