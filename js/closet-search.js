@@ -1,29 +1,8 @@
 import {getAllItems} from './db.js';
-import {LABELS,FR_LABELS} from './data.js';
+import {closetSearchMatches} from './closet-search-core.mjs?v=0.5.16';
 
 const root=document.querySelector('#mainContent');
 let currentQuery='';
-
-export const normalizeClosetSearch=value=>String(value??'')
-  .normalize('NFD')
-  .replace(/[\u0300-\u036f]/g,'')
-  .toLowerCase()
-  .trim();
-
-export function closetSearchText(item={}){
-  const translated=(type,value)=>[
-    value,
-    LABELS[type]?.[value],
-    FR_LABELS[type]?.[value]
-  ].filter(Boolean).join(' ');
-  return normalizeClosetSearch([
-    item.name,
-    translated('category',item.category),
-    ...(item.colors||[]).map(value=>translated('color',value)),
-    ...(item.styles||[]).map(value=>translated('style',value)),
-    ...(item.tags||[]).map(value=>translated('tag',value))
-  ].join(' '));
-}
 
 function emptyCopy(){
   return document.documentElement.lang==='fr'
@@ -32,14 +11,13 @@ function emptyCopy(){
 }
 
 async function applySearch(input){
-  const query=normalizeClosetSearch(currentQuery);
   const items=await getAllItems();
   if(!input.isConnected)return;
   const byId=new Map(items.map(item=>[String(item.id),item]));
   let visible=0;
   document.querySelectorAll('.item-grid .item-card[data-open]').forEach(card=>{
     const item=byId.get(String(card.dataset.open));
-    const show=!query||Boolean(item&&closetSearchText(item).includes(query));
+    const show=Boolean(item&&closetSearchMatches(item,currentQuery));
     card.hidden=!show;
     if(show)visible++;
   });
@@ -48,7 +26,7 @@ async function applySearch(input){
   const grid=document.querySelector('.item-grid');
   if(!grid)return;
   let empty=grid.querySelector('.closet-search-empty');
-  if(!visible&&query){
+  if(!visible&&currentQuery.trim()){
     if(!empty){
       empty=document.createElement('div');
       empty.className='empty-state closet-search-empty';
