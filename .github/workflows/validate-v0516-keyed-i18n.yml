@@ -21,6 +21,8 @@ jobs:
       - name: Check migrated module syntax
         run: |
           node --check js/i18n-keyed.mjs
+          node --check js/app.js
+          node --check js/outfit-picker.js
           node --check js/closet-search.js
           node --check js/photo-picker.js
           node --check js/manual-sync.js
@@ -38,7 +40,7 @@ jobs:
 
       - name: Check high-risk surfaces use keyed rendering
         run: |
-          for file in closet-search photo-picker manual-sync outfit-integrity-ui outfit-presentation daily-assistant build-version sync-diagnostics; do
+          for file in app outfit-picker closet-search photo-picker manual-sync outfit-integrity-ui outfit-presentation daily-assistant build-version sync-diagnostics; do
             grep -q "i18n-keyed.mjs?v=0.5.16" "js/${file}.js"
           done
           grep -q "daily.reason.saved" js/daily-assistant-core.mjs
@@ -46,8 +48,13 @@ jobs:
           grep -q "reasonText(reason)" js/daily-assistant.js
           grep -q "t(\`occasion.\${params.occasion}\`)" js/daily-assistant.js
 
-      - name: Reject old dynamic text matching in migrated surfaces
+      - name: Reject retired compatibility bridge and source leaks
         run: |
+          test ! -e js/i18n-runtime-compat.js
+          ! grep -q "i18n-runtime-compat.js" js/bootstrap.js
+          ! grep -q "i18n-runtime-compat.js" sw.js
+          ! grep -q 'Vêtements, nhãn' js/app.js
+          ! grep -q 'đồng bộ canonique' js/app.js
           ! grep -q "Outfit đã lưu trong Phối đồ" js/daily-assistant-core.mjs
           ! grep -q "Tủ còn thiếu quần/váy" js/daily-assistant-core.mjs
           ! grep -q "Đang chuẩn bị ảnh" js/outfit-presentation.js
@@ -55,19 +62,32 @@ jobs:
           ! grep -q "Prendre une photo" js/photo-picker.js
           ! grep -q "Synchronisation terminée" js/manual-sync.js
 
+      - name: Check app and picker keyed migration
+        run: |
+          grep -q "t('app.edit.eyebrow')" js/app.js
+          grep -q "t(navigator.onLine?'app.delete.syncing':'app.delete.offline')" js/app.js
+          grep -q "t('app.privacy')" js/app.js
+          grep -q "outfit.picker.selected" js/outfit-picker.js
+          grep -q "outfit.picker.searchPlaceholder" js/outfit-picker.js
+          grep -q "outfit.picker.remove" js/outfit-picker.js
+
       - name: Check offline/runtime wiring
         run: |
           test "$(tr -d '\r\n' < VERSION)" = "v0.5.16"
           grep -q "i18n-keyed.mjs?v=0.5.16" sw.js
+          grep -q "app.js?v=0.5.16" sw.js
+          grep -q "outfit-picker.js?v=0.5.16" sw.js
           grep -q "daily-assistant-core.mjs?v=0.5.16" sw.js
           grep -q "daily-assistant.js?v=0.5.16" sw.js
           grep -q "outfit-presentation.js?v=0.5.16" sw.js
+          grep -q "app.js?v=0.5.16" js/bootstrap.js
+          grep -q "outfit-picker.js?v=0.5.16" js/bootstrap.js
           grep -q "daily-assistant.js?v=0.5.16" js/bootstrap.js
           grep -q "outfit-presentation.js?v=0.5.16" js/bootstrap.js
 
-      - name: Keep legacy bridge explicitly bounded
+      - name: Keep legacy DOM translator explicitly bounded
         run: |
-          # Slice 16.5A intentionally keeps the old i18n.js + one runtime compat
-          # bridge only for legacy app.js/outfit-picker/AI surfaces not migrated yet.
+          # app.js and the migrated dynamic modules now use keyed rendering.
+          # The old i18n.js remains temporarily for broad static legacy route copy
+          # and AI/duplicate surfaces; its retirement is the remaining 16.5 work.
           grep -q "i18n.js?v=0.5.1" js/bootstrap.js
-          grep -q "i18n-runtime-compat.js?v=0.5.16" js/bootstrap.js
