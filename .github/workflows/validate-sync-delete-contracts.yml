@@ -1,0 +1,103 @@
+name: Validate Sync and Delete contracts
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  sync-delete-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check relevant JavaScript syntax
+        run: |
+          node --check js/manual-sync.js
+          node --check js/app-refresh.js
+          node --check js/delete-reconciliation.mjs
+          node --check js/sync-client.js
+          node --check js/sync-diagnostics.js
+          node --check js/bootstrap.js
+          node --check js/build-version.js
+          node --check worker/src/v058.js
+          node --check sw.js
+
+      - name: Check crash-safe manual sync controller
+        run: |
+          VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
+          RELEASE="${VERSION_VALUE#v}"
+          grep -q "document.addEventListener('click'" js/manual-sync.js
+          grep -q "stopImmediatePropagation()" js/manual-sync.js
+          grep -q "flushMutationQueue()" js/manual-sync.js
+          grep -q "flushOutfitQueue()" js/manual-sync.js
+          ! grep -q "location.reload()" js/manual-sync.js
+          grep -q "window.dispatchEvent(new Event('online'))" js/manual-sync.js
+          grep -q "manual-sync.js?v=${RELEASE}" js/bootstrap.js
+          grep -q "manual-sync.js?v=${RELEASE}" sw.js
+          grep -q "version:'${VERSION_VALUE}'" js/build-version.js
+
+      - name: Test delete reconciliation semantics
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {reconcileDeleteResults} from './js/delete-reconciliation.mjs';
+          const mutations=[
+            {id:'m-delete',operation:'delete',airtableRecordId:'recGone'},
+            {id:'m-update',operation:'update',airtableRecordId:'recGone'}
+          ];
+          const failed=[
+            {mutationId:'m-delete',ok:false,error:'Airtable 403'},
+            {mutationId:'m-update',ok:false,error:'Airtable 403'}
+          ];
+          const absent=reconcileDeleteResults(mutations,failed,new Set(['recOther']));
+          assert.equal(absent[0].ok,true);
+          assert.equal(absent[0].reconciled,true);
+          assert.equal(absent[0].reconciliation,'canonical-absent');
+          assert.equal(absent[1].ok,false);
+          const present=reconcileDeleteResults(mutations,failed,new Set(['recGone']));
+          assert.equal(present[0].ok,false);
+          console.log('delete reconciliation semantics PASS');
+          NODE
+
+      - name: Check live canonical reread integration and CORS safety
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          source=Path('js/sync-client.js').read_text()
+          assert 'cache-control' not in source.lower(), 'client must not send Cache-Control cross-origin'
+          assert "cache:'no-store'" in source, 'browser cache mode must remain no-store'
+          assert 'reconcileFailedDeletes' in source
+          assert '/v1/items' in source
+          assert 'reconcileDeleteResults' in source
+          worker=Path('worker/src/v058.js').read_text()
+          assert "access-control-allow-headers':'authorization,content-type'" in worker
+          print('CORS-safe canonical reread PASS')
+          PY
+          grep -q "mutationStates" js/sync-diagnostics.js
+
+      - name: Check current release wiring
+        run: |
+          VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
+          RELEASE="${VERSION_VALUE#v}"
+          python - "$VERSION_VALUE" <<'PY'
+          import re,sys
+          value=sys.argv[1]
+          match=re.fullmatch(r'v(\d+)\.(\d+)\.(\d+)',value)
+          assert match, value
+          assert tuple(map(int,match.groups())) >= (0,5,15), value
+          PY
+          grep -q "version:'${VERSION_VALUE}'" js/build-version.js
+          grep -q "sync-client.js?v=${RELEASE}" js/sync-diagnostics.js
+          grep -q "sync-diagnostics.js?v=${RELEASE}" js/bootstrap.js
+          grep -q "build-version.js?v=${RELEASE}" js/bootstrap.js
+          grep -q "delete-reconciliation.mjs?v=${RELEASE}" js/sync-client.js
+          grep -q "sync-client.js?v=${RELEASE}" sw.js
+          grep -q "delete-reconciliation.mjs?v=${RELEASE}" sw.js
