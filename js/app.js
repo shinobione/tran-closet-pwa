@@ -16,7 +16,7 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>ESC[c]);
 const label=(type,v)=>LABELS[type]?.[v]||v;
 const outfitLabel=(type,v)=>OUTFIT_LABELS[type]?.[v]||v;
 
-function say(msg){toast.textContent=msg;toast.classList.add('show');clearTimeout(say.t);say.t=setTimeout(()=>toast.classList.remove('show'),2400);}
+function say(msg){const localized=window.TranClosetI18n?.t?.(msg)||msg;toast.textContent=localized;toast.classList.add('show');clearTimeout(say.t);say.t=setTimeout(()=>toast.classList.remove('show'),2400);}
 function standalone(){return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;}
 
 async function seed(){
@@ -173,6 +173,7 @@ function openOutfitForm(id=null){
     <form id="outfitForm" class="item-form outfit-form">${outfitFormFields(existing||{})}
       <button class="primary-button" type="submit">${existing?'Lưu thay đổi':'Lưu outfit'}</button>
     </form></div></div>`;
+  window.TranClosetI18n?.apply?.(itemDialog);
   if(!itemDialog.open)itemDialog.showModal();
   itemDialog.querySelector('[data-close]').onclick=()=>itemDialog.close();
   itemDialog.querySelector('#outfitForm').onsubmit=async e=>{
@@ -215,6 +216,7 @@ function openOutfit(id){
     </button>`).join('')}</div>
     <div class="detail-actions three"><button id="outfitFav" class="secondary-button">${outfit.favorite?'♥':'♡'}</button><button id="outfitEdit" class="secondary-button">Sửa</button><button id="outfitDelete" class="danger-button">Xóa</button></div>
     </div></div>`;
+  window.TranClosetI18n?.apply?.(itemDialog);
   itemDialog.showModal();
   itemDialog.querySelector('[data-close]').onclick=()=>itemDialog.close();
   itemDialog.querySelectorAll('[data-outfit-item]').forEach(b=>b.onclick=()=>{itemDialog.close();openItem(b.dataset.outfitItem);});
@@ -250,6 +252,8 @@ function profile(){
 function render(){
   main.innerHTML=state.route==='closet'?closet():state.route==='favorites'?closet(true):state.route==='add'?addView():state.route==='outfits'?outfits():profile();
   bind();
+  window.TranClosetI18n?.apply?.(main);
+  window.TranClosetI18n?.apply?.(title);
 }
 
 async function bindSyncForm(){
@@ -346,6 +350,7 @@ function openItem(id){
     <div class="detail-chips">${[...(i.colors||[]).map(v=>label('color',v)),...(i.styles||[]).map(v=>label('style',v)),...(i.tags||[]).map(v=>label('tag',v))].map(v=>`<span>${esc(v)}</span>`).join('')}</div>
     ${syncText(i)?`<p class="sync-detail">↻ ${esc(syncText(i))}</p>`:''}
     <div class="detail-actions three"><button id="detailFav" class="secondary-button">${i.favorite?'♥':'♡'}</button><button id="detailEdit" class="secondary-button">Sửa</button><button id="detailDelete" class="danger-button">Xóa</button></div></div></div>`;
+  window.TranClosetI18n?.apply?.(itemDialog);
   itemDialog.showModal();
   itemDialog.querySelector('[data-close]').onclick=()=>itemDialog.close();
   itemDialog.querySelector('#detailFav').onclick=async()=>{await putItem({...i,favorite:!i.favorite});itemDialog.close();await refresh();render();};
@@ -369,6 +374,7 @@ function openEdit(id){
     <p class="eyebrow">${t('app.edit.eyebrow')}</p><h2>${esc(i.name)}</h2>${i.photo?`<img class="edit-photo" src="${i.photo}" alt="${esc(i.name)}">`:''}
     <form id="editItemForm" class="item-form">${itemFields(i)}<p class="form-note">${t('app.edit.photoLater')}</p><button class="primary-button" type="submit">Lưu thay đổi</button></form>
     </div></div>`;
+  window.TranClosetI18n?.apply?.(itemDialog);
   itemDialog.querySelector('[data-close]').onclick=()=>itemDialog.close();
   itemDialog.querySelector('#editItemForm').onsubmit=async e=>{
     e.preventDefault();

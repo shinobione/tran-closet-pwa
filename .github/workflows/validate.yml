@@ -125,9 +125,18 @@ jobs:
           grep -q 'MAX_CLIENT_ATTEMPTS=3' js/item-ai-assistant.js
           grep -q 'duplicateGuardMounted' js/duplicate-guard.js
           grep -q 'MAX_VISUAL_CANDIDATES=80' js/duplicate-guard.js
-          grep -q 'Vẫn lưu món này' js/duplicate-guard.js
+          grep -q "i18n-keyed.mjs?v=0.5.16" js/duplicate-guard.js
+          grep -q "t('duplicate.continue')" js/duplicate-guard.js
+          grep -q 'duplicate.reason.nearlyIdentical' js/duplicate-core.mjs
+          ! grep -q 'Vẫn lưu món này' js/duplicate-guard.js
           grep -q 'hammingDistance' js/duplicate-core.mjs
           grep -q 'duplicateAssessment' js/duplicate-core.mjs
+          grep -q "i18n-keyed.mjs?v=0.5.16" js/item-ai-assistant.js
+          grep -q 'language:currentLanguage()' js/item-ai-assistant.js
+          ! grep -q 'TRỢ LÝ ẢNH' js/item-ai-assistant.js
+          ! grep -q 'Áp dụng gợi ý' js/item-ai-assistant.js
+          grep -q "outputLanguage=language==='fr'?'French':'Vietnamese'" worker/src/index.js
+          grep -Fq '${outputLanguage}' worker/src/index.js
           grep -q 'tran-closet-v0.5.1' sw.js
           grep -q 'app.js?v=0.5.16' sw.js
           grep -q 'outfit-picker.js?v=0.5.16' sw.js
@@ -191,12 +200,17 @@ jobs:
           grep -q "searchParams.get('lang')" js/i18n.js
           grep -q "localStorage.setItem(LANGUAGE_KEY" js/i18n.js
           grep -q "window.confirm=message=>nativeConfirm(translateRaw(message))" js/i18n.js
+          grep -q "apply:scope=>" js/i18n.js
+          ! grep -q "observer.observe(document.body,{subtree:true" js/i18n.js
+          grep -q "TranClosetI18n?.apply" js/app.js
           grep -q "export function t(key" js/i18n-keyed.mjs
           grep -q "SUPPORTED_LANGUAGES=new Set(\['vi','fr'\])" js/i18n-keyed.mjs
           grep -q "'photo.take':'Prendre une photo'" js/i18n-keyed.mjs
           grep -q "'diagnostics.title':'Diagnostic de synchronisation'" js/i18n-keyed.mjs
           grep -q "'app.edit.eyebrow':'MODIFIER'" js/i18n-keyed.mjs
           grep -q "'outfit.picker.reset':'Réinitialiser'" js/i18n-keyed.mjs
+          grep -q "'duplicate.continue':'Enregistrer quand même'" js/i18n-keyed.mjs
+          grep -q "'ai.card.eyebrow':'ASSISTANT PHOTO'" js/i18n-keyed.mjs
           grep -q "i18n-keyed.mjs?v=0.5.16" js/app.js
           grep -q "i18n-keyed.mjs?v=0.5.16" js/outfit-picker.js
           test ! -e js/i18n-runtime-compat.js
