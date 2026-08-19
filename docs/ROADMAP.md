@@ -5,7 +5,7 @@
 > Current factual runtime state lives in [`PROJECT-STATE.md`](./PROJECT-STATE.md). When chat history and the repository disagree, **verify `main` and follow the repository**.
 
 Last roadmap update: **2026-08-19**  
-Current slice: **V0.5.16 · Slice 16.8 — canonical taxonomy unification**
+Current slice: **V0.5.16 · Slice 16.9 — repository / deployment governance**
 
 ---
 
@@ -256,15 +256,24 @@ Delivered:
 
 **Status:** merged / CI + deterministic browser smoke green. This does not replace installed-device/Pages verification in Slice 16.11.
 
-## Slice 16.8 — Canonical taxonomy unification 🔵 CURRENT
+## Slice 16.8 — Canonical taxonomy unification 🟡 MERGED / 9/9 GREEN
 
-Deliverables:
-- one canonical category/color/style/tag source;
-- client and Worker consume shared/generated definitions where practical;
-- CI validates Airtable-compatible values/mappings;
-- normalize legacy spelling/spacing quirks without destructive migration.
+PR **#62**, tested head **`35d1711f480d5e711462d442d2dcfd9b44249c78`**, squash merge **`f748d0b62bc4f610009eee886d7c5e5689c80477`**.
 
-## Slice 16.9 — Repository / deployment governance
+Delivered:
+- one canonical repository taxonomy source: **17 categories / 24 colors / 6 styles / 22 tags** + exact VI/FR labels;
+- deterministic generated client + Worker modules and drift detection;
+- base Worker AI schema aligned to the full client/fine-color taxonomy;
+- explicit Airtable `Swimware ` storage compatibility alias with round-trip tests, no destructive rename;
+- snapshot taxonomy validation fails closed on unknown Airtable select/multi-select values;
+- Worker deploy taxonomy preflight;
+- Daily Assistant policy subsets proven to reference canonical values;
+- taxonomy parity owned by existing global + UI/Profile suites, keeping the **9-workflow** CI topology;
+- final **9/9** PR workflows and browser smoke green.
+
+**Status:** engineering merged / CI green. No canonical data migration. Worker deployment state must be independently proven when needed.
+
+## Slice 16.9 — Repository / deployment governance 🔵 CURRENT
 
 Deliverables:
 - protect `main` where compatible with project workflow;
@@ -286,7 +295,7 @@ Current visual identity must not change during this cleanup.
 
 ## Slice 16.11 — V0.5.16 end-to-end closeout
 
-Required QA accumulates deferred production/device proof from 16.2–16.6 plus the final consolidated-runtime verification:
+Required QA accumulates deferred production/device proof from 16.2–16.6 plus Worker deployment proof affected by 16.8 and the final consolidated-runtime verification:
 - Android + iPhone install/open/update sanity;
 - clothing CREATE / UPDATE / DELETE / live cross-device reread;
 - Outfit CREATE / UPDATE / DELETE / live cross-device reread **without manual refresh**;
