@@ -208,7 +208,6 @@ Delivered by PR **#58**:
 Installed iOS/Android update/cache behavior remains part of Slice 16.11, so this is not yet VERIFIED PROD.
 
 ### 16.7 — CI fossilization / browser smoke
-### 16.7 — CI fossilization / browser smoke
 
 Many workflow names remain version-specific even though several were retargeted in 16.4. Static guards did not catch previous browser-only Profile failures. Consolidate the workflows and add a real browser smoke.
 
@@ -267,7 +266,6 @@ Because the user explicitly asked engineering work to continue, strict product Q
 
 ---
 
-## Verification vocabulary
 ## Verification vocabulary
 
 - **implemented** — code exists on a branch;

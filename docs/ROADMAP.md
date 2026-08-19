@@ -240,7 +240,6 @@ Delivered:
 **Status:** engineering merged / CI green. Installed iOS/Android update/cache verification remains in Slice 16.11; do not label VERIFIED PROD yet.
 
 ## Slice 16.7 — CI consolidation + browser smoke 🔵 CURRENT
-## Slice 16.7 — CI consolidation + browser smoke
 
 Deliverables:
 - consolidate useful regression checks into maintainable suites;
