@@ -55,13 +55,14 @@ for(const file of expected){
 const tracked=execFileSync('git',['ls-files','-z'],{cwd:root}).toString('utf8').split('\0').filter(Boolean);
 for(const retired of RETIRED){
   const offenders=[];
-  const needle=Buffer.from(retired);
+  const needles=[Buffer.from(retired),Buffer.from(path.basename(retired))];
   for(const file of tracked){
     if(file===retired||allowedReferenceDocs.has(file))continue;
     const full=path.join(root,file);
     if(!fs.existsSync(full)||!fs.statSync(full).isFile())continue;
     try{
-      if(fs.readFileSync(full).includes(needle))offenders.push(file);
+      const data=fs.readFileSync(full);
+      if(needles.some(needle=>data.includes(needle)))offenders.push(file);
     }catch{}
   }
   if(offenders.length)fail(`${retired} is still referenced by: ${offenders.join(', ')}`);
