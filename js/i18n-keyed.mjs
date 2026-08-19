@@ -3,94 +3,47 @@ export const SUPPORTED_LANGUAGES=new Set(['vi','fr']);
 
 const MESSAGES={
   vi:{
-    'search.empty.title':'Không có kết quả',
-    'search.empty.body':'Hãy thử tên, loại, màu, phong cách hoặc nhãn khác.',
-    'photo.take':'Chụp ảnh',
-    'photo.gallery':'Chọn từ thư viện',
-    'photo.add':'Thêm ảnh',
-    'photo.intro':'Chụp ảnh hoặc chọn từ thư viện',
-    'photo.preview':'Xem trước',
-    'sync.running':'Đang đồng bộ…',
-    'sync.done':'Đồng bộ hoàn tất ✓',
-    'sync.offline':'Ngoại tuyến · thay đổi vẫn đang chờ',
-    'sync.config':'Hãy cấu hình kết nối đồng bộ',
-    'sync.auth':'Khóa đồng bộ không đúng',
-    'sync.pending':({count})=>`${count} thay đổi vẫn đang chờ`,
-    'sync.error':'Lỗi đồng bộ · hãy thử lại',
-    'outfit.incomplete.title':'Outfit chưa hoàn chỉnh',
-    'outfit.incomplete.card':'Outfit chưa hoàn chỉnh',
-    'outfit.incomplete.count':({count,minimum})=>`${count}/${minimum} món còn sẵn`,
-    'outfit.incomplete.detail':({count,minimum})=>`Outfit này chỉ còn ${count} món khả dụng. Hãy chỉnh sửa để thêm ít nhất ${Math.max(0,minimum-count)} món nữa, hoặc xóa outfit nếu không còn cần.`,
-    'outfit.incomplete.share':'Hãy sửa outfit trước khi chia sẻ.',
-    'build.eyebrow':'PHIÊN BẢN TRIỂN KHAI',
-    'build.liveTitle':'Build stamp GitHub Pages',
-    'build.fallbackTitle':'Fallback local',
-    'build.exact':'Khớp chính xác với commit đang được GitHub Pages phục vụ.',
-    'build.fallback':'Không đọc được build stamp · đang dùng giá trị dự phòng cục bộ.',
-    'build.deployed':'Triển khai',
-    'build.copy':'Sao chép thông tin phiên bản',
-    'diagnostics.title':'Chẩn đoán đồng bộ',
-    'diagnostics.intro':'Không hiển thị khóa bí mật. Nút bên dưới chạy cả đồng bộ quần áo và outfit, rồi hiển thị lỗi thật.',
-    'diagnostics.run':'Chạy chẩn đoán + đồng bộ',
-    'diagnostics.running':'Đang chẩn đoán…',
-    'diagnostics.ready':'Sẵn sàng.'
+    'search.empty.title':'Không có kết quả','search.empty.body':'Hãy thử tên, loại, màu, phong cách hoặc nhãn khác.',
+    'photo.take':'Chụp ảnh','photo.gallery':'Chọn từ thư viện','photo.add':'Thêm ảnh','photo.intro':'Chụp ảnh hoặc chọn từ thư viện','photo.preview':'Xem trước',
+    'sync.running':'Đang đồng bộ…','sync.done':'Đồng bộ hoàn tất ✓','sync.offline':'Ngoại tuyến · thay đổi vẫn đang chờ','sync.config':'Hãy cấu hình kết nối đồng bộ','sync.auth':'Khóa đồng bộ không đúng','sync.pending':({count})=>`${count} thay đổi vẫn đang chờ`,'sync.error':'Lỗi đồng bộ · hãy thử lại',
+    'outfit.incomplete.title':'Outfit chưa hoàn chỉnh','outfit.incomplete.card':'Outfit chưa hoàn chỉnh','outfit.incomplete.count':({count,minimum})=>`${count}/${minimum} món còn sẵn`,'outfit.incomplete.detail':({count,minimum})=>`Outfit này chỉ còn ${count} món khả dụng. Hãy chỉnh sửa để thêm ít nhất ${Math.max(0,minimum-count)} món nữa, hoặc xóa outfit nếu không còn cần.`,'outfit.incomplete.share':'Hãy sửa outfit trước khi chia sẻ.',
+    'outfit.presentation.itemFallback':'Món đồ','outfit.presentation.count':({count})=>`${count} món`,'outfit.presentation.more':({count})=>`+${count} món`,'outfit.presentation.savedCaption':'Một outfit được lưu trong Trân Closet','outfit.presentation.madeFrom':'Tạo từ tủ đồ của cô ấy ✦','outfit.presentation.shareText':({title})=>`${title} · Trân Closet`,'outfit.presentation.saved':'Đã lưu ảnh ✓','outfit.presentation.preparing':'Đang chuẩn bị ảnh…','outfit.presentation.private':'Chia sẻ dưới dạng ảnh · không công khai tủ đồ','outfit.presentation.share':'↗ Chia sẻ outfit','outfit.presentation.download':'⇩ Lưu ảnh outfit','outfit.presentation.error':'Không tạo được ảnh',
+    'build.eyebrow':'PHIÊN BẢN TRIỂN KHAI','build.liveTitle':'Build stamp GitHub Pages','build.fallbackTitle':'Fallback local','build.exact':'Khớp chính xác với commit đang được GitHub Pages phục vụ.','build.fallback':'Không đọc được build stamp · đang dùng giá trị dự phòng cục bộ.','build.deployed':'Triển khai','build.copy':'Sao chép thông tin phiên bản',
+    'diagnostics.title':'Chẩn đoán đồng bộ','diagnostics.intro':'Không hiển thị khóa bí mật. Nút bên dưới chạy cả đồng bộ quần áo và outfit, rồi hiển thị lỗi thật.','diagnostics.run':'Chạy chẩn đoán + đồng bộ','diagnostics.running':'Đang chẩn đoán…','diagnostics.ready':'Sẵn sàng.',
+    'weather.clear':'Trời quang','weather.fewClouds':'Ít mây','weather.cloudy':'Nhiều mây','weather.fog':'Có sương','weather.drizzle':'Mưa phùn','weather.rain':'Có mưa','weather.thunder':'Dông','weather.current':'Thời tiết hiện tại','weather.feels':({temperature})=>`Cảm giác ${temperature}°`,'weather.none.title':'Không có dữ liệu thời tiết','weather.none.body':'Trợ lý vẫn có thể gợi ý theo dịp và tủ đồ hiện tại.',
+    'occasion.Everyday':'Hằng ngày','occasion.Work':'Đi làm','occasion.Date':'Hẹn hò','occasion.Party':'Tiệc','occasion.Travel':'Du lịch','occasion.Sport':'Thể thao','occasion.Formal':'Trang trọng','occasion.Other':'Khác',
+    'daily.launch.title':'Hôm nay mặc gì?','daily.launch.subtitle':'Thời tiết + tủ đồ thật + dịp hôm nay','daily.loading.title':'Đang nhìn tủ đồ và thời tiết…','daily.loading.body':'Trợ lý đang xếp các món phù hợp nhất cho hôm nay.','daily.header.eyebrow':'TRỢ LÝ CỦA TRÂN','daily.header.title':'Hôm nay mặc gì?','daily.header.subtitle':'Gợi ý từ tủ đồ thật · Trân luôn là người quyết định.','daily.location':'Vị trí','daily.change':'Đổi','daily.occasion':'Dịp','daily.currentLocation':'⌖ Vị trí hiện tại','daily.currentLocationName':'Vị trí hiện tại','daily.city.placeholder':'Tìm thành phố…','daily.city.search':'Tìm','daily.city.searching':'Đang tìm…','daily.city.notFound':'Không tìm thấy.','daily.city.error':'Không tìm được thành phố lúc này.','daily.geo.error':'Không lấy được vị trí hiện tại. Bạn có thể tìm thành phố thủ công.','daily.error.weatherCached':'Không lấy được thời tiết mới · đang dùng dữ liệu gần nhất.','daily.error.weather':'Không lấy được thời tiết lúc này.','daily.suggestions.eyebrow':'GỢI Ý','daily.suggestions.count':({count})=>`${count} lựa chọn`,'daily.suggestions.none':'Chưa đủ dữ liệu','daily.refresh':'↻ Làm mới','daily.empty.title':'Chưa tạo được gợi ý','daily.empty.body':'Hãy thêm vài món cơ bản hoặc outfit đã lưu.','daily.privacy':'Vị trí chỉ được dùng để lấy thời tiết. Không có outfit nào được lưu nếu Trân chưa bấm “Lưu thành outfit”.','daily.openSaved':'Mở trong Phối đồ','daily.save':'Lưu thành outfit','daily.needOneMore':'Thêm ít nhất một món nữa để lưu thành outfit.','daily.needCore':'Thêm một áo + quần/váy, hoặc đầm/jumpsuit để tạo outfit hoàn chỉnh.','daily.card.saved':'OUTFIT ĐÃ LƯU','daily.card.generated':'GỢI Ý HÔM NAY','daily.card.partial':'TỦ ĐỒ HIỆN TẠI','daily.save.exists':'Đã có trong Phối đồ ✓','daily.save.done':'Đã lưu outfit ✓','daily.generatedName':({date,occasion})=>`Gợi ý ${date} · ${occasion}`,'daily.generatedNote':({weather})=>`Trợ lý hôm nay · ${weather}`,
+    'daily.reason.saved':'Outfit đã lưu trong Phối đồ.','daily.reason.rainReady':({chance})=>`Có chuẩn bị cho mưa${chance?` · ${chance}%`:''}.`,'daily.reason.rainReminder':'Trời có khả năng mưa — nhớ mang ô/dù nếu ra ngoài.','daily.reason.hotLight':'Ưu tiên món nhẹ cho thời tiết nóng.','daily.reason.coolWarm':'Có lớp ấm hơn cho thời tiết mát.','daily.reason.occasion':({occasion})=>`Phong cách hợp dịp ${occasion}.`,'daily.reason.balanced':({occasion})=>`Cân bằng theo dịp ${occasion} và các món hiện có.`,'daily.reason.missingBottom':'Tủ còn thiếu quần/váy để hoàn thiện bộ này.','daily.reason.missingTop':'Tủ còn thiếu áo để hoàn thiện bộ này.','daily.reason.missingCore':'Tủ chưa có đủ áo + quần/váy hoặc một món liền thân để dựng outfit hoàn chỉnh.','daily.reason.availableBest':'Đây là các món hiện có phù hợp nhất với thời tiết và dịp đã chọn.',
+    'weather.summary.veryHot':'rất nóng','weather.summary.hot':'nóng','weather.summary.cool':'mát','weather.summary.pleasant':'dễ chịu','weather.summary.rain':({chance})=>`có mưa${chance?` ${chance}%`:''}`,'weather.summary.windy':'có gió'
   },
   fr:{
-    'search.empty.title':'Aucun résultat',
-    'search.empty.body':'Essaie un nom, une catégorie, une couleur, un style ou un tag.',
-    'photo.take':'Prendre une photo',
-    'photo.gallery':'Choisir dans la galerie',
-    'photo.add':'Ajouter une photo',
-    'photo.intro':'Prendre une photo ou choisir dans la galerie',
-    'photo.preview':'Aperçu',
-    'sync.running':'Synchronisation…',
-    'sync.done':'Synchronisation terminée ✓',
-    'sync.offline':'Hors ligne · les modifications restent en attente',
-    'sync.config':'Configure la connexion de synchronisation',
-    'sync.auth':'Clé de synchronisation incorrecte',
-    'sync.pending':({count})=>`${count} modification${Number(count)===1?'':'s'} encore en attente`,
-    'sync.error':'Erreur de synchronisation · réessaie',
-    'outfit.incomplete.title':'Tenue incomplète',
-    'outfit.incomplete.card':'Tenue incomplète',
-    'outfit.incomplete.count':({count,minimum})=>`${count}/${minimum} articles disponibles`,
-    'outfit.incomplete.detail':({count,minimum})=>{const missing=Math.max(0,minimum-count);return `Cette tenue ne contient plus que ${count} article${Number(count)===1?'':'s'} disponible${Number(count)===1?'':'s'}. Modifie-la pour ajouter au moins ${missing} article${missing===1?'':'s'}, ou supprime-la si elle n’est plus utile.`;},
-    'outfit.incomplete.share':'Répare la tenue avant de la partager.',
-    'build.eyebrow':'VERSION DÉPLOYÉE',
-    'build.liveTitle':'Build stamp GitHub Pages',
-    'build.fallbackTitle':'Fallback local',
-    'build.exact':'Correspond exactement au commit servi par GitHub Pages.',
-    'build.fallback':'Build stamp indisponible · valeur locale de secours.',
-    'build.deployed':'Déployé',
-    'build.copy':'Copier les infos de version',
-    'diagnostics.title':'Diagnostic de synchronisation',
-    'diagnostics.intro':'Aucune clé secrète n’est affichée. Le bouton lance la synchronisation des vêtements et des tenues puis affiche les erreurs réelles.',
-    'diagnostics.run':'Lancer diagnostic + synchronisation',
-    'diagnostics.running':'Diagnostic en cours…',
-    'diagnostics.ready':'Prêt.'
+    'search.empty.title':'Aucun résultat','search.empty.body':'Essaie un nom, une catégorie, une couleur, un style ou un tag.',
+    'photo.take':'Prendre une photo','photo.gallery':'Choisir dans la galerie','photo.add':'Ajouter une photo','photo.intro':'Prendre une photo ou choisir dans la galerie','photo.preview':'Aperçu',
+    'sync.running':'Synchronisation…','sync.done':'Synchronisation terminée ✓','sync.offline':'Hors ligne · les modifications restent en attente','sync.config':'Configure la connexion de synchronisation','sync.auth':'Clé de synchronisation incorrecte','sync.pending':({count})=>`${count} modification${Number(count)===1?'':'s'} encore en attente`,'sync.error':'Erreur de synchronisation · réessaie',
+    'outfit.incomplete.title':'Tenue incomplète','outfit.incomplete.card':'Tenue incomplète','outfit.incomplete.count':({count,minimum})=>`${count}/${minimum} articles disponibles`,'outfit.incomplete.detail':({count,minimum})=>{const missing=Math.max(0,minimum-count);return `Cette tenue ne contient plus que ${count} article${Number(count)===1?'':'s'} disponible${Number(count)===1?'':'s'}. Modifie-la pour ajouter au moins ${missing} article${missing===1?'':'s'}, ou supprime-la si elle n’est plus utile.`;},'outfit.incomplete.share':'Répare la tenue avant de la partager.',
+    'outfit.presentation.itemFallback':'Article','outfit.presentation.count':({count})=>`${count} article${Number(count)===1?'':'s'}`,'outfit.presentation.more':({count})=>`+${count} article${Number(count)===1?'':'s'}`,'outfit.presentation.savedCaption':'Une tenue enregistrée dans Trân Closet','outfit.presentation.madeFrom':'Créé depuis son dressing ✦','outfit.presentation.shareText':({title})=>`${title} · Trân Closet`,'outfit.presentation.saved':'Image enregistrée ✓','outfit.presentation.preparing':'Préparation de l’image…','outfit.presentation.private':'Partager sous forme d’image · le dressing reste privé','outfit.presentation.share':'↗ Partager la tenue','outfit.presentation.download':'⇩ Enregistrer l’image de la tenue','outfit.presentation.error':'Impossible de créer l’image',
+    'build.eyebrow':'VERSION DÉPLOYÉE','build.liveTitle':'Build stamp GitHub Pages','build.fallbackTitle':'Fallback local','build.exact':'Correspond exactement au commit servi par GitHub Pages.','build.fallback':'Build stamp indisponible · valeur locale de secours.','build.deployed':'Déployé','build.copy':'Copier les infos de version',
+    'diagnostics.title':'Diagnostic de synchronisation','diagnostics.intro':'Aucune clé secrète n’est affichée. Le bouton lance la synchronisation des vêtements et des tenues puis affiche les erreurs réelles.','diagnostics.run':'Lancer diagnostic + synchronisation','diagnostics.running':'Diagnostic en cours…','diagnostics.ready':'Prêt.',
+    'weather.clear':'Ciel dégagé','weather.fewClouds':'Peu nuageux','weather.cloudy':'Nuageux','weather.fog':'Brume','weather.drizzle':'Bruine','weather.rain':'Pluie','weather.thunder':'Orage','weather.current':'Météo actuelle','weather.feels':({temperature})=>`Ressenti ${temperature}°`,'weather.none.title':'Pas de données météo','weather.none.body':'L’assistant peut quand même proposer selon l’occasion et le dressing actuel.',
+    'occasion.Everyday':'Quotidien','occasion.Work':'Travail','occasion.Date':'Rendez-vous','occasion.Party':'Soirée','occasion.Travel':'Voyage','occasion.Sport':'Sport','occasion.Formal':'Formel','occasion.Other':'Autre',
+    'daily.launch.title':'Que porter aujourd’hui ?','daily.launch.subtitle':'Météo + vrai dressing + occasion du jour','daily.loading.title':'Analyse du dressing et de la météo…','daily.loading.body':'L’assistant classe les articles les plus adaptés pour aujourd’hui.','daily.header.eyebrow':'ASSISTANT DE TRÂN','daily.header.title':'Que porter aujourd’hui ?','daily.header.subtitle':'Suggestions depuis le vrai dressing · Trân garde toujours la décision.','daily.location':'Lieu','daily.change':'Changer','daily.occasion':'Occasion','daily.currentLocation':'⌖ Position actuelle','daily.currentLocationName':'Position actuelle','daily.city.placeholder':'Rechercher une ville…','daily.city.search':'Rechercher','daily.city.searching':'Recherche…','daily.city.notFound':'Aucun résultat.','daily.city.error':'Impossible de rechercher une ville maintenant.','daily.geo.error':'Impossible d’obtenir la position actuelle. Tu peux rechercher une ville manuellement.','daily.error.weatherCached':'Impossible d’actualiser la météo · dernières données disponibles utilisées.','daily.error.weather':'Impossible de récupérer la météo pour le moment.','daily.suggestions.eyebrow':'SUGGESTIONS','daily.suggestions.count':({count})=>`${count} option${Number(count)===1?'':'s'}`,'daily.suggestions.none':'Pas assez de données','daily.refresh':'↻ Actualiser','daily.empty.title':'Aucune suggestion complète','daily.empty.body':'Ajoute quelques pièces de base ou une tenue enregistrée.','daily.privacy':'La position sert uniquement à récupérer la météo. Aucune tenue n’est enregistrée tant que Trân ne clique pas sur « Enregistrer comme tenue ».','daily.openSaved':'Ouvrir dans Tenues','daily.save':'Enregistrer comme tenue','daily.needOneMore':'Ajoute au moins un article pour pouvoir enregistrer cette tenue.','daily.needCore':'Ajoute un haut + pantalon/jupe, ou une robe/combinaison, pour créer une tenue complète.','daily.card.saved':'TENUE ENREGISTRÉE','daily.card.generated':'SUGGESTION DU JOUR','daily.card.partial':'DRESSING ACTUEL','daily.save.exists':'Déjà dans Tenues ✓','daily.save.done':'Tenue enregistrée ✓','daily.generatedName':({date,occasion})=>`Suggestion ${date} · ${occasion}`,'daily.generatedNote':({weather})=>`Assistant du jour · ${weather}`,
+    'daily.reason.saved':'Tenue déjà enregistrée dans Tenues.','daily.reason.rainReady':({chance})=>`Préparée pour la pluie${chance?` · ${chance}%`:''}.`,'daily.reason.rainReminder':'Risque de pluie — pense à prendre un parapluie si tu sors.','daily.reason.hotLight':'Pièces légères privilégiées pour la chaleur.','daily.reason.coolWarm':'Couche plus chaude adaptée au temps frais.','daily.reason.occasion':({occasion})=>`Style adapté à l’occasion « ${occasion} ».`,'daily.reason.balanced':({occasion})=>`Équilibre selon l’occasion « ${occasion} » et les articles disponibles.`,'daily.reason.missingBottom':'Il manque encore un pantalon ou une jupe pour compléter cette tenue.','daily.reason.missingTop':'Il manque encore un haut pour compléter cette tenue.','daily.reason.missingCore':'Le dressing n’a pas encore assez de pièces pour construire une tenue complète.','daily.reason.availableBest':'Voici les articles disponibles les plus adaptés à la météo et à l’occasion choisie.',
+    'weather.summary.veryHot':'très chaud','weather.summary.hot':'chaud','weather.summary.cool':'frais','weather.summary.pleasant':'agréable','weather.summary.rain':({chance})=>`pluie${chance?` ${chance}%`:''}`,'weather.summary.windy':'venteux'
   }
 };
 
 export function normalizeLanguage(value){return SUPPORTED_LANGUAGES.has(value)?value:'vi';}
-
 export function currentLanguage(){
   if(typeof document!=='undefined'&&SUPPORTED_LANGUAGES.has(document.documentElement?.lang))return document.documentElement.lang;
   if(typeof localStorage!=='undefined')return normalizeLanguage(localStorage.getItem(LANGUAGE_KEY));
   return 'vi';
 }
-
-function interpolate(template,params){
-  return String(template).replace(/\{([a-zA-Z0-9_]+)\}/g,(_,key)=>params[key]??'');
-}
-
+function interpolate(template,params){return String(template).replace(/\{([a-zA-Z0-9_]+)\}/g,(_,key)=>params[key]??'');}
 export function t(key,params={},language=currentLanguage()){
   const lang=normalizeLanguage(language);
   const candidate=MESSAGES[lang]?.[key]??MESSAGES.vi[key];
-  if(candidate==null){
-    if(typeof console!=='undefined')console.warn(`Missing i18n key: ${key}`);
-    return key;
-  }
+  if(candidate==null){if(typeof console!=='undefined')console.warn(`Missing i18n key: ${key}`);return key;}
   return typeof candidate==='function'?candidate(params):interpolate(candidate,params);
 }
-
 export function hasTranslation(key,language){return MESSAGES[normalizeLanguage(language)]?.[key]!=null;}
 export function translationKeys(){return Object.keys(MESSAGES.vi);}
