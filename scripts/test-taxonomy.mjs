@@ -47,8 +47,42 @@ const clientData=fs.readFileSync('js/data.js','utf8');
 assert.ok(workerIndex.includes("from './taxonomy.generated.mjs'"),'base Worker must import generated taxonomy');
 assert.ok(!workerIndex.includes("const TAXONOMY={"),'base Worker must not redefine taxonomy');
 assert.ok(workerFine.includes("from './taxonomy.generated.mjs'"),'fine-color Worker must import generated taxonomy');
+assert.ok(workerFine.includes('const COLORS=TAXONOMY.colors;'),'fine-color Worker must consume canonical colors');
 assert.ok(!workerFine.includes("const COLORS=['Blue'"),'fine-color Worker must not redefine canonical colors');
 assert.ok(clientData.includes("from './taxonomy.generated.mjs?v=0.5.16'"),'client data module must import generated taxonomy');
 assert.ok(!clientData.includes('export const TAXONOMY = {'),'client data module must not redefine taxonomy');
 
-console.log(`Canonical taxonomy PASS (${CLIENT_TAXONOMY.categories.length} categories, ${CLIENT_TAXONOMY.colors.length} colors, ${CLIENT_TAXONOMY.styles.length} styles, ${CLIENT_TAXONOMY.tags.length} tags)`);
+// Recommendation policy is allowed to define semantic subsets, but every
+// taxonomy value it references must remain canonical rather than becoming a
+// hidden second taxonomy source.
+const assistant=fs.readFileSync('js/daily-assistant-core.mjs','utf8');
+const quoted=block=>[...block.matchAll(/'([^']+)'/g)].map(match=>match[1]);
+const between=(start,end)=>{
+  const a=assistant.indexOf(start),b=assistant.indexOf(end,a+start.length);
+  assert.ok(a>=0&&b>a,`Daily Assistant block not found: ${start}`);
+  return assistant.slice(a,b);
+};
+for(const value of quoted(between('const ROLES={','const EXCLUDED_CATEGORIES='))){
+  assert.ok(CLIENT_TAXONOMY.categories.includes(value),`Daily Assistant role uses non-canonical category: ${value}`);
+}
+for(const value of quoted(between('const EXCLUDED_CATEGORIES=', 'const RAIN_CODES='))){
+  assert.ok(CLIENT_TAXONOMY.categories.includes(value),`Daily Assistant exclusion uses non-canonical category: ${value}`);
+}
+for(const value of quoted(between('const NEUTRALS=', '// Legacy labels'))){
+  assert.ok(CLIENT_TAXONOMY.colors.includes(value),`Daily Assistant neutral uses non-canonical color: ${value}`);
+}
+const occasionSignals=between('const OCCASION_SIGNALS={','const arr=');
+for(const match of occasionSignals.matchAll(/styles:\[([^\]]*)\]/g)){
+  for(const value of quoted(match[1]))assert.ok(CLIENT_TAXONOMY.styles.includes(value),`Daily Assistant occasion uses non-canonical style: ${value}`);
+}
+for(const match of occasionSignals.matchAll(/tags:\[([^\]]*)\]/g)){
+  for(const value of quoted(match[1]))assert.ok(CLIENT_TAXONOMY.tags.includes(value),`Daily Assistant occasion uses non-canonical tag: ${value}`);
+}
+for(const value of ['Lightweight','Summer','Warm','Winter','Layering','Rain-ready']){
+  assert.ok(CLIENT_TAXONOMY.tags.includes(value),`Daily Assistant weather policy uses non-canonical tag: ${value}`);
+}
+for(const value of ['Coat','Umbrella']){
+  assert.ok(CLIENT_TAXONOMY.categories.includes(value),`Daily Assistant weather policy uses non-canonical category: ${value}`);
+}
+
+console.log(`Canonical taxonomy PASS (${CLIENT_TAXONOMY.categories.length} categories, ${CLIENT_TAXONOMY.colors.length} colors, ${CLIENT_TAXONOMY.styles.length} styles, ${CLIENT_TAXONOMY.tags.length} tags; Daily Assistant subsets canonical)`);
