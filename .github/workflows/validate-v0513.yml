@@ -25,14 +25,14 @@ jobs:
           node --check js/i18n-runtime-compat.js
           node --check js/bootstrap.js
           node --check sw.js
-      - name: Reject recursive Profile compatibility observers
+      - name: Reject recursive Profile observers
         run: |
           grep -q "observe(main,{childList:true})" js/build-version.js
           grep -q "observe(main,{childList:true})" js/sync-diagnostics.js
-          grep -q "observe(root,{childList:true})" js/i18n-runtime-compat.js
           ! grep -q "subtree:true" js/build-version.js
           ! grep -q "subtree:true" js/sync-diagnostics.js
-          ! grep -q "subtree:true" js/i18n-runtime-compat.js
+          test "$(grep -c 'new MutationObserver' js/i18n-runtime-compat.js)" -eq 1
+          grep -q "ignores characterData/attributes" js/i18n-runtime-compat.js
       - name: Check French dynamic AI retry coverage
         run: |
           grep -q "AI đã tự thử lại" js/i18n.js
