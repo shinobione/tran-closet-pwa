@@ -5,6 +5,10 @@ on:
     branches: [v0.5.16-repo-governance]
     paths:
       - '.github/workflows/cleanup-merged-branches.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/cleanup-merged-branches.yml'
   workflow_dispatch:
 
 permissions:
@@ -13,6 +17,7 @@ permissions:
 
 jobs:
   cleanup:
+    if: ${{ github.event_name != 'pull_request' || github.head_ref == 'v0.5.16-repo-governance' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
