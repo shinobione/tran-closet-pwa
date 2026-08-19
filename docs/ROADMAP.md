@@ -4,8 +4,8 @@
 >
 > Current factual runtime state lives in [`PROJECT-STATE.md`](./PROJECT-STATE.md). When chat history and the repository disagree, **verify `main` and follow the repository**.
 
-Last roadmap reset: **2026-08-19**  
-Current slice: **V0.5.16 · Slice 16.2 — Live Outfit sync parity (P1)**
+Last roadmap update: **2026-08-19**  
+Current slice: **V0.5.16 · Slice 16.5 — i18n architecture cleanup**
 
 ---
 
@@ -91,9 +91,9 @@ At the end of every merged slice:
 
 ## 2. V0.5 — Assistant / current product generation
 
-### V0.5-A — `Hôm nay mặc gì?` 🟢 DEPLOYED
+### V0.5-A — `Hôm nay mặc gì?` 🟢 OPERATIONAL
 
-Current capabilities already present in production:
+Current capabilities already present:
 - weather-aware daily assistant using Open-Meteo;
 - TP. Hồ Chí Minh default location + manual city + explicit browser geolocation;
 - occasion-aware ranking;
@@ -108,13 +108,13 @@ Current capabilities already present in production:
 - stabilized profile diagnostics and exact build identification;
 - safe reconciliation of stale DELETE mutations through v0.5.15.
 
-**V0.5 is NOT closed yet.** The product works, but the implementation accumulated technical debt between v0.5.8 and v0.5.15. Consolidation comes before V0.5-B.
+**V0.5 is NOT closed yet.** Consolidation must finish before V0.5-B.
 
 ---
 
 # 3. V0.5.16 — Consolidation & Hardening 🔵 ACTIVE ROADMAP
 
-Goal: turn the currently working v0.5.15 product into a clean, resumable, testable base before adding new product features.
+Goal: turn the working product into a clean, resumable, testable base before adding new product features.
 
 ## Slice 16.0 — Canonical documentation & continuation protocol ✅ CLOSED
 
@@ -122,14 +122,9 @@ Completed by PR **#46**.
 
 Delivered:
 - `ROADMAP.md` is the cross-session master roadmap;
-- `PROJECT-STATE.md` describes the audited v0.5.15 baseline and blockers;
+- `PROJECT-STATE.md` describes factual state and blockers;
 - README points new sessions to `VERSION` → `PROJECT-STATE` → `ROADMAP`;
-- stable baseline and current blockers are recorded;
-- session continuation and verification vocabulary are explicit.
-
-Exit criteria met:
-- a new chat can recover the project state from the repo without relying on previous chat transcripts;
-- README / PROJECT-STATE / ROADMAP now share the same continuation model.
+- continuation and verification vocabulary are explicit.
 
 ## Slice 16.1 — GitHub hygiene ✅ CLOSED
 
@@ -137,185 +132,177 @@ Completed on **2026-08-19**.
 
 Delivered:
 - obsolete branding recovery PR **#33** closed without merge;
-- repository branch inventory audited against merged/superseded work;
-- one-shot cleanup PR **#48** used only to execute branch cleanup;
-- historical merged/superseded branches deleted in a controlled runner;
-- the one-shot workflow removed itself from `main` after completion;
-- final branch inventory contains **only `main`**;
-- open PR inventory is **empty**.
+- historical branch inventory audited and cleaned through a one-shot runner;
+- cleanup runner removed itself after execution;
+- stale open-PR inventory cleared at closeout.
 
-Branch / PR convention going forward:
-- one active engineering slice at a time;
-- feature/fix work uses a dedicated short-lived branch + PR;
-- merged/superseded branches should not be kept as permanent project state;
-- repository truth lives in `main`, `PROJECT-STATE` and `ROADMAP`, not archival branches;
-- governance/protection rules themselves are handled later in Slice 16.9.
+Governance/protection itself remains Slice 16.9.
 
-Exit criteria met:
-- no stale open PR;
-- historical branches no longer obscure active work.
+## Slice 16.2 — Live Outfit sync parity 🟡 ENGINEERING MERGED
 
-## Slice 16.2 — Live Outfit sync parity **P1** 🔵 CURRENT
+Initial implementation: PR **#49**, runtime merge **`183a2650f1cfe95320bb6fde9c3d9768ea31f07c`**.
 
-Problem:
-- clothing has live canonical reread/polling;
-- Outfit writes sync live, but cross-device Outfit reads can still depend on the scheduled GitHub snapshot.
+Real PC ↔ phone QA then proved:
+- Worker/auth/queues/canonical reread were healthy;
+- remote create/delete were visible after manual page refresh;
+- visible UI did not reliably auto-converge.
 
-Deliverables:
+Follow-up: PR **#50**, merge **`6ed2bcd345fcaf8c98ba03abdad9ad876ee6a21f`**.
+
+Delivered:
 - authenticated canonical `GET /v1/outfits` through the Worker;
-- `syncLiveCanonicalOutfits()` client equivalent to clothing live sync;
-- preserve local pending Outfit mutations during reconciliation;
-- propagate remote deletes safely;
-- visibility/online polling parity with clothing;
-- diagnostics expose live Outfit record count and last sync/error.
+- live Outfit hydration/polling;
+- pending local Outfit mutation protection;
+- remote delete propagation + tombstone protection;
+- diagnostics for live Outfit count / timestamp / error;
+- `focus` + `pageshow` foreground checks;
+- UI convergence through `tran:outfits-live-changed` without `location.reload()`;
+- behavior-focused regression tests.
 
-Exit criteria:
-- create/update/delete an Outfit on device A appears/disappears on device B without waiting for the 6-hour snapshot;
-- zero duplicated Outfit IDs;
-- pending local Outfit edits are never overwritten by a live reread.
+**Status:** engineering merged and CI green. A strict post-#50 two-device create/update/delete auto-convergence pass was not recorded before the user elected to continue consolidation. Do **not** label this VERIFIED PROD yet; final proof is carried into Slice 16.11.
 
-## Slice 16.3 — Outfit integrity / incomplete state
+## Slice 16.3 — Outfit integrity / incomplete state 🟡 MERGED / CI GREEN
+
+PR **#51**, squash merge **`f3cf862d94c7186773a35f0fca511838d68bd5d8`**.
+
+Delivered:
+- canonical derived `complete` / `incomplete` behavior;
+- fewer than 2 **resolved** linked clothing items => `incomplete`;
+- no automatic delete/write/repair;
+- explicit FR/VI warning + resolved count;
+- edit/favorite/delete stay available;
+- incomplete Outfit is not presented as share-ready complete Lookbook;
+- incomplete saved Outfits are excluded from Daily Assistant complete-look ranking;
+- tests cover missing linked items and the important one-piece-garment edge case.
+
+Real lifecycle case: `Lookbook Test` previously had only `Melody Bag` linked.
+
+**Status:** merged / CI green. Production UI/device verification is carried into Slice 16.11.
+
+## Slice 16.4 — Runtime consolidation 🟡 MERGED / 12/12 CI GREEN
+
+PR **#52**, squash merge **`082487fc938bbbed47e37a00727a23989a58a99b`** after **12/12 PR workflows SUCCESS**.
+
+Delivered canonical runtime controllers:
+- `app-refresh.js` — one external canonical-data refresh adapter;
+- `closet-search-core.mjs` + `closet-search.js` — accent-insensitive VI/FR search without recreating the focused field;
+- `photo-picker.js` — explicit Camera + Gallery source picker;
+- `manual-sync.js` — clothing + Outfit queue flush without browser reload;
+- `i18n-runtime-compat.js` — one transitional dynamic compatibility layer pending Slice 16.5.
+
+Physically removed historical runtime files:
+- `v0512-sync-hotfix.js`;
+- `v059-ux-fixes.js`;
+- `v0510-search.js`;
+- `photo-picker-mobile.js`;
+- `i18n-v059-hotfix.js`;
+- `i18n-v0510-profile.js`;
+- `i18n-v0513-ai.js`;
+- `assistant-ui-hotfix.js`;
+- `live-outfit-ui-bridge.js`.
+
+Historical workflow filenames remain temporarily but relevant checks now target canonical modules. CI workflow-name consolidation itself remains 16.7.
+
+**Status:** merged / 12-of-12 PR CI green. Final browser/device regression QA is carried into Slice 16.11.
+
+## Slice 16.5 — i18n architecture cleanup 🔵 CURRENT
 
 Problem:
-- an Outfit created with ≥2 pieces may later drop below 2 if a linked clothing record is deleted.
+- `i18n.js` still relies heavily on exact rendered-text replacement;
+- the transitional `i18n-runtime-compat.js` still observes dynamically inserted content;
+- past Profile failures demonstrated the fragility of mutation-based translation.
 
 Deliverables:
-- define canonical `incomplete` behavior without auto-deleting the Outfit;
-- visibly warn when fewer than 2 linked items remain;
-- exclude incomplete outfits from recommendation/ranking as complete looks;
-- allow user repair/edit/delete explicitly.
-
-Exit criteria:
-- no silent invalid Outfit presented as complete;
-- no destructive automatic cleanup.
-
-## Slice 16.4 — Runtime consolidation
-
-Problem:
-- bootstrap currently loads a historical stack of versioned hotfix modules (`v059-*`, `v0510-*`, `v0512-*`, `v0513-*`, etc.).
-
-Deliverables:
-- absorb proven hotfix behavior into canonical modules;
-- remove legacy patch modules once behavior is covered by tests;
-- simplify bootstrap imports;
-- remove obsolete compatibility markers where CI no longer needs them.
-
-Exit criteria:
-- one canonical implementation per concern;
-- no hotfix-on-hotfix runtime chain;
-- no regression in profile, search, photo picker, sync diagnostics, AI or assistant.
-
-## Slice 16.5 — i18n architecture cleanup
-
-Problem:
-- current FR/VI translation relies heavily on exact DOM text replacement plus later hotfixes.
-
-Deliverables:
-- introduce key-based translations (`t('...')`) for canonical UI rendering;
-- move dynamic messages to translation keys with parameters;
+- introduce a keyed translation API (`t('...')`) with parameter interpolation;
+- migrate canonical user-visible dynamic surfaces to keys at render time;
 - preserve Vietnamese default and persistent FR QA mode;
-- retire mutation-based translation patches once migrated.
+- prioritize high-risk surfaces: navigation/header, Profile/sync, Add/photo/AI, Outfit integrity/presentation, Daily Assistant;
+- remove `i18n-runtime-compat.js` once no covered runtime surface depends on it;
+- retire mutation-based translation for migrated surfaces and eliminate observer feedback risks.
 
 Exit criteria:
 - no Vietnamese leakage in FR mode for covered product surfaces;
 - no DOM-observer translation loops;
-- FR ↔ VI switch remains persistent and safe.
+- FR ↔ VI selection remains persistent and safe;
+- dynamic translated messages are generated from keys/parameters rather than observed text.
 
 ## Slice 16.6 — Version / cache normalization
 
 Problem:
-- runtime is v0.5.15 while service-worker cache and many asset query strings still carry historical v0.5.1…v0.5.15 labels.
+- service-worker cache and many asset query strings still carry historical labels.
 
 Deliverables:
-- define one build/version source derived from `VERSION`/build metadata;
-- normalize Service Worker cache namespace/versioning;
-- remove stale hard-coded cache-bust versions where possible;
+- one build/version source derived from `VERSION` / build metadata;
+- normalized Service Worker cache identity;
+- remove stale hard-coded cache-bust versions where practical;
 - preserve `build-info.json` as exact deployment proof.
 
 Exit criteria:
-- no ambiguous "v0.5.1 cache serving v0.5.15 runtime" state;
-- update behavior remains safe on installed iOS/Android PWAs.
+- no ambiguous old cache namespace serving newer runtime;
+- installed iOS/Android update behavior remains safe.
 
 ## Slice 16.7 — CI consolidation + browser smoke
 
-Problem:
-- many historical version-specific workflows protect strings/files rather than final user behavior.
-
 Deliverables:
 - consolidate useful regression checks into maintainable suites;
-- remove redundant version-specific gates after equivalent coverage exists;
-- add a lightweight browser smoke (Playwright or equivalent) for critical routes/actions:
-  - app boot;
-  - Dressing navigation/search;
-  - Add + gallery/photo controls;
-  - Profile open/diagnostics;
-  - FR/VI switch;
-  - Assistant open;
-  - Outfit route/picker.
+- remove redundant version-specific workflow gates after equivalent coverage exists;
+- add lightweight browser smoke for boot, search, Add/photo, Profile/diagnostics, FR/VI, Assistant and Outfit routes.
 
 Exit criteria:
 - CI tests product behavior instead of historical implementation details;
-- the Profile crash class is caught automatically.
+- browser-only crash classes are caught automatically.
 
 ## Slice 16.8 — Canonical taxonomy unification
 
-Problem:
-- categories/colors/styles/tags exist in multiple client/Worker/versioned definitions and can drift from Airtable choices.
-
 Deliverables:
-- one canonical taxonomy source;
-- client and Worker consume generated/shared definitions where practical;
-- CI validates Airtable-compatible values and mappings;
-- normalize known legacy spelling/spacing quirks without destructive migration.
-
-Exit criteria:
-- adding a future color/category requires one intentional source change, not several scattered edits.
+- one canonical category/color/style/tag source;
+- client and Worker consume shared/generated definitions where practical;
+- CI validates Airtable-compatible values/mappings;
+- normalize legacy spelling/spacing quirks without destructive migration.
 
 ## Slice 16.9 — Repository / deployment governance
 
 Deliverables:
-- protect `main` where compatible with the project workflow;
-- define required checks for feature PRs;
-- review workflows that commit generated snapshots/assets directly to `main`;
-- keep Airtable snapshots as fallback/offline artifacts without letting automated commits surprise active development;
-- document what constitutes merge / deployed / verified-prod.
-
-Exit criteria:
-- accidental direct writes cannot bypass the project gates;
-- automation does not create hidden project-state divergence.
+- protect `main` where compatible with project workflow;
+- define required checks;
+- review workflows that commit snapshots/assets directly to `main`;
+- keep snapshots as fallback/offline artifacts without surprising active development;
+- clean harmless leftover branches including `noop-check` / `noop-check-2` created during connector work;
+- document merge / deployed / VERIFIED-PROD boundaries.
 
 ## Slice 16.10 — Branding source cleanup
 
 Deliverables:
-- identify canonical current favicon/header/logo/splash masters;
-- remove obsolete cream/round branding sources only after dependency search;
-- keep deterministic system-icon generation;
+- identify canonical favicon/header/logo/splash masters;
+- remove obsolete branding sources after dependency search;
+- keep deterministic icon generation;
 - ensure no workflow can resurrect retired branding.
 
-Exit criteria:
-- one understandable branding source-of-truth set;
-- current visual identity unchanged.
+Current visual identity must not change during this cleanup.
 
 ## Slice 16.11 — V0.5.16 end-to-end closeout
 
-Required QA:
+Required QA accumulates deferred proof from 16.2–16.4 plus final consolidated-runtime verification:
 - Android + iPhone install/open/update sanity;
 - clothing CREATE / UPDATE / DELETE / live cross-device reread;
-- Outfit CREATE / UPDATE / DELETE / live cross-device reread;
+- Outfit CREATE / UPDATE / DELETE / live cross-device reread **without manual refresh**;
+- incomplete Outfit warning / repair/delete behavior;
 - offline queue recovery;
 - Profile diagnostics stable;
-- FR/VI switch stable;
-- photo/gallery path stable;
+- FR/VI switch stable with no migrated-surface language leakage;
+- photo Camera + Gallery path stable;
+- search typing remains uninterrupted;
+- manual sync remains stable and does not reload the browser unexpectedly;
 - AI suggestion still human-in-the-loop;
-- Daily Assistant still produces context-aware suggestions;
+- Daily Assistant still produces context-aware suggestions and excludes incomplete saved Outfits;
 - PWA icon/splash/header remain correct;
 - diagnostics end with no unexpected pending mutations/orphans.
 
 Close only when:
-- CI consolidated and green;
-- Pages/Worker state verified where changed;
+- consolidated CI is green;
+- Pages/Worker state is verified where changed;
 - phone QA passes;
-- `PROJECT-STATE.md` records the exact final SHA and baseline.
+- `PROJECT-STATE.md` records exact final runtime SHA and baseline.
 
 ---
 
@@ -344,7 +331,7 @@ Planned:
 
 ## V0.6 — Daily Driver hardening / productization
 
-Candidate themes after V0.5 is closed:
+Candidate themes:
 - private access/authentication strategy;
 - optional notifications/reminders;
 - deeper iPhone/PWA polish;
@@ -363,23 +350,23 @@ Target definition will be frozen only after V0.6 learnings. Minimum expectation:
 
 ---
 
-# 5. Explicit deferred/backlog — not blockers for V0.5.16 unless promoted
+# 5. Explicit deferred/backlog
 
 - replace the photo of an already existing Airtable-backed clothing record;
 - richer color nuance beyond current canonical set;
 - smarter 2/3/4+ item Lookbook composition;
-- optional background removal/cutout for clothing presentation;
+- optional background removal/cutout;
 - richer accessory/style semantics;
 - notifications;
-- public/shareable links (current sharing remains local image/file oriented).
+- public/shareable links.
 
 ---
 
 # 6. Status legend
 
 - ✅ **CLOSED / VERIFIED PROD** — production behavior verified with real QA.
-- 🟢 **DEPLOYED / operational** — present in production; parent phase may still be open.
-- 🔵 **ACTIVE ROADMAP** — current engineering phase/slice.
-- 🟡 **CANDIDATE** — implemented/deployed but required QA incomplete.
+- 🟢 **OPERATIONAL** — capability exists in current product; parent phase may still be open.
+- 🔵 **CURRENT / ACTIVE** — active engineering slice.
+- 🟡 **MERGED / QA DEFERRED** — code is in `main`, required product proof remains for 16.11.
 - ⏭ **NEXT** — explicitly sequenced after current blockers/phase.
-- ⏸ **DEFERRED** — deliberately postponed; do not pull into active work casually.
+- ⏸ **DEFERRED** — deliberately postponed.
