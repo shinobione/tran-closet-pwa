@@ -8,11 +8,11 @@ try{await syncOutfitSnapshotToLocalDB();}catch(error){console.warn('Airtable out
 try{await syncLiveCanonicalItems();}catch(error){console.warn('Live Airtable clothing hydration failed; keeping snapshot/local closet.',error);}
 try{await syncLiveCanonicalOutfits();}catch(error){console.warn('Live Airtable Outfit hydration failed; keeping snapshot/local outfits.',error);}
 
-await import('./app.js?v=0.5.1');
+await import('./app.js?v=0.5.16');
 await import('./app-refresh.js?v=0.5.16');
 await import('./closet-search.js?v=0.5.16');
 await import('./photo-picker.js?v=0.5.16');
-await import('./outfit-picker.js?v=0.5.1');
+await import('./outfit-picker.js?v=0.5.16');
 await import('./outfit-sync-client.js?v=0.5.1');
 await import('./manual-sync.js?v=0.5.16');
 await import('./outfit-presentation.js?v=0.5.16');
@@ -22,7 +22,6 @@ await import('./duplicate-guard.js?v=0.5.1');
 await import('./daily-assistant.js?v=0.5.16');
 await import('./sync-diagnostics.js?v=0.5.16');
 await import('./i18n.js?v=0.5.1');
-await import('./i18n-runtime-compat.js?v=0.5.16');
 await import('./build-version.js?v=0.5.16');
 
 startLiveSyncWatch();
