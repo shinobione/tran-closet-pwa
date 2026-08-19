@@ -1,0 +1,92 @@
+name: Retarget global version cache gates
+
+on:
+  push:
+    branches: [v0.5.16-version-cache-normalization]
+
+permissions:
+  contents: write
+
+jobs:
+  retarget:
+    if: ${{ !contains(github.event.head_commit.message, '[skip version-gate-retarget]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: v0.5.16-version-cache-normalization
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Retarget global PWA workflow
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          import re
+
+          p=Path('.github/workflows/validate.yml')
+          s=p.read_text()
+
+          old="""          node --check scripts/test-keyed-i18n.mjs
+          node --check worker/src/index.js
+"""
+          new="""          node --check scripts/test-keyed-i18n.mjs
+          node --check scripts/normalize-release-refs.mjs
+          node --check scripts/test-version-cache.mjs
+          node --check scripts/test-pwa-isolation.mjs
+          node --check worker/src/index.js
+"""
+          if s.count(old)!=1: raise SystemExit('syntax insertion target mismatch')
+          s=s.replace(old,new)
+
+          old="""          node scripts/test-keyed-i18n.mjs
+      - name: Check JSON and manifest
+"""
+          new="""          node scripts/test-keyed-i18n.mjs
+          node scripts/normalize-release-refs.mjs
+          node scripts/test-version-cache.mjs
+          node scripts/test-pwa-isolation.mjs
+      - name: Check JSON and manifest
+"""
+          if s.count(old)!=1: raise SystemExit('unit test insertion target mismatch')
+          s=s.replace(old,new)
+
+          marker="          test -f scripts/test-keyed-i18n.mjs\n"
+          replacement=marker+"          test -f scripts/normalize-release-refs.mjs\n          test -f scripts/test-version-cache.mjs\n          test -f scripts/test-pwa-isolation.mjs\n"
+          if s.count(marker)!=1: raise SystemExit('file presence marker mismatch')
+          s=s.replace(marker,replacement)
+
+          # Generic PWA validation checks that refs remain cache-busted; the
+          # dedicated 16.6 contract owns the exact VERSION value.
+          s=re.sub(r'\?v=\d+\.\d+\.\d+', '?v=', s)
+
+          old="          grep -q 'tran-closet-v0.5.1' sw.js\n"
+          new="          grep -q \"const CACHE_PREFIX='tran-closet-'\" sw.js\n          grep -q 'shortSha' sw.js\n"
+          if s.count(old)!=1: raise SystemExit('static cache assertion mismatch')
+          s=s.replace(old,new)
+
+          s=s.replace("          grep -q \"FALLBACK_VERSION='v0.5.16'\" js/sync-diagnostics.js\n","          grep -q \"const FALLBACK_VERSION='v\" js/sync-diagnostics.js\n")
+
+          p.write_text(s)
+          PY
+      - name: Validate retargeted gate
+        run: |
+          grep -q 'node scripts/normalize-release-refs.mjs' .github/workflows/validate.yml
+          grep -q 'node scripts/test-version-cache.mjs' .github/workflows/validate.yml
+          grep -q 'node scripts/test-pwa-isolation.mjs' .github/workflows/validate.yml
+          grep -q "const CACHE_PREFIX='tran-closet-'" .github/workflows/validate.yml
+          ! grep -Eq '\?v=0\.5\.(1|8|9|10|16)' .github/workflows/validate.yml
+          node scripts/normalize-release-refs.mjs
+          node scripts/test-version-cache.mjs
+          node scripts/test-pwa-isolation.mjs
+      - name: Remove one-shot workflow
+        run: rm .github/workflows/retarget-version-cache-gates.yml
+      - name: Commit gate retargeting
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m "CI · Retarget global gate to canonical VERSION cache contract [skip version-gate-retarget]"
+          git push origin HEAD:v0.5.16-version-cache-normalization
