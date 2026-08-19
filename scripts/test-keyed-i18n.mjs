@@ -13,6 +13,14 @@ assert.equal(t('photo.take',{},'fr'),'Prendre une photo');
 assert.equal(t('sync.pending',{count:1},'fr'),'1 modification encore en attente');
 assert.equal(t('sync.pending',{count:2},'fr'),'2 modifications encore en attente');
 assert.match(t('outfit.incomplete.detail',{count:1,minimum:2},'fr'),/1 article disponible/);
+assert.equal(t('outfit.picker.selected',{count:1},'fr'),'1 sélectionné');
+assert.equal(t('outfit.picker.selected',{count:2},'fr'),'2 sélectionnés');
+assert.equal(t('outfit.picker.results',{visible:7,total:11},'vi'),'7/11 món');
+assert.equal(t('outfit.picker.remove',{name:'Melody Bag'},'fr'),'Retirer Melody Bag');
+assert.equal(t('app.edit.eyebrow',{},'fr'),'MODIFIER');
+assert.equal(t('app.delete.offline',{},'vi'),'Đã xóa · sẽ đồng bộ khi có mạng');
+assert.match(t('app.install.iosHtml',{},'fr'),/Safari/);
+assert.match(t('app.privacy',{},'fr'),/flux de synchronisation canonique/);
 assert.equal(t('occasion.Work',{},'fr'),'Travail');
 assert.equal(t('weather.rain',{},'fr'),'Pluie');
 

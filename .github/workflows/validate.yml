@@ -85,6 +85,7 @@ jobs:
           test -f js/daily-assistant.js
           test -f js/i18n.js
           test -f js/i18n-keyed.mjs
+          test ! -e js/i18n-runtime-compat.js
           test -f scripts/test-duplicate-core.mjs
           test -f scripts/test-smart-tags.mjs
           test -f scripts/test-daily-assistant.mjs
@@ -98,13 +99,14 @@ jobs:
           grep -q 'duplicate-guard.css?v=0.5.1' index.html
           grep -q 'daily-assistant.css?v=0.5.1' index.html
           grep -q 'i18n.css?v=0.5.1' index.html
-          grep -q 'app.js?v=0.5.1' js/bootstrap.js
-          grep -q 'outfit-picker.js?v=0.5.1' js/bootstrap.js
+          grep -q 'app.js?v=0.5.16' js/bootstrap.js
+          grep -q 'outfit-picker.js?v=0.5.16' js/bootstrap.js
           grep -q 'item-ai-assistant.js?v=0.5.1' js/bootstrap.js
           grep -q 'duplicate-guard.js?v=0.5.1' js/bootstrap.js
           grep -q 'daily-assistant.js?v=0.5.16' js/bootstrap.js
           grep -q 'sync-diagnostics.js?v=0.5.16' js/bootstrap.js
           grep -q 'i18n.js?v=0.5.1' js/bootstrap.js
+          ! grep -q 'i18n-runtime-compat.js' js/bootstrap.js
           grep -q 'serviceWorker' js/app.js
           grep -q 'queueMutation' js/app.js
           grep -q "STORE_OUTFITS='outfits'" js/db.js
@@ -127,10 +129,13 @@ jobs:
           grep -q 'hammingDistance' js/duplicate-core.mjs
           grep -q 'duplicateAssessment' js/duplicate-core.mjs
           grep -q 'tran-closet-v0.5.1' sw.js
+          grep -q 'app.js?v=0.5.16' sw.js
+          grep -q 'outfit-picker.js?v=0.5.16' sw.js
           grep -q 'daily-assistant-core.mjs?v=0.5.16' sw.js
           grep -q 'daily-assistant.js?v=0.5.16' sw.js
           grep -q 'i18n-keyed.mjs?v=0.5.16' sw.js
           grep -q 'i18n.js?v=0.5.1' sw.js
+          ! grep -q 'i18n-runtime-compat.js' sw.js
           grep -q "FALLBACK_VERSION='v0.5.16'" js/sync-diagnostics.js
           grep -q 'navigator.share' js/outfit-presentation.js
           grep -q '1080' js/outfit-presentation.js
@@ -179,7 +184,7 @@ jobs:
           grep -q 'sameItemSet' js/daily-assistant-core.mjs
           grep -q "daily.reason.rainReady" js/daily-assistant-core.mjs
           grep -q 'daily assistant core: PASS' scripts/test-daily-assistant.mjs
-      - name: Check bilingual UI bridge and keyed foundation
+      - name: Check bilingual keyed foundation and legacy boundary
         run: |
           grep -q "LANGUAGE_KEY='tran-closet-language'" js/i18n.js
           grep -q "SUPPORTED=new Set(\['vi','fr'\])" js/i18n.js
@@ -190,6 +195,11 @@ jobs:
           grep -q "SUPPORTED_LANGUAGES=new Set(\['vi','fr'\])" js/i18n-keyed.mjs
           grep -q "'photo.take':'Prendre une photo'" js/i18n-keyed.mjs
           grep -q "'diagnostics.title':'Diagnostic de synchronisation'" js/i18n-keyed.mjs
+          grep -q "'app.edit.eyebrow':'MODIFIER'" js/i18n-keyed.mjs
+          grep -q "'outfit.picker.reset':'Réinitialiser'" js/i18n-keyed.mjs
+          grep -q "i18n-keyed.mjs?v=0.5.16" js/app.js
+          grep -q "i18n-keyed.mjs?v=0.5.16" js/outfit-picker.js
+          test ! -e js/i18n-runtime-compat.js
           grep -q 'language-switch' css/i18n.css
       - name: Guard against committed secrets
         run: |
