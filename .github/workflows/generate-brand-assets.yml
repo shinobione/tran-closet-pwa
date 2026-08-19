@@ -6,13 +6,23 @@ on:
     branches: [main]
     paths:
       - 'branding/favicon-user-v058.b64'
+      - 'branding/header-lockup-v057.png'
+      - 'branding/logo-mark-v057.png'
+      - 'branding/splash-1242x2688.png'
       - 'scripts/generate-brand-assets.py'
+      - 'scripts/test-branding-sources.mjs'
+      - 'docs/BRANDING-SOURCES.md'
       - '.github/workflows/generate-brand-assets.yml'
   push:
     branches: [main]
     paths:
       - 'branding/favicon-user-v058.b64'
+      - 'branding/header-lockup-v057.png'
+      - 'branding/logo-mark-v057.png'
+      - 'branding/splash-1242x2688.png'
       - 'scripts/generate-brand-assets.py'
+      - 'scripts/test-branding-sources.mjs'
+      - 'docs/BRANDING-SOURCES.md'
       - '.github/workflows/generate-brand-assets.yml'
 
 permissions:
@@ -36,11 +46,19 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       - name: Install image dependency
         run: python -m pip install --disable-pip-version-check pillow
 
       - name: Generate favicon and PWA icons from exact glossy user master
         run: python scripts/generate-brand-assets.py
+
+      - name: Verify canonical branding sources
+        run: node scripts/test-branding-sources.mjs --audit
 
       - name: Verify expected outputs
         run: |
@@ -56,6 +74,10 @@ jobs:
           test -f branding/header-lockup-v057.png
           test -f branding/logo-mark-v057.png
           test -f branding/splash-1242x2688.png
+
+      - name: Verify generated icon outputs are committed
+        if: github.event_name == 'pull_request'
+        run: git diff --exit-code -- favicon.ico icons/favicon-16.png icons/favicon-32.png icons/favicon-48.png icons/icon-192.png icons/icon-512.png icons/maskable-512.png icons/apple-touch-icon.png
 
       - name: Commit generated system icons safely when changed
         if: github.event_name != 'pull_request'
