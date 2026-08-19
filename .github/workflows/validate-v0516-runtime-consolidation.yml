@@ -33,17 +33,20 @@ jobs:
       - name: Test canonical search behavior
         run: node scripts/test-runtime-consolidation.mjs
 
-      - name: Reject historical runtime hotfix imports
+      - name: Reject historical runtime hotfix imports and files
         run: |
-          ! grep -q "v0512-sync-hotfix.js" js/bootstrap.js
-          ! grep -q "v059-ux-fixes.js" js/bootstrap.js
-          ! grep -q "v0510-search.js" js/bootstrap.js
-          ! grep -q "photo-picker-mobile.js" js/bootstrap.js
-          ! grep -q "i18n-v059-hotfix.js" js/bootstrap.js
-          ! grep -q "i18n-v0510-profile.js" js/bootstrap.js
-          ! grep -q "i18n-v0513-ai.js" js/bootstrap.js
-          ! grep -q "assistant-ui-hotfix.js" js/bootstrap.js
-          ! grep -q "live-outfit-ui-bridge.js" js/bootstrap.js
+          for legacy in \
+            js/v0512-sync-hotfix.js \
+            js/v059-ux-fixes.js \
+            js/v0510-search.js \
+            js/photo-picker-mobile.js \
+            js/i18n-v059-hotfix.js \
+            js/i18n-v0510-profile.js \
+            js/i18n-v0513-ai.js \
+            js/assistant-ui-hotfix.js \
+            js/live-outfit-ui-bridge.js; do
+            test ! -e "$legacy"
+          done
 
       - name: Check canonical search/photo/sync behavior
         run: |
@@ -60,8 +63,8 @@ jobs:
         run: |
           ! grep -q "subtree:true" js/closet-search.js
           ! grep -q "subtree:true" js/photo-picker.js
-          ! grep -q "subtree:true" js/i18n-runtime-compat.js
-          grep -q "One observer replaces the historical" js/i18n-runtime-compat.js
+          test "$(grep -c 'new MutationObserver' js/i18n-runtime-compat.js)" -eq 1
+          grep -q "ignores characterData/attributes" js/i18n-runtime-compat.js
 
       - name: Check canonical integration and offline shell
         run: |
