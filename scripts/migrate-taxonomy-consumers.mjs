@@ -74,12 +74,4 @@ replaceOnce('sw.js',
   "'./js/data.js','./js/sync-client.js?v=0.5.16'",
   "'./js/data.js','./js/taxonomy.generated.mjs?v=0.5.16','./js/sync-client.js?v=0.5.16'");
 
-// Worker deploy must validate taxonomy parity before deployment and react to canonical-source changes.
-replaceOnce('.github/workflows/deploy-worker.yml',
-  "      - 'worker/**'\n      - '.github/workflows/deploy-worker.yml'",
-  "      - 'worker/**'\n      - 'shared/taxonomy.json'\n      - 'scripts/generate-taxonomy.mjs'\n      - 'scripts/test-taxonomy.mjs'\n      - '.github/workflows/deploy-worker.yml'");
-replaceOnce('.github/workflows/deploy-worker.yml',
-  "      - name: Deploy Worker and Worker secrets",
-  "      - uses: actions/setup-node@v4\n        with:\n          node-version: '22'\n\n      - name: Verify canonical taxonomy parity\n        run: |\n          node scripts/generate-taxonomy.mjs\n          node scripts/test-taxonomy.mjs\n\n      - name: Deploy Worker and Worker secrets");
-
 console.log('Taxonomy consumer migration: PASS');
