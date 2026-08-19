@@ -78,6 +78,17 @@ jobs:
             sleep 5
           done
 
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          body=json.loads(Path('/tmp/worker-health.json').read_text())
+          assert body.get('ok') is True, body
+          assert body.get('workerRevision')=='v059', body
+          assert body.get('taxonomy')=='canonical-v1', body
+          assert body.get('taxonomyCounts')=={'categories':17,'colors':24,'styles':6,'tags':22}, body
+          print('Canonical Worker identity verified: v059 / canonical-v1 / 17-24-6-22')
+          PY
+
           STATUS="$(curl --silent --show-error --output /tmp/worker-items.json --write-out '%{http_code}' \
             -H "Authorization: Bearer $CLOSET_SYNC_KEY" \
             -H 'Cache-Control: no-cache' \
