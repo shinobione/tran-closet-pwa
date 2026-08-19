@@ -58,7 +58,7 @@ jobs:
         run: python scripts/generate-brand-assets.py
 
       - name: Verify canonical branding sources
-        run: node scripts/test-branding-sources.mjs --audit
+        run: node scripts/test-branding-sources.mjs --strict
 
       - name: Verify expected outputs
         run: |
