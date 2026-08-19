@@ -1,0 +1,103 @@
+name: Patch search-safe silent sync
+
+on:
+  push:
+    branches: [v0.5.16-repo-governance]
+    paths:
+      - '.github/workflows/patch-search-safe-sync.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: v0.5.16-repo-governance
+          fetch-depth: 0
+      - name: Patch exact app sync boundary
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          p=Path('js/app.js')
+          s=p.read_text()
+          old="""async function syncNow(silent=true){
+  if(state.syncing)return;
+  state.syncing=true;
+  if(!silent&&state.route==='profile')render();
+  const result=await flushMutationQueue();
+  await refresh();
+  state.syncing=false;
+  if(!silent){
+    if(result.ok)say('Đồng bộ Airtable hoàn tất ✓');
+    else if(result.offline)say('Ngoại tuyến · thay đổi vẫn được lưu');
+    else if(result.configured===false)say('Hãy cấu hình Worker trước');
+    else if(result.status===401)say('Khóa đồng bộ không đúng');
+    else say(`${state.pending} thay đổi vẫn đang chờ`);
+  }
+  render();
+}
+"""
+          new="""async function syncNow(silent=true){
+  if(state.syncing)return;
+  state.syncing=true;
+  if(!silent&&state.route==='profile')render();
+  const result=await flushMutationQueue();
+  await refresh();
+  state.syncing=false;
+  if(!silent){
+    if(result.ok)say('Đồng bộ Airtable hoàn tất ✓');
+    else if(result.offline)say('Ngoại tuyến · thay đổi vẫn được lưu');
+    else if(result.configured===false)say('Hãy cấu hình Worker trước');
+    else if(result.status===401)say('Khóa đồng bộ không đúng');
+    else say(`${state.pending} thay đổi vẫn đang chờ`);
+  }
+  render();
+}
+
+let silentSyncOnSearchBlur=false;
+function syncWhenSearchIdle(){
+  const search=document.querySelector('#searchInput');
+  if(state.route==='closet'&&search&&document.activeElement===search){
+    if(!silentSyncOnSearchBlur){
+      silentSyncOnSearchBlur=true;
+      search.addEventListener('blur',()=>{
+        silentSyncOnSearchBlur=false;
+        syncNow(true);
+      },{once:true});
+    }
+    return;
+  }
+  syncNow(true);
+}
+"""
+          if s.count(old)!=1:
+            raise SystemExit(f'syncNow target count {s.count(old)}')
+          s=s.replace(old,new)
+          old2="window.addEventListener('online',()=>syncNow(true));"
+          new2="window.addEventListener('online',syncWhenSearchIdle);"
+          if s.count(old2)!=1:
+            raise SystemExit(f'online target count {s.count(old2)}')
+          s=s.replace(old2,new2)
+          old3="setTimeout(()=>syncNow(true),700);"
+          new3="setTimeout(syncWhenSearchIdle,700);"
+          if s.count(old3)!=1:
+            raise SystemExit(f'startup target count {s.count(old3)}')
+          s=s.replace(old3,new3)
+          p.write_text(s)
+          PY
+          node --check js/app.js
+          grep -q "function syncWhenSearchIdle" js/app.js
+          grep -q "window.addEventListener('online',syncWhenSearchIdle)" js/app.js
+          grep -q "setTimeout(syncWhenSearchIdle,700)" js/app.js
+          ! grep -q "setTimeout(()=>syncNow(true),700)" js/app.js
+      - name: Commit product patch only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add js/app.js
+          git diff --cached --quiet && exit 0
+          git commit -m "Fix search focus during silent sync"
+          git push origin HEAD:v0.5.16-repo-governance
