@@ -2,12 +2,11 @@ import {getSyncConfig,testSyncConnection,flushMutationQueue,pendingMutationCount
 import {flushOutfitQueue,pendingOutfitMutationCount} from './outfit-sync-client.js?v=0.5.1';
 import {syncLiveCanonicalOutfits} from './live-airtable-outfit-sync.js?v=0.5.16';
 import {getAllItems,getAllMutations,getAllOutfits,getAllOutfitMutations,getMeta} from './db.js';
+import {t} from './i18n-keyed.mjs?v=0.5.16';
 
-// Legacy CI marker only: const VERSION='v0.5.1'
 const FALLBACK_VERSION='v0.5.16';
 let running=false;
 
-function fr(){return document.documentElement.lang==='fr';}
 function buildInfo(){
   const info=window.TranClosetBuildInfo;
   return info&&info.version?info:{version:FALLBACK_VERSION,sha:null,shortSha:'local',builtAt:null,source:'fallback'};
@@ -18,16 +17,7 @@ function versionLabel(){
   return info.shortSha&&info.shortSha!=='local'?`${info.version} · ${info.shortSha}`:info.version;
 }
 
-function summaryLabel(){return `${fr()?'Diagnostic de synchronisation':'Chẩn đoán đồng bộ'} · ${versionLabel()}`;}
-function copy(key){
-  const text={
-    intro:fr()?'Aucune clé secrète n’est affichée. Le bouton lance la synchronisation des vêtements et des tenues puis affiche les erreurs réelles.':'Không hiển thị khóa bí mật. Nút bên dưới chạy cả đồng bộ quần áo và outfit, rồi hiển thị lỗi thật.',
-    run:fr()?'Lancer diagnostic + synchronisation':'Chạy chẩn đoán + đồng bộ',
-    running:fr()?'Diagnostic en cours…':'Đang chẩn đoán…',
-    ready:fr()?'Prêt.':'Sẵn sàng.'
-  };
-  return text[key];
-}
+function summaryLabel(){return `${t('diagnostics.title')} · ${versionLabel()}`;}
 
 function orphanCount(items,mutations,idKey='localItemId'){
   const queued=new Set(mutations.map(m=>m[idKey]));
@@ -79,35 +69,22 @@ async function snapshot(){
     mutationOps:mutations.map(m=>m.operation),
     outfitMutationOps:outfitMutations.map(m=>m.operation),
     mutationStates:mutations.map(m=>({
-      id:m.id,
-      operation:m.operation,
-      localItemId:m.localItemId||null,
-      airtableRecordId:m.airtableRecordId||null,
-      createdAt:m.createdAt||null
+      id:m.id,operation:m.operation,localItemId:m.localItemId||null,
+      airtableRecordId:m.airtableRecordId||null,createdAt:m.createdAt||null
     })),
     outfitMutationStates:outfitMutations.map(m=>({
-      id:m.id,
-      operation:m.operation,
-      localOutfitId:m.localOutfitId||null,
-      airtableRecordId:m.airtableRecordId||null,
-      createdAt:m.createdAt||null
+      id:m.id,operation:m.operation,localOutfitId:m.localOutfitId||null,
+      airtableRecordId:m.airtableRecordId||null,createdAt:m.createdAt||null
     })),
     itemStates:items.map(i=>({
-      name:i.name,
-      airtableRecordId:i.airtableRecordId||null,
-      tagCount:Array.isArray(i.tags)?i.tags.length:0,
-      source:i.source||null,
-      syncState:i.syncState||null,
-      cloudWriteAt:i.cloudWriteAt||null
+      name:i.name,airtableRecordId:i.airtableRecordId||null,
+      tagCount:Array.isArray(i.tags)?i.tags.length:0,source:i.source||null,
+      syncState:i.syncState||null,cloudWriteAt:i.cloudWriteAt||null
     })),
     outfitStates:outfits.map(o=>({
-      name:o.name,
-      id:o.id,
-      airtableRecordId:o.airtableRecordId||null,
-      itemCount:Array.isArray(o.itemIds)?o.itemIds.length:0,
-      source:o.source||null,
-      syncState:o.syncState||null,
-      cloudWriteAt:o.cloudWriteAt||null
+      name:o.name,id:o.id,airtableRecordId:o.airtableRecordId||null,
+      itemCount:Array.isArray(o.itemIds)?o.itemIds.length:0,source:o.source||null,
+      syncState:o.syncState||null,cloudWriteAt:o.cloudWriteAt||null
     }))
   };
 }
@@ -132,16 +109,16 @@ function mount(){
   box.style.border='1px solid rgba(255,255,255,.12)';
   box.style.borderRadius='14px';
   box.innerHTML=`<summary style="cursor:pointer;font-weight:700">${summaryLabel()}</summary>
-    <p style="opacity:.72;font-size:.84rem;margin:10px 0">${copy('intro')}</p>
-    <button type="button" id="runSyncDiagnostics" class="secondary-button">${copy('run')}</button>
-    <pre id="syncDiagnosticsOutput" style="white-space:pre-wrap;word-break:break-word;font-size:.72rem;line-height:1.45;max-height:420px;overflow:auto;margin-top:10px;padding:10px;border-radius:10px;background:rgba(0,0,0,.24)">${copy('ready')}</pre>`;
+    <p style="opacity:.72;font-size:.84rem;margin:10px 0">${t('diagnostics.intro')}</p>
+    <button type="button" id="runSyncDiagnostics" class="secondary-button">${t('diagnostics.run')}</button>
+    <pre id="syncDiagnosticsOutput" style="white-space:pre-wrap;word-break:break-word;font-size:.72rem;line-height:1.45;max-height:420px;overflow:auto;margin-top:10px;padding:10px;border-radius:10px;background:rgba(0,0,0,.24)">${t('diagnostics.ready')}</pre>`;
   card.appendChild(box);
   box.querySelector('#runSyncDiagnostics').onclick=async()=>{
     if(running)return;
     running=true;
     const btn=box.querySelector('#runSyncDiagnostics');
     const out=box.querySelector('#syncDiagnosticsOutput');
-    btn.disabled=true;btn.textContent=copy('running');
+    btn.disabled=true;btn.textContent=t('diagnostics.running');
     try{
       const before=await snapshot();
       const clothingFlush=await flushMutationQueue();
@@ -153,14 +130,12 @@ function mount(){
     }catch(error){
       out.textContent=JSON.stringify({version:buildInfo().version,build:buildInfo(),error:String(error?.message||error)},null,2);
     }finally{
-      running=false;btn.disabled=false;btn.textContent=copy('run');
+      running=false;btn.disabled=false;btn.textContent=t('diagnostics.run');
     }
   };
 }
 
 window.addEventListener('tran:build-info',refreshSummary);
 const main=document.querySelector('#mainContent');
-// Only direct route renders are observed. Internal Profile DOM changes must never
-// recursively remount diagnostics.
 if(main)new MutationObserver(mount).observe(main,{childList:true});
 mount();
