@@ -83,6 +83,11 @@ jobs:
           grep -q "detectFineColors" worker/src/v059.js
           grep -q "Use Navy for very dark blue" worker/src/v059.js
           grep -q "Distinguish Beige, Cream and White" worker/src/v059.js
+          grep -q "function canonicalHealth" worker/src/v059.js
+          grep -q "workerRevision:'v059'" worker/src/v059.js
+          grep -q "taxonomyCounts" worker/src/v059.js
+          grep -q "assert body.get('workerRevision')=='v059'" .github/workflows/deploy-worker.yml
+          grep -q "assert body.get('taxonomy')=='canonical-v1'" .github/workflows/deploy-worker.yml
           grep -q "Verify canonical taxonomy parity" .github/workflows/deploy-worker.yml
           grep -q "node scripts/test-taxonomy.mjs" .github/workflows/deploy-worker.yml
 
