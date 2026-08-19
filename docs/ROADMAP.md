@@ -5,7 +5,7 @@
 > Current factual runtime state lives in [`PROJECT-STATE.md`](./PROJECT-STATE.md). When chat history and the repository disagree, **verify `main` and follow the repository**.
 
 Last roadmap update: **2026-08-19**  
-Current slice: **V0.5.16 · Slice 16.7 — CI consolidation + browser smoke**
+Current slice: **V0.5.16 · Slice 16.8 — canonical taxonomy unification**
 
 ---
 
@@ -239,18 +239,24 @@ Delivered:
 
 **Status:** engineering merged / CI green. Installed iOS/Android update/cache verification remains in Slice 16.11; do not label VERIFIED PROD yet.
 
-## Slice 16.7 — CI consolidation + browser smoke 🔵 CURRENT
+## Slice 16.7 — CI consolidation + browser smoke ✅ MERGED / 9/9 GREEN
 
-Deliverables:
-- consolidate useful regression checks into maintainable suites;
-- remove redundant version-specific workflow gates after equivalent coverage exists;
-- add lightweight browser smoke for boot, search, Add/photo, Profile/diagnostics, FR/VI, Assistant and Outfit routes.
+PR **#60**, tested head **`845ffa7f9aa56f28a7e09160a85dd803dda4a45a`**, squash merge **`19b32a12de6752b5b610e502789c22f27e2a225d`**.
 
-Exit criteria:
-- CI tests product behavior instead of historical implementation details;
-- browser-only crash classes are caught automatically.
+Delivered:
+- 14 → **9** PR validation workflows;
+- current domain suites for UI/Profile and Sync/Delete contracts;
+- topology guard forbidding 8 retired historical gates;
+- documented CI ownership map;
+- deterministic Playwright smoke using system Chrome;
+- real-browser coverage for boot, search focus, Add/photo source choice, Profile/diagnostics, Outfits, Daily Assistant and FR↔VI rendering;
+- page exceptions and failed local script/style loads are fatal;
+- external weather/Worker/build endpoints are stubbed and no canonical write occurs;
+- final head passed **9/9** workflows including the browser smoke.
 
-## Slice 16.8 — Canonical taxonomy unification
+**Status:** merged / CI + deterministic browser smoke green. This does not replace installed-device/Pages verification in Slice 16.11.
+
+## Slice 16.8 — Canonical taxonomy unification 🔵 CURRENT
 
 Deliverables:
 - one canonical category/color/style/tag source;
@@ -280,7 +286,7 @@ Current visual identity must not change during this cleanup.
 
 ## Slice 16.11 — V0.5.16 end-to-end closeout
 
-Required QA accumulates deferred proof from 16.2–16.6 plus final consolidated-runtime verification:
+Required QA accumulates deferred production/device proof from 16.2–16.6 plus the final consolidated-runtime verification:
 - Android + iPhone install/open/update sanity;
 - clothing CREATE / UPDATE / DELETE / live cross-device reread;
 - Outfit CREATE / UPDATE / DELETE / live cross-device reread **without manual refresh**;
