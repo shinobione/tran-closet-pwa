@@ -1,3 +1,5 @@
+import {outfitIntegrity} from './outfit-integrity.mjs?v=0.5.16';
+
 const ROLES={
   top:new Set(['Shirt','Coat']),
   bottom:new Set(['Pant','Skirt']),
@@ -190,9 +192,9 @@ export function recommendLooks({items=[],outfits=[],weather={},occasion='Everyda
   const candidates=[];
 
   for(const outfit of outfits){
-    const outfitItems=arr(outfit.itemIds)
-      .map(id=>byId.get(String(id)))
-      .filter(Boolean)
+    const integrity=outfitIntegrity(outfit,items);
+    if(integrity.incomplete)continue;
+    const outfitItems=integrity.items
       .filter(item=>!EXCLUDED_CATEGORIES.has(item.category));
     // A saved collection is only a wearable recommendation when it contains
     // either a one-piece garment or a top + bottom core. Accessories alone
