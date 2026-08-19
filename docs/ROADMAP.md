@@ -5,7 +5,7 @@
 > Current factual runtime state lives in [`PROJECT-STATE.md`](./PROJECT-STATE.md). When chat history and the repository disagree, **verify `main` and follow the repository**.
 
 Last roadmap update: **2026-08-19**  
-Current slice: **V0.5.16 · Slice 16.10 — branding source cleanup**
+Current slice: **V0.5.16 · Slice 16.11 — end-to-end closeout**
 
 ---
 
@@ -292,19 +292,25 @@ Delivered:
 
 **Status:** engineering/governance merged. `main` branch protection is not claimed enabled; Pages/Worker/installed-device VERIFIED PROD remain separate.
 
-## Slice 16.10 — Branding source cleanup 🔵 CURRENT
+## Slice 16.10 — Branding source cleanup ✅ MERGED / STRICT GREEN
 
-Deliverables:
-- identify canonical favicon/header/logo/splash masters;
-- remove obsolete branding sources after dependency search;
-- keep deterministic icon generation;
-- ensure no workflow can resurrect retired branding.
+PR **#66**, tested head **`ae852dd88ce9fdb33304b04fbdf323f0bbda7d5d`**, squash merge **`c13f2e380fd2228375372e31ead06537f647deb1`**.
 
-Current visual identity must not change during this cleanup.
+Delivered:
+- exactly four approved branding masters remain under `branding/`, all byte-locked by Git blob SHA;
+- four historical/intermediate sources removed after dependency audit;
+- strict retired-reference and runtime/Service Worker/generator wiring guard;
+- favicon decoded-source SHA-256 remains locked;
+- Pillow pinned to **12.3.0** for deterministic generation;
+- pull requests regenerate favicon/PWA icon outputs and require zero diff;
+- Chrome smoke proves canonical header/logo/splash wiring while retaining the hardened search-focus test;
+- final **9/9** primary PR validations + **Generate brand assets SUCCESS**.
 
-## Slice 16.11 — V0.5.16 end-to-end closeout
+**Status:** engineering merged with current visual bytes unchanged. Installed-device visual/cache proof remains in Slice 16.11; do not label VERIFIED PROD from merge alone.
 
-Required QA accumulates deferred production/device proof from 16.2–16.6 plus Worker deployment proof affected by 16.8, installed-device search/sync proof affected by 16.9, and the final consolidated-runtime verification:
+## Slice 16.11 — V0.5.16 end-to-end closeout 🔵 CURRENT FINAL SLICE
+
+Required QA accumulates deferred production/device proof from 16.2–16.6 plus Worker deployment proof affected by 16.8, installed-device search/sync proof affected by 16.9, installed-device branding/cache proof affected by 16.10, and the final consolidated-runtime verification:
 - Android + iPhone install/open/update sanity;
 - clothing CREATE / UPDATE / DELETE / live cross-device reread;
 - Outfit CREATE / UPDATE / DELETE / live cross-device reread **without manual refresh**;

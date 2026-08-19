@@ -13,7 +13,7 @@ Last state update: **2026-08-19**
 - repository: `shinobione/tran-closet-pwa`
 - canonical branch: `main`
 - version file: **`v0.5.16`**
-- current runtime-changing main SHA: **`a1689d14548c4ecbffe2e4b526d6db655f546ead`** — Slice 16.9 governance + search-safe silent sync
+- current runtime-changing main SHA: **`c13f2e380fd2228375372e31ead06537f647deb1`** — Slice 16.10 canonical branding source cleanup
 - PWA: `https://shinobione.github.io/tran-closet-pwa/`
 - Cloudflare Worker: `https://tran-closet-sync.jerryquinet.workers.dev`
 - IndexedDB: `tran-closet`, schema version **4**
@@ -31,6 +31,7 @@ Important recent runtime lineage:
 - Slice 16.7 CI consolidation + browser smoke: PR **#60**, tested head **`845ffa7f9aa56f28a7e09160a85dd803dda4a45a`**, squash merge **`19b32a12de6752b5b610e502789c22f27e2a225d`** after **9/9 final PR workflows SUCCESS**; real system-Chrome smoke passed both deterministic browser scenarios.
 - Slice 16.8 canonical taxonomy unification: PR **#62**, tested head **`35d1711f480d5e711462d442d2dcfd9b44249c78`**, squash merge **`f748d0b62bc4f610009eee886d7c5e5689c80477`** after **9/9 PR workflows SUCCESS**; canonical taxonomy **17 categories / 24 colors / 6 styles / 22 tags**, client=Worker, Airtable alias round-trip and system-Chrome smoke PASS.
 - Slice 16.9 repository/deployment governance: PR **#64**, tested head **`4927f447227991b23dc48d4e6b8923176dc0a433`**, squash merge **`a1689d14548c4ecbffe2e4b526d6db655f546ead`** after **9/9 PR validations SUCCESS** + branding generator SUCCESS; 17 stale branches removed, generated-main writers hardened, and the startup silent-sync search focus regression fixed with hardened Chrome proof.
+- Slice 16.10 canonical branding source cleanup: PR **#66**, tested head **`ae852dd88ce9fdb33304b04fbdf323f0bbda7d5d`**, squash merge **`c13f2e380fd2228375372e31ead06537f647deb1`** after **9/9 PR validations SUCCESS + Generate brand assets SUCCESS**; four approved masters byte-locked, four obsolete intermediates removed, Pillow 12.3.0 pinned, generated icons zero-diff and Chrome branding wiring PASS.
 
 **Do not infer deployment from merge.** Post-merge Pages/Worker state must still be independently proven when a claim depends on deployment. The available GitHub connector is reliable for PR-triggered CI but does not consistently expose all push-triggered deployment runs.
 
@@ -70,7 +71,8 @@ The stale clothing DELETE reconciliation bug targeting `rec6sAxfNivkTmiMp` remai
   - **16.7 CI consolidation + browser smoke:** ✅ MERGED / 9/9 CI + BROWSER SMOKE GREEN.
   - **16.8 taxonomy unification:** 🟡 MERGED / 9/9 CI + BROWSER SMOKE GREEN; Worker deployment proof not inferred from merge.
   - **16.9 repo/deployment governance:** ✅ MERGED / 9/9 CI + BROWSER SMOKE GREEN; governance contract recorded, `main` protection state remains explicitly unprotected.
-  - **16.10 branding source cleanup:** 🔵 NEXT ACTIVE ENGINEERING SLICE
+  - **16.10 branding source cleanup:** ✅ MERGED / 9/9 CI + BRANDING GENERATOR + BROWSER SMOKE GREEN; installed-device visual/cache proof deferred to 16.11.
+  - **16.11 end-to-end closeout:** 🔵 CURRENT FINAL SLICE
 - **V0.5-B — Wear history & rotation:** ⏭ blocked until V0.5.16 closeout
 
 Canonical principle:
@@ -265,13 +267,24 @@ Delivered by PR **#64**:
 
 Branch protection/ruleset was not enabled: the available connector does not expose a safe mutation while preserving the two legitimate generated-main writers. This is documented governance, not an unverified claim. Final installed-device search/sync behavior remains part of Slice 16.11.
 
-### 16.10 — branding source clutter
+### 16.10 — canonical branding source cleanup — MERGED / STRICT GREEN
 
-Current visual identity is correct; old/current branding sources still need dependency-safe cleanup later. Do not redesign during consolidation.
+Delivered by PR **#66**:
+- `branding/` now contains exactly four approved visual masters: favicon source, header lockup, hero logo mark and iOS splash;
+- all four masters are byte-locked by exact Git blob SHA in `scripts/test-branding-sources.mjs`;
+- four historical/intermediate branding sources were removed after dependency audit; exact retired filenames remain documented only in `docs/BRANDING-SOURCES.md`, the intentional audit-history allowlist;
+- strict source guard scans tracked files for retired path/basename references and verifies HTML/CSS/Service Worker/generator wiring;
+- favicon generation keeps decoded source SHA-256 `b0a52f01ae3679515abc10caf1db3a331a49ab57d85928ed3a007696a1f8eb3d`;
+- Python remains 3.12 and Pillow is pinned to **12.3.0**, the exact version proven by the last successful pre-cleanup generator run;
+- PR generation regenerates `favicon.ico` + all `icons/*` outputs and requires zero diff;
+- real Chrome smoke verifies the canonical header actually loads, the hero uses `logo-mark-v057.png`, the iOS splash remains wired, and the hardened two-batch search proof stays green;
+- final tested head **`ae852dd88ce9fdb33304b04fbdf323f0bbda7d5d`** passed **9/9** primary PR validations plus **Generate brand assets SUCCESS** before squash merge **`c13f2e380fd2228375372e31ead06537f647deb1`**.
+
+No approved visual master was redesigned/recolored/recropped, and no canonical user/Airtable data or Worker behavior changed. Installed-device cache/visual confirmation remains part of Slice 16.11.
 
 ### Deferred production proof
 
-Because the user explicitly asked engineering work to continue, strict product QA for 16.2/16.3/16.4/16.5/16.6 plus deployment proof affected by 16.8 and installed-device search/sync proof affected by 16.9 is accumulated in **Slice 16.11 end-to-end closeout** rather than falsely marked VERIFIED PROD now.
+Because the user explicitly asked engineering work to continue, strict product QA for 16.2/16.3/16.4/16.5/16.6 plus deployment proof affected by 16.8, installed-device search/sync proof affected by 16.9, and installed-device branding/cache proof affected by 16.10 is accumulated in **Slice 16.11 end-to-end closeout** rather than falsely marked VERIFIED PROD now.
 
 ---
 
@@ -287,8 +300,8 @@ Because the user explicitly asked engineering work to continue, strict product Q
 8. 16.7 CI consolidation + browser smoke — ✅ merged / 9-of-9 CI + deterministic browser smoke green
 9. 16.8 taxonomy unification — 🟡 merged / 9-of-9 CI + browser smoke green; Worker deploy proof separate
 10. 16.9 repo/deployment governance — ✅ merged / 9-of-9 CI + browser smoke green
-11. **16.10 branding source cleanup — 🔵 NEXT ACTIVE**
-12. 16.11 end-to-end closeout
+11. 16.10 branding source cleanup — ✅ merged / strict branding + generator + browser smoke green
+12. **16.11 end-to-end closeout — 🔵 CURRENT FINAL SLICE**
 
 **Do not start V0.5-B before V0.5.16 is closed.**
 
@@ -296,15 +309,18 @@ Because the user explicitly asked engineering work to continue, strict product Q
 
 ## Next canonical action
 
-### Slice 16.10 — branding source cleanup
+### Slice 16.11 — V0.5.16 end-to-end closeout
 
-1. inventory all branding masters, generated outputs and every runtime/workflow/script reference;
-2. preserve the approved current identity exactly — no redesign, recolor, recrop or artistic regeneration;
-3. identify canonical favicon/header/logo/splash sources and distinguish runtime masters from obsolete historical intermediates;
-4. remove only assets proven dependency-free after repo-wide checks;
-5. keep deterministic favicon/PWA icon generation from the approved source with checksum protection;
-6. add CI/governance guards so retired branding sources cannot silently return and canonical assets cannot disappear;
-7. verify HTML/CSS/manifest/Service Worker/generator wiring plus browser smoke before merge.
+Engineering is feature-frozen for closeout unless production QA exposes a regression.
+
+1. independently verify the current Pages build identity and Worker health/deployment-sensitive contracts where possible;
+2. run the smallest real-device matrix that covers deferred proof: iPhone + secondary device/desktop cross-device sync, installed PWA update/cache, FR↔VI, search, Camera/Gallery, Profile diagnostics and branding;
+3. exercise clothing CREATE / UPDATE / DELETE and Outfit CREATE / UPDATE / DELETE with automatic cross-device convergence and no manual refresh;
+4. verify incomplete Outfit warning/repair/delete, offline queue recovery, manual sync without unexpected reload, AI human-in-the-loop and Daily Assistant complete-look filtering;
+5. finish from Profile diagnostics with no unexpected pending mutations/orphans and record the exact deployed build SHA + clean baseline;
+6. only then mark V0.5.16 CLOSED / VERIFIED PROD and unblock V0.5-B wear history & rotation.
+
+Do not introduce unrelated feature work during closeout. Any failure stays inside 16.11 until fixed and re-verified.
 
 ---
 
