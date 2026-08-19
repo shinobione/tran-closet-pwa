@@ -1,0 +1,89 @@
+name: Checkpoint V0.5.16 branding docs
+
+on:
+  push:
+    branches: [v0.5.16-state-after-branding]
+    paths:
+      - '.github/workflows/checkpoint-branding-docs.yml'
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  checkpoint:
+    if: ${{ github.event_name != 'pull_request' || github.head_ref == 'v0.5.16-state-after-branding' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: v0.5.16-state-after-branding
+          fetch-depth: 0
+      - name: Update canonical state
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          import re
+
+          def once(text,old,new,label):
+            n=text.count(old)
+            if n!=1: raise SystemExit(f'{label}: expected 1 occurrence, got {n}')
+            return text.replace(old,new)
+
+          def section(text,start,end,replacement,label):
+            pattern=re.compile(start+r'.*?(?='+end+r')',re.S|re.M)
+            out,n=pattern.subn(replacement,text,count=1)
+            if n!=1: raise SystemExit(f'{label}: expected 1 section, got {n}')
+            return out
+
+          p=Path('docs/PROJECT-STATE.md'); s=p.read_text()
+          s=once(s,
+            '- current runtime-changing main SHA: **`a1689d14548c4ecbffe2e4b526d6db655f546ead`** — Slice 16.9 governance + search-safe silent sync',
+            '- current runtime-changing main SHA: **`c13f2e380fd2228375372e31ead06537f647deb1`** — Slice 16.10 canonical branding source cleanup',
+            'runtime sha')
+          lineage='- Slice 16.9 repository/deployment governance: PR **#64**, tested head **`4927f447227991b23dc48d4e6b8923176dc0a433`**, squash merge **`a1689d14548c4ecbffe2e4b526d6db655f546ead`** after **9/9 PR validations SUCCESS** + branding generator SUCCESS; 17 stale branches removed, generated-main writers hardened, and the startup silent-sync search focus regression fixed with hardened Chrome proof.'
+          s=once(s,lineage,lineage+'\n- Slice 16.10 canonical branding source cleanup: PR **#66**, tested head **`ae852dd88ce9fdb33304b04fbdf323f0bbda7d5d`**, squash merge **`c13f2e380fd2228375372e31ead06537f647deb1`** after **9/9 PR validations SUCCESS + Generate brand assets SUCCESS**; four approved masters byte-locked, four obsolete intermediates removed, Pillow 12.3.0 pinned, generated icons zero-diff and Chrome branding wiring PASS.','lineage')
+          s=once(s,
+            '  - **16.10 branding source cleanup:** 🔵 NEXT ACTIVE ENGINEERING SLICE',
+            '  - **16.10 branding source cleanup:** ✅ MERGED / 9/9 CI + BRANDING GENERATOR + BROWSER SMOKE GREEN; installed-device visual/cache proof deferred to 16.11.\n  - **16.11 end-to-end closeout:** 🔵 CURRENT FINAL SLICE',
+            'slice status')
+          branding='''### 16.10 — canonical branding source cleanup — MERGED / STRICT GREEN\n\nDelivered by PR **#66**:\n- `branding/` now contains exactly four approved visual masters: favicon source, header lockup, hero logo mark and iOS splash;\n- all four masters are byte-locked by exact Git blob SHA in `scripts/test-branding-sources.mjs`;\n- historical/intermediate `logo-lockup-centered.png`, `logo-mark-256.png`, `logo-mark.png` and `logo-source-round.b64.part1` were removed after dependency audit;\n- strict source guard scans tracked files for retired path/basename references and verifies HTML/CSS/Service Worker/generator wiring;\n- favicon generation keeps decoded source SHA-256 `b0a52f01ae3679515abc10caf1db3a331a49ab57d85928ed3a007696a1f8eb3d`;\n- Python remains 3.12 and Pillow is pinned to **12.3.0**, the exact version proven by the last successful pre-cleanup generator run;\n- PR generation regenerates `favicon.ico` + all `icons/*` outputs and requires zero diff;\n- real Chrome smoke verifies the canonical header actually loads, the hero uses `logo-mark-v057.png`, the iOS splash remains wired, and the hardened two-batch search proof stays green;\n- final tested head **`ae852dd88ce9fdb33304b04fbdf323f0bbda7d5d`** passed **9/9** primary PR validations plus **Generate brand assets SUCCESS** before squash merge **`c13f2e380fd2228375372e31ead06537f647deb1`**.\n\nNo approved visual master was redesigned/recolored/recropped, and no canonical user/Airtable data or Worker behavior changed. Installed-device cache/visual confirmation remains part of Slice 16.11.\n\n'''
+          s=section(s,r'^### 16\.10 — branding source clutter\n',r'^### Deferred production proof\n',branding,'16.10 section')
+          s=once(s,
+            '11. **16.10 branding source cleanup — 🔵 NEXT ACTIVE**\n12. 16.11 end-to-end closeout',
+            '11. 16.10 branding source cleanup — ✅ merged / strict branding + generator + browser smoke green\n12. **16.11 end-to-end closeout — 🔵 CURRENT FINAL SLICE**',
+            'ordered plan')
+          next_action='''## Next canonical action\n\n### Slice 16.11 — V0.5.16 end-to-end closeout\n\nEngineering is feature-frozen for closeout unless production QA exposes a regression.\n\n1. independently verify the current Pages build identity and Worker health/deployment-sensitive contracts where possible;\n2. run the smallest real-device matrix that covers deferred proof: iPhone + secondary device/desktop cross-device sync, installed PWA update/cache, FR↔VI, search, Camera/Gallery, Profile diagnostics and branding;\n3. exercise clothing CREATE / UPDATE / DELETE and Outfit CREATE / UPDATE / DELETE with automatic cross-device convergence and no manual refresh;\n4. verify incomplete Outfit warning/repair/delete, offline queue recovery, manual sync without unexpected reload, AI human-in-the-loop and Daily Assistant complete-look filtering;\n5. finish from Profile diagnostics with no unexpected pending mutations/orphans and record the exact deployed build SHA + clean baseline;\n6. only then mark V0.5.16 CLOSED / VERIFIED PROD and unblock V0.5-B wear history & rotation.\n\nDo not introduce unrelated feature work during closeout. Any failure stays inside 16.11 until fixed and re-verified.\n\n---\n\n'''
+          s=section(s,r'^## Next canonical action\n',r'^## Verification vocabulary\n',next_action,'next action')
+          s=s.replace('strict product QA for 16.2/16.3/16.4/16.5/16.6 plus deployment proof affected by 16.8 and installed-device search/sync proof affected by 16.9 is accumulated','strict product QA for 16.2/16.3/16.4/16.5/16.6 plus deployment proof affected by 16.8, installed-device search/sync proof affected by 16.9, and installed-device branding/cache proof affected by 16.10 is accumulated')
+          p.write_text(s)
+
+          p=Path('docs/ROADMAP.md'); r=p.read_text()
+          r=once(r,
+            'Current slice: **V0.5.16 · Slice 16.10 — branding source cleanup**',
+            'Current slice: **V0.5.16 · Slice 16.11 — end-to-end closeout**',
+            'roadmap current')
+          branding='''## Slice 16.10 — Branding source cleanup ✅ MERGED / STRICT GREEN\n\nPR **#66**, tested head **`ae852dd88ce9fdb33304b04fbdf323f0bbda7d5d`**, squash merge **`c13f2e380fd2228375372e31ead06537f647deb1`**.\n\nDelivered:\n- exactly four approved branding masters remain under `branding/`, all byte-locked by Git blob SHA;\n- four historical/intermediate sources removed after dependency audit;\n- strict retired-reference and runtime/Service Worker/generator wiring guard;\n- favicon decoded-source SHA-256 remains locked;\n- Pillow pinned to **12.3.0** for deterministic generation;\n- pull requests regenerate favicon/PWA icon outputs and require zero diff;\n- Chrome smoke proves canonical header/logo/splash wiring while retaining the hardened search-focus test;\n- final **9/9** primary PR validations + **Generate brand assets SUCCESS**.\n\n**Status:** engineering merged with current visual bytes unchanged. Installed-device visual/cache proof remains in Slice 16.11; do not label VERIFIED PROD from merge alone.\n\n'''
+          r=section(r,r'^## Slice 16\.10 — Branding source cleanup 🔵 CURRENT\n',r'^## Slice 16\.11 — V0\.5\.16 end-to-end closeout\n',branding,'roadmap 16.10')
+          r=r.replace('## Slice 16.11 — V0.5.16 end-to-end closeout\n','## Slice 16.11 — V0.5.16 end-to-end closeout 🔵 CURRENT FINAL SLICE\n',1)
+          r=r.replace('installed-device search/sync proof affected by 16.9, and the final consolidated-runtime verification','installed-device search/sync proof affected by 16.9, installed-device branding/cache proof affected by 16.10, and the final consolidated-runtime verification')
+          p.write_text(r)
+          PY
+      - name: Validate checkpoint
+        run: |
+          grep -q 'c13f2e380fd2228375372e31ead06537f647deb1' docs/PROJECT-STATE.md
+          grep -q '16.10 branding source cleanup:.*MERGED' docs/PROJECT-STATE.md
+          grep -q '16.11 end-to-end closeout:.*CURRENT FINAL SLICE' docs/PROJECT-STATE.md
+          test "$(grep -c '^### 16.10 — canonical branding source cleanup — MERGED / STRICT GREEN$' docs/PROJECT-STATE.md)" -eq 1
+          grep -q 'Current slice: .*Slice 16.11' docs/ROADMAP.md
+          test "$(grep -c '^## Slice 16.10 — Branding source cleanup ✅ MERGED / STRICT GREEN$' docs/ROADMAP.md)" -eq 1
+          test "$(grep -c '^## Slice 16.11 — V0.5.16 end-to-end closeout 🔵 CURRENT FINAL SLICE$' docs/ROADMAP.md)" -eq 1
+      - name: Commit docs only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/PROJECT-STATE.md docs/ROADMAP.md
+          git diff --cached --quiet && exit 0
+          git commit -m "Docs · Close Slice 16.10 and activate 16.11 [skip branding-docs]"
+          git push origin HEAD:v0.5.16-state-after-branding
