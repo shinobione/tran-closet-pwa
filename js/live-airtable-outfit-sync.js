@@ -15,7 +15,12 @@ let running=false;
 let lastWatchAt=0;
 let intervalId=null;
 
-export async function syncLiveCanonicalOutfits({reloadOnChange=false}={}){
+function publishLiveChange(detail){
+  if(typeof window==='undefined'||typeof CustomEvent==='undefined')return;
+  window.dispatchEvent(new CustomEvent('tran:outfits-live-changed',{detail}));
+}
+
+export async function syncLiveCanonicalOutfits({refreshUiOnChange=false,reloadOnChange=false}={}){
   if(running)return {ok:false,busy:true};
   const {endpoint,token}=await getSyncConfig();
   if(!endpoint||!token)return {ok:false,configured:false};
@@ -59,7 +64,12 @@ export async function syncLiveCanonicalOutfits({reloadOnChange=false}={}){
 
     const after=canonicalOutfitSignature(await getAllOutfits());
     const changed=before!==after;
-    if(reloadOnChange&&changed&&document.visibilityState==='visible')location.reload();
+    // `reloadOnChange` is retained only as a compatibility alias for the first
+    // V0.5.16 implementation. Live sync now publishes a data-change signal;
+    // the UI bridge refreshes app state without a full browser reload.
+    if((refreshUiOnChange||reloadOnChange)&&changed&&document.visibilityState==='visible'){
+      publishLiveChange({recordCount:incoming.length,syncedAt:body.syncedAt||null});
+    }
     return {ok:true,changed,recordCount:incoming.length,syncedAt:body.syncedAt||null};
   }catch(error){
     await setMeta('airtable-outfit-live-last-error',{at:new Date().toISOString(),networkError:true,error:String(error?.message||error)});
@@ -75,11 +85,16 @@ export function startLiveOutfitSyncWatch(){
     const now=Date.now();
     if(now-lastWatchAt<15000)return;
     lastWatchAt=now;
-    syncLiveCanonicalOutfits({reloadOnChange:true}).catch(error=>console.warn('Live Airtable Outfit sync failed',error));
+    syncLiveCanonicalOutfits({refreshUiOnChange:true}).catch(error=>console.warn('Live Airtable Outfit sync failed',error));
   };
 
   window.addEventListener('online',check);
+  window.addEventListener('focus',check);
+  window.addEventListener('pageshow',check);
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')check();});
   if(intervalId)clearInterval(intervalId);
   intervalId=setInterval(check,30000);
+  // iOS standalone/browser restore paths are not perfectly consistent about
+  // firing visibilitychange; run one foreground check as soon as the watcher mounts.
+  setTimeout(check,0);
 }
