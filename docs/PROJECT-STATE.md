@@ -189,7 +189,6 @@ Delivered across PRs #54, #55 and #56:
 Final FR↔VI device/browser leakage verification remains part of Slice 16.11, so this is not yet VERIFIED PROD.
 
 ### 16.6 — PWA cache/version debt
-### 16.6 — PWA cache/version debt
 
 Service Worker cache namespace is still historically `tran-closet-v0.5.1` and app-shell URLs contain mixed query versions. `VERSION`/build metadata must become the single source of cache/version identity.
 
@@ -252,7 +251,6 @@ Because the user explicitly asked engineering work to continue, strict product Q
 
 ---
 
-## Verification vocabulary
 ## Verification vocabulary
 
 - **implemented** — code exists on a branch;

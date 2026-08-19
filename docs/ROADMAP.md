@@ -223,7 +223,6 @@ Delivered:
 **Status:** engineering merged / CI green. Final browser/device FR↔VI leakage QA is carried into Slice 16.11; do not label VERIFIED PROD yet.
 
 ## Slice 16.6 — Version / cache normalization 🔵 CURRENT
-## Slice 16.6 — Version / cache normalization
 
 Problem:
 - service-worker cache and many asset query strings still carry historical labels.
