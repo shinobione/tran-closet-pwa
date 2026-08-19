@@ -1,3 +1,5 @@
+import {currentLanguage,t} from './i18n-keyed.mjs?v=0.5.16';
+
 const FALLBACK={version:'v0.5.16',sha:null,shortSha:'local',builtAt:null,runId:null,source:'fallback'};
 let info=FALLBACK;
 
@@ -5,10 +7,9 @@ function isValid(value){
   return value&&/^v\d+\.\d+\.\d+$/.test(String(value.version||''))&&/^[0-9a-f]{40}$/i.test(String(value.sha||''));
 }
 
-function language(){return document.documentElement.lang==='fr'?'fr':'vi';}
 function dateLabel(value){
   if(!value)return null;
-  try{return new Intl.DateTimeFormat(language()==='fr'?'fr-FR':'vi-VN',{dateStyle:'short',timeStyle:'short'}).format(new Date(value));}
+  try{return new Intl.DateTimeFormat(currentLanguage()==='fr'?'fr-FR':'vi-VN',{dateStyle:'short',timeStyle:'short'}).format(new Date(value));}
   catch{return value;}
 }
 
@@ -28,16 +29,16 @@ function mount(){
     settings.after(card);
   }
 
-  const fr=language()==='fr';
+  const language=currentLanguage();
   const reliable=info.source==='deployment';
-  const signature=[fr?'fr':'vi',info.version,info.sha||'',info.shortSha||'',info.builtAt||'',info.source||''].join('|');
+  const signature=[language,info.version,info.sha||'',info.shortSha||'',info.builtAt||'',info.source||''].join('|');
   if(card.dataset.buildSignature===signature)return;
   card.dataset.buildSignature=signature;
 
-  card.innerHTML=`<div class="build-version-head"><div><p class="eyebrow">${fr?'VERSION DÉPLOYÉE':'PHIÊN BẢN TRIỂN KHAI'}</p><h3>${info.version} <code>${info.shortSha}</code></h3></div><span class="build-version-dot ${reliable?'is-live':''}" title="${reliable?'Build stamp GitHub Pages':'Fallback local'}"></span></div>
-    <p>${reliable?(fr?'Correspond exactement au commit servi par GitHub Pages.':'Khớp chính xác với commit đang được GitHub Pages phục vụ.'):(fr?'Build stamp indisponible · valeur locale de secours.':'Không đọc được build stamp · đang dùng giá trị dự phòng cục bộ.')}</p>
-    ${info.builtAt?`<small>${fr?'Déployé':'Triển khai'} · ${dateLabel(info.builtAt)}</small>`:''}
-    <button type="button" class="secondary-button build-version-copy">${fr?'Copier les infos de version':'Sao chép thông tin phiên bản'}</button>`;
+  card.innerHTML=`<div class="build-version-head"><div><p class="eyebrow">${t('build.eyebrow')}</p><h3>${info.version} <code>${info.shortSha}</code></h3></div><span class="build-version-dot ${reliable?'is-live':''}" title="${t(reliable?'build.liveTitle':'build.fallbackTitle')}"></span></div>
+    <p>${t(reliable?'build.exact':'build.fallback')}</p>
+    ${info.builtAt?`<small>${t('build.deployed')} · ${dateLabel(info.builtAt)}</small>`:''}
+    <button type="button" class="secondary-button build-version-copy">${t('build.copy')}</button>`;
   card.querySelector('.build-version-copy')?.addEventListener('click',copyText);
 }
 
@@ -59,7 +60,5 @@ async function load(){
 
 window.addEventListener('tran:build-info',mount);
 const main=document.querySelector('#mainContent');
-// Profile renders replace main's direct children. Observe only that boundary: never
-// observe subtree mutations created by this card, diagnostics or translations.
 if(main)new MutationObserver(mount).observe(main,{childList:true});
 await load();
