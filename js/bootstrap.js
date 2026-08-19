@@ -37,6 +37,7 @@ await import('./v0510-search.js?v=0.5.10');
 await import('./outfit-picker.js?v=0.5.1');
 await import('./outfit-sync-client.js?v=0.5.1');
 await import('./outfit-presentation.js?v=0.5.1');
+await import('./outfit-integrity-ui.js?v=0.5.16');
 await import('./item-ai-assistant.js?v=0.5.1');
 await import('./duplicate-guard.js?v=0.5.1');
 await import('./daily-assistant.js?v=0.5.1');
