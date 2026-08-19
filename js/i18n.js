@@ -382,18 +382,8 @@ if(language==='fr'){
   document.title='Dressing de Trân';
 }
 
-window.TranClosetI18n={language,setLanguage,t:translateRaw,isFrench:language==='fr'};
+window.TranClosetI18n={language,setLanguage,t:translateRaw,isFrench:language==='fr',apply:scope=>{mountSwitcher();if(language==='fr')translateTree(scope);}};
 
 mountSwitcher();
 translateTree(document.body);
 
-const observer=new MutationObserver(records=>{
-  mountSwitcher();
-  if(language!=='fr')return;
-  for(const record of records){
-    if(record.type==='characterData')translateTextNode(record.target);
-    for(const node of record.addedNodes)translateTree(node);
-    if(record.type==='attributes')translateAttributes(record.target);
-  }
-});
-observer.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['placeholder','title','aria-label']});

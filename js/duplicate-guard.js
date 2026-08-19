@@ -1,6 +1,7 @@
 import {getAllItems} from './db.js';
-import {LABELS} from './data.js';
-import {metadataSimilarity,hammingDistance,duplicateAssessment,duplicateReasons} from './duplicate-core.mjs?v=0.4.6';
+import {LABELS,FR_LABELS} from './data.js';
+import {metadataSimilarity,hammingDistance,duplicateAssessment,duplicateReasons} from './duplicate-core.mjs?v=0.5.16';
+import {t,currentLanguage} from './i18n-keyed.mjs?v=0.5.16';
 
 const root=document.querySelector('#mainContent');
 const hashMemory=new Map();
@@ -9,7 +10,7 @@ const HASH_CONCURRENCY=5;
 
 const ESC={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>ESC[char]);
-const label=(type,value)=>LABELS[type]?.[value]||value;
+const label=(type,value)=>(currentLanguage()==='fr'?FR_LABELS:LABELS)[type]?.[value]||value;
 
 function loadImage(src){
   return new Promise((resolve,reject)=>{
@@ -140,7 +141,7 @@ async function findDuplicates(candidate,items){
 function candidateMarkup(match){
   const item=match.item;
   const percent=Math.round(match.score*100);
-  const level=match.level==='high'?'Rất giống':'Có thể trùng';
+  const level=t(match.level==='high'?'duplicate.level.high':'duplicate.level.medium');
   const media=item.photo
     ? `<img src="${esc(item.photo)}" alt="${esc(item.name)}">`
     : `<span>◇</span>`;
@@ -148,7 +149,7 @@ function candidateMarkup(match){
     <div class="duplicate-candidate-media">${media}</div>
     <div class="duplicate-candidate-copy">
       <div class="duplicate-candidate-title"><div><strong>${esc(item.name)}</strong><small>${esc(label('category',item.category))}</small></div><b>${percent}%</b></div>
-      <div class="duplicate-reasons">${match.reasons.map(reason=>`<span>${esc(reason)}</span>`).join('')}</div>
+      <div class="duplicate-reasons">${match.reasons.map(reason=>`<span>${esc(t(reason.key,reason.params||{}))}</span>`).join('')}</div>
       <small class="duplicate-level">${level}</small>
     </div>
   </article>`;
@@ -165,14 +166,14 @@ function renderWarning(form,matches){
   panel.className='duplicate-warning';
   panel.setAttribute('role','alert');
   panel.innerHTML=`
-    <div class="duplicate-warning-head"><span>◎</span><div><p class="eyebrow">KIỂM TRA TRÙNG</p><h3>Có vẻ món này đã có trong tủ</h3></div></div>
-    <p>Ứng dụng chỉ cảnh báo dựa trên ảnh và thông tin hiện tại. Hãy kiểm tra các món gần giống trước khi lưu thêm một bản nữa.</p>
+    <div class="duplicate-warning-head"><span>◎</span><div><p class="eyebrow">${t('duplicate.eyebrow')}</p><h3>${t('duplicate.title')}</h3></div></div>
+    <p>${t('duplicate.body')}</p>
     <div class="duplicate-candidates">${matches.map(candidateMarkup).join('')}</div>
     <div class="duplicate-actions">
-      <button type="button" class="secondary-button" data-dup-dismiss>Quay lại kiểm tra</button>
-      <button type="button" class="primary-button" data-dup-continue>Vẫn lưu món này</button>
+      <button type="button" class="secondary-button" data-dup-dismiss>${t('duplicate.review')}</button>
+      <button type="button" class="primary-button" data-dup-continue>${t('duplicate.continue')}</button>
     </div>
-    <small>Không có món nào bị xóa hoặc gộp tự động. Quyết định cuối cùng luôn là của Trân.</small>`;
+    <small>${t('duplicate.footnote')}</small>`;
   submit?.before(panel);
   panel.querySelector('[data-dup-dismiss]')?.addEventListener('click',()=>{
     panel.remove();
@@ -204,7 +205,7 @@ function mount(){
 
     const submit=form.querySelector('button[type="submit"]');
     const originalText=submit?.textContent||'Lưu vào tủ đồ';
-    if(submit){submit.disabled=true;submit.textContent='Đang kiểm tra trùng…';}
+    if(submit){submit.disabled=true;submit.textContent=t('duplicate.checking');}
 
     try{
       const [items,candidate]=await Promise.all([getAllItems(),Promise.resolve(formCandidate(form,photoInput))]);

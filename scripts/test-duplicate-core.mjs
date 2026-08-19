@@ -20,7 +20,8 @@ assert.equal(exactMeta.name,1);
 const exactImage=duplicateAssessment({distance:2,metadata:exactMeta});
 assert.equal(exactImage.level,'high');
 assert.ok(exactImage.score>.9);
-assert.ok(duplicateReasons(exactImage).includes('Ảnh gần như trùng'));
+assert.ok(duplicateReasons(exactImage).some(reason=>reason.key==='duplicate.reason.nearlyIdentical'));
+assert.ok(duplicateReasons(exactImage).every(reason=>typeof reason.key==='string'));
 
 const visuallyClose=duplicateAssessment({
   distance:10,

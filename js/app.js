@@ -250,6 +250,7 @@ function profile(){
 function render(){
   main.innerHTML=state.route==='closet'?closet():state.route==='favorites'?closet(true):state.route==='add'?addView():state.route==='outfits'?outfits():profile();
   bind();
+  window.TranClosetI18n?.apply?.(main);
 }
 
 async function bindSyncForm(){

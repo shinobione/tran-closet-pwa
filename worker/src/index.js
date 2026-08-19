@@ -198,7 +198,8 @@ async function describeWardrobePhoto(photo,env,mode='primary'){
   return description.slice(0,1600);
 }
 
-async function classifyDescriptions(descriptions,env){
+async function classifyDescriptions(descriptions,env,language='vi'){
+  const outputLanguage=language==='fr'?'French':'Vietnamese';
   const numbered=descriptions.map((text,index)=>`VISION PASS ${index+1}:\n${text}`).join('\n\n');
   const prompt=[
     'You classify ONE private wardrobe item using ONLY the independent visual descriptions below.',
@@ -224,10 +225,10 @@ async function classifyDescriptions(descriptions,env){
     '- Travel-friendly/Compact = folding or clearly portable functional object; Cozy = soft/cushioned comfort object.',
     '- Minimal = visually simple/clean; Statement = intentionally eye-catching focal design.',
     'Do not infer tags from brand reputation, gender, price, identity, or hidden material properties.',
-    'tagReason must be one short Vietnamese sentence explaining the strongest visible evidence for the chosen tags. If tags is empty, explain briefly that no extra tag is visually certain.',
+    `tagReason must be one short ${outputLanguage} sentence explaining the strongest visible evidence for the chosen tags. If tags is empty, explain briefly that no extra tag is visually certain.`,
     'Set recognized=false only when the descriptions genuinely fail to identify any wardrobe item.',
     'confidence is confidence in the final classification from 0 to 1. Do not use 1.0 when the vision passes conflict materially.',
-    'reason must be one short Vietnamese sentence grounded only in the descriptions.',
+    `reason must be one short ${outputLanguage} sentence grounded only in the descriptions.`,
     '',
     numbered
   ].join('\n');
@@ -248,18 +249,19 @@ async function analyzeItem(payload,env){
   if(!env.AI)throw new Error('Workers AI binding is not configured');
   const photo=parsePhoto(payload?.image,MAX_AI_IMAGE_BYTES);
   if(!photo)throw new Error('Missing image');
+  const language=payload?.language==='fr'?'fr':'vi';
 
   const descriptions=await Promise.all([
     describeWardrobePhoto(photo,env,'primary'),
     describeWardrobePhoto(photo,env,'crosscheck')
   ]);
-  let analysis=await classifyDescriptions(descriptions,env);
+  let analysis=await classifyDescriptions(descriptions,env,language);
   let retryUsed=false;
 
   if(needsRetry(analysis)){
     retryUsed=true;
     descriptions.push(await describeWardrobePhoto(photo,env,'rescue'));
-    analysis=await classifyDescriptions(descriptions,env);
+    analysis=await classifyDescriptions(descriptions,env,language);
   }
 
   const reliability=reliabilityFor(analysis,{retryUsed});
