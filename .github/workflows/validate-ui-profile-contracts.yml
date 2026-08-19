@@ -37,6 +37,8 @@ jobs:
           node --check scripts/generate-taxonomy.mjs
           node --check scripts/test-taxonomy.mjs
           node --check scripts/test-ci-topology.mjs
+          node --check scripts/test-repository-governance.mjs
+          bash -n scripts/commit-generated-artifacts.sh
           node --check sw.js
 
       - name: Check live mobile and photo source contracts
@@ -131,3 +133,6 @@ jobs:
 
       - name: Guard consolidated CI topology
         run: node scripts/test-ci-topology.mjs
+
+      - name: Guard repository and deployment governance
+        run: node scripts/test-repository-governance.mjs
