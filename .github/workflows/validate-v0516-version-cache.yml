@@ -1,0 +1,53 @@
+name: Validate V0.5.16 version and cache identity
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-version-cache:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check normalization tooling syntax
+        run: |
+          node --check scripts/normalize-release-refs.mjs
+          node --check scripts/test-version-cache.mjs
+          node --check scripts/test-pwa-isolation.mjs
+          node --check sw.js
+          node --check js/app.js
+
+      - name: Reject release reference drift
+        run: node scripts/normalize-release-refs.mjs
+
+      - name: Test exact build cache and app-shell coherence
+        run: node scripts/test-version-cache.mjs
+
+      - name: Test PWA namespace isolation
+        run: node scripts/test-pwa-isolation.mjs
+
+      - name: Check deployment proof contract
+        run: |
+          VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
+          RELEASE="${VERSION_VALUE#v}"
+          echo "$VERSION_VALUE" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'
+          grep -q "node scripts/normalize-release-refs.mjs" .github/workflows/deploy-pages.yml
+          grep -q "node scripts/test-version-cache.mjs" .github/workflows/deploy-pages.yml
+          grep -q "git rev-parse HEAD" .github/workflows/deploy-pages.yml
+          grep -q "shortSha:sha.slice(0,7)" .github/workflows/deploy-pages.yml
+          grep -q "build-info.json" .github/workflows/deploy-pages.yml
+          grep -q "const CACHE_PREFIX='tran-closet-'" sw.js
+          grep -q 'shortSha' sw.js
+          grep -q "bootstrap.js?v=${RELEASE}" index.html
+          grep -q "icon-192.png?v=${RELEASE}" manifest.webmanifest
+          grep -q "updateViaCache:'none'" js/app.js
+          ! grep -q "const CACHE = 'tran-closet-v0.5.1'" sw.js
