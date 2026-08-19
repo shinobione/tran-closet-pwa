@@ -1,0 +1,76 @@
+name: Validate V0.5.16 runtime consolidation
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-runtime-consolidation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check canonical runtime syntax
+        run: |
+          node --check js/app-refresh.js
+          node --check js/closet-search-core.mjs
+          node --check js/closet-search.js
+          node --check js/photo-picker.js
+          node --check js/manual-sync.js
+          node --check js/i18n-runtime-compat.js
+          node --check js/bootstrap.js
+          node --check scripts/test-runtime-consolidation.mjs
+          node --check sw.js
+
+      - name: Test canonical search behavior
+        run: node scripts/test-runtime-consolidation.mjs
+
+      - name: Reject historical runtime hotfix imports and files
+        run: |
+          for legacy in \
+            js/v0512-sync-hotfix.js \
+            js/v059-ux-fixes.js \
+            js/v0510-search.js \
+            js/photo-picker-mobile.js \
+            js/i18n-v059-hotfix.js \
+            js/i18n-v0510-profile.js \
+            js/i18n-v0513-ai.js \
+            js/assistant-ui-hotfix.js \
+            js/live-outfit-ui-bridge.js; do
+            test ! -e "$legacy"
+          done
+
+      - name: Check canonical search/photo/sync behavior
+        run: |
+          grep -q "closet-search-core.mjs?v=0.5.16" js/closet-search.js
+          grep -q "stopImmediatePropagation()" js/closet-search.js
+          grep -q "removeAttribute('capture')" js/photo-picker.js
+          grep -q "data-photo-camera" js/photo-picker.js
+          grep -q "data-photo-gallery" js/photo-picker.js
+          grep -q "flushMutationQueue()" js/manual-sync.js
+          grep -q "flushOutfitQueue()" js/manual-sync.js
+          ! grep -q "location.reload()" js/manual-sync.js
+
+      - name: Check reduced observer topology
+        run: |
+          ! grep -q "subtree:true" js/closet-search.js
+          ! grep -q "subtree:true" js/photo-picker.js
+          test "$(grep -c 'new MutationObserver' js/i18n-runtime-compat.js)" -eq 1
+          grep -q "ignores characterData/attributes" js/i18n-runtime-compat.js
+
+      - name: Check canonical integration and offline shell
+        run: |
+          test "$(tr -d '\r\n' < VERSION)" = "v0.5.16"
+          for module in app-refresh closet-search photo-picker manual-sync i18n-runtime-compat; do
+            grep -q "./${module}.js?v=0.5.16" js/bootstrap.js
+            grep -q "./js/${module}.js?v=0.5.16" sw.js
+          done
+          grep -q "./js/closet-search-core.mjs?v=0.5.16" sw.js

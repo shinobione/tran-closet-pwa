@@ -20,26 +20,27 @@ jobs:
       - name: Check JavaScript syntax
         run: |
           node --check js/data.js
-          node --check js/photo-picker-mobile.js
-          node --check js/v059-ux-fixes.js
-          node --check js/i18n-v059-hotfix.js
+          node --check js/photo-picker.js
+          node --check js/closet-search-core.mjs
+          node --check js/closet-search.js
+          node --check js/i18n-runtime-compat.js
           node --check worker/src/v059.js
           node --check js/bootstrap.js
           node --check sw.js
       - name: Check dual camera and gallery contract
         run: |
-          grep -q "camera.id='cameraInput'" js/photo-picker-mobile.js
-          grep -q "camera.setAttribute('capture','environment')" js/photo-picker-mobile.js
-          grep -q "input.removeAttribute('capture')" js/photo-picker-mobile.js
-          grep -q "data-photo-camera" js/photo-picker-mobile.js
-          grep -q "data-photo-gallery" js/photo-picker-mobile.js
-          grep -q "input.dataset.photo=photo" js/photo-picker-mobile.js
-      - name: Check uninterrupted search contract
+          grep -q "camera.id='cameraInput'" js/photo-picker.js
+          grep -q "camera.setAttribute('capture','environment')" js/photo-picker.js
+          grep -q "input.removeAttribute('capture')" js/photo-picker.js
+          grep -q "data-photo-camera" js/photo-picker.js
+          grep -q "data-photo-gallery" js/photo-picker.js
+          grep -q "input.dataset.photo=photo" js/photo-picker.js
+      - name: Check uninterrupted canonical search contract
         run: |
-          grep -q "#searchInput" js/v059-ux-fixes.js
-          grep -q "queueMicrotask" js/v059-ux-fixes.js
-          grep -q "focus({preventScroll:true})" js/v059-ux-fixes.js
-          grep -q "setSelectionRange" js/v059-ux-fixes.js
+          grep -q "#searchInput" js/closet-search.js
+          grep -q "card.hidden=!show" js/closet-search.js
+          grep -q "FR_LABELS" js/closet-search-core.mjs
+          ! grep -q "focus({preventScroll:true})" js/closet-search.js
       - name: Check expanded color taxonomy and French labels
         run: |
           grep -q "'Navy','Light Blue','Turquoise','Teal'" js/data.js
@@ -58,14 +59,14 @@ jobs:
           grep -q "Use Navy for very dark blue" worker/src/v059.js
           grep -q "Distinguish Beige, Cream and White" worker/src/v059.js
           grep -q "colorTaxonomy='v0.5.9'" worker/src/v059.js
-      - name: Check integration and French cleanup
+      - name: Check canonical runtime integration
         run: |
           test -f css/v059-ux.css
           grep -q "v059-ux.css?v=0.5.9" index.html
-          grep -q "v059-ux-fixes.js?v=0.5.9" js/bootstrap.js
-          grep -q "i18n-v059-hotfix.js?v=0.5.9" js/bootstrap.js
-          grep -q "v059-ux-fixes.js?v=0.5.9" sw.js
-          grep -q "i18n-v059-hotfix.js?v=0.5.9" sw.js
-          grep -q "Prendre une photo" js/i18n-v059-hotfix.js
-          grep -q "Choisir dans la galerie" js/i18n-v059-hotfix.js
-          grep -q "Météo + vrai dressing + occasion du jour" js/i18n-v059-hotfix.js
+          grep -q "closet-search.js?v=0.5.16" js/bootstrap.js
+          grep -q "photo-picker.js?v=0.5.16" js/bootstrap.js
+          grep -q "i18n-runtime-compat.js?v=0.5.16" js/bootstrap.js
+          grep -q "closet-search-core.mjs?v=0.5.16" sw.js
+          grep -q "closet-search.js?v=0.5.16" sw.js
+          grep -q "i18n-runtime-compat.js?v=0.5.16" sw.js
+          grep -q "Ouvrir dans Tenues" js/i18n-runtime-compat.js

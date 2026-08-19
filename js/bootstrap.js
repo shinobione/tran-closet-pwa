@@ -27,15 +27,13 @@ try{
   console.warn('Live Airtable Outfit hydration failed; keeping snapshot/local outfits.',error);
 }
 
-// Legacy CI markers only: photo-picker-mobile.js?v=0.5.8 · sync-diagnostics.js?v=0.5.1
-await import('./photo-picker-mobile.js?v=0.5.10');
 await import('./app.js?v=0.5.1');
-await import('./live-outfit-ui-bridge.js?v=0.5.16');
-await import('./v0512-sync-hotfix.js?v=0.5.12');
-await import('./v059-ux-fixes.js?v=0.5.9');
-await import('./v0510-search.js?v=0.5.10');
+await import('./app-refresh.js?v=0.5.16');
+await import('./closet-search.js?v=0.5.16');
+await import('./photo-picker.js?v=0.5.16');
 await import('./outfit-picker.js?v=0.5.1');
 await import('./outfit-sync-client.js?v=0.5.1');
+await import('./manual-sync.js?v=0.5.16');
 await import('./outfit-presentation.js?v=0.5.1');
 await import('./outfit-integrity-ui.js?v=0.5.16');
 await import('./item-ai-assistant.js?v=0.5.1');
@@ -43,11 +41,8 @@ await import('./duplicate-guard.js?v=0.5.1');
 await import('./daily-assistant.js?v=0.5.1');
 await import('./sync-diagnostics.js?v=0.5.16');
 await import('./i18n.js?v=0.5.1');
-await import('./i18n-v059-hotfix.js?v=0.5.9');
-await import('./i18n-v0510-profile.js?v=0.5.16');
-await import('./i18n-v0513-ai.js?v=0.5.16');
+await import('./i18n-runtime-compat.js?v=0.5.16');
 await import('./build-version.js?v=0.5.16');
-await import('./assistant-ui-hotfix.js?v=0.5.2');
 
 startLiveSyncWatch();
 startLiveOutfitSyncWatch();

@@ -21,31 +21,30 @@ jobs:
         run: |
           node --check js/build-version.js
           node --check js/sync-diagnostics.js
-          node --check js/i18n-v0510-profile.js
-          node --check js/i18n-v0513-ai.js
+          node --check js/i18n.js
+          node --check js/i18n-runtime-compat.js
           node --check js/bootstrap.js
           node --check sw.js
       - name: Reject recursive Profile observers
         run: |
           grep -q "observe(main,{childList:true})" js/build-version.js
           grep -q "observe(main,{childList:true})" js/sync-diagnostics.js
-          grep -q "observe(main,{childList:true})" js/i18n-v0510-profile.js
           ! grep -q "subtree:true" js/build-version.js
           ! grep -q "subtree:true" js/sync-diagnostics.js
-          ! grep -q "subtree:true" js/i18n-v0510-profile.js
+          test "$(grep -c 'new MutationObserver' js/i18n-runtime-compat.js)" -eq 1
+          grep -q "ignores characterData/attributes" js/i18n-runtime-compat.js
       - name: Check French dynamic AI retry coverage
         run: |
-          grep -q "AI đã tự thử lại" js/i18n-v0513-ai.js
-          grep -q "L’IA a réessayé automatiquement" js/i18n-v0513-ai.js
-          grep -q "Đang tự thử lại" js/i18n-v0513-ai.js
-          grep -q "Nouvelle tentative automatique" js/i18n-v0513-ai.js
+          grep -q "AI đã tự thử lại" js/i18n.js
+          grep -q "L’IA a réessayé" js/i18n.js
+          grep -q "Đang tự thử lại" js/i18n.js
+          grep -q "Nouvel essai automatique" js/i18n.js
       - name: Check current-version integration
         run: |
           VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
           echo "$VERSION_VALUE" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'
           grep -q "version:'${VERSION_VALUE}'" js/build-version.js
           grep -q "sync-diagnostics.js?v=${VERSION_VALUE#v}" js/bootstrap.js
-          grep -q "i18n-v0510-profile.js?v=${VERSION_VALUE#v}" js/bootstrap.js
-          grep -q "i18n-v0513-ai.js?v=${VERSION_VALUE#v}" js/bootstrap.js
+          grep -q "i18n-runtime-compat.js?v=${VERSION_VALUE#v}" js/bootstrap.js
           grep -q "build-version.js?v=${VERSION_VALUE#v}" js/bootstrap.js
-          grep -q "i18n-v0513-ai.js?v=${VERSION_VALUE#v}" sw.js
+          grep -q "i18n-runtime-compat.js?v=${VERSION_VALUE#v}" sw.js

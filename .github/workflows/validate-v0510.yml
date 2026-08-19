@@ -19,26 +19,25 @@ jobs:
           node-version: '22'
       - name: Check JavaScript syntax
         run: |
-          node --check js/photo-picker-mobile.js
-          node --check js/v0510-search.js
-          node --check js/i18n-v0510-profile.js
-          node --check js/i18n-v0513-ai.js
+          node --check js/photo-picker.js
+          node --check js/closet-search-core.mjs
+          node --check js/closet-search.js
+          node --check js/i18n-runtime-compat.js
           node --check js/build-version.js
           node --check js/sync-diagnostics.js
           node --check js/bootstrap.js
           node --check sw.js
       - name: Check photo source chooser
         run: |
-          grep -q "camera.setAttribute('capture','environment')" js/photo-picker-mobile.js
-          grep -q "input.removeAttribute('capture')" js/photo-picker-mobile.js
-          grep -q "preview.insertAdjacentHTML('beforeend',sourceMarkup())" js/photo-picker-mobile.js
-          grep -q "event.stopImmediatePropagation()" js/photo-picker-mobile.js
+          grep -q "camera.setAttribute('capture','environment')" js/photo-picker.js
+          grep -q "input.removeAttribute('capture')" js/photo-picker.js
+          grep -q "event.stopImmediatePropagation()" js/photo-picker.js
       - name: Check non destructive search
         run: |
-          grep -q "event.stopImmediatePropagation()" js/v0510-search.js
-          grep -q "card.hidden=!show" js/v0510-search.js
-          grep -q "FR_LABELS" js/v0510-search.js
-          if grep -q "state.query=e.target.value;render()" js/v0510-search.js; then exit 1; fi
+          grep -q "event.stopImmediatePropagation()" js/closet-search.js
+          grep -q "card.hidden=!show" js/closet-search.js
+          grep -q "FR_LABELS" js/closet-search-core.mjs
+          ! grep -q "state.query=e.target.value;render()" js/closet-search.js
       - name: Check reliable deployment version
         run: |
           VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
@@ -56,28 +55,26 @@ jobs:
           grep -q "if(summary.textContent!==next)summary.textContent=next" js/sync-diagnostics.js
           grep -q "observe(main,{childList:true})" js/build-version.js
           grep -q "observe(main,{childList:true})" js/sync-diagnostics.js
-          grep -q "observe(main,{childList:true})" js/i18n-v0510-profile.js
-          if grep -q "subtree:true" js/build-version.js; then exit 1; fi
-          if grep -q "subtree:true" js/sync-diagnostics.js; then exit 1; fi
-          if grep -q "subtree:true" js/i18n-v0510-profile.js; then exit 1; fi
-          VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
-          grep -q "build-version.js?v=${VERSION_VALUE#v}" js/bootstrap.js
-          grep -q "sync-diagnostics.js?v=${VERSION_VALUE#v}" js/bootstrap.js
-      - name: Check integration
+          ! grep -q "subtree:true" js/build-version.js
+          ! grep -q "subtree:true" js/sync-diagnostics.js
+          test "$(grep -c 'new MutationObserver' js/i18n-runtime-compat.js)" -eq 1
+          grep -q "characterData/attributes" js/i18n-runtime-compat.js
+      - name: Check canonical runtime integration
         run: |
           test -f css/v0510-ux.css
           grep -q "v0510-ux.css?v=0.5.10" index.html
-          grep -q "photo-picker-mobile.js?v=0.5.10" js/bootstrap.js
-          grep -q "v0510-search.js?v=0.5.10" js/bootstrap.js
+          grep -q "photo-picker.js?v=0.5.16" js/bootstrap.js
+          grep -q "closet-search.js?v=0.5.16" js/bootstrap.js
+          grep -q "i18n-runtime-compat.js?v=0.5.16" js/bootstrap.js
           VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
-          grep -q "i18n-v0510-profile.js?v=${VERSION_VALUE#v}" js/bootstrap.js
-          grep -q "i18n-v0513-ai.js?v=${VERSION_VALUE#v}" js/bootstrap.js
-          grep -q "v0510-search.js?v=0.5.10" sw.js
-          grep -q "build-version.js?v=${VERSION_VALUE#v}" sw.js
-          grep -q "i18n-v0513-ai.js?v=${VERSION_VALUE#v}" sw.js
-      - name: Check French profile coverage
+          grep -q "build-version.js?v=${VERSION_VALUE#v}" js/bootstrap.js
+          grep -q "sync-diagnostics.js?v=${VERSION_VALUE#v}" js/bootstrap.js
+          grep -q "closet-search-core.mjs?v=0.5.16" sw.js
+          grep -q "closet-search.js?v=0.5.16" sw.js
+          grep -q "i18n-runtime-compat.js?v=0.5.16" sw.js
+      - name: Check French profile coverage remains canonical
         run: |
-          grep -q "Synchronisation configurée" js/i18n-v0510-profile.js
-          grep -q "Adresse du Worker" js/i18n-v0510-profile.js
-          grep -q "Clé de synchronisation" js/i18n-v0510-profile.js
-          grep -q "Réinitialiser les données locales" js/i18n-v0510-profile.js
+          grep -q "Synchronisation configurée" js/i18n.js
+          grep -q "Adresse du Worker" js/i18n.js
+          grep -q "Clé de synchronisation" js/i18n.js
+          grep -q "Réinitialiser les données locales" js/i18n.js
