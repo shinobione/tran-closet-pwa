@@ -54,9 +54,8 @@ for(const file of expected){
 
 const tracked=execFileSync('git',['ls-files','-z'],{cwd:root}).toString('utf8').split('\0').filter(Boolean);
 for(const retired of RETIRED){
-  const relativeName=retired;
   const offenders=[];
-  const needle=Buffer.from(relativeName);
+  const needle=Buffer.from(retired);
   for(const file of tracked){
     if(file===retired||allowedReferenceDocs.has(file))continue;
     const full=path.join(root,file);
@@ -76,7 +75,6 @@ const wiring=[
   ['sw.js','./branding/header-lockup-v057.png'],
   ['sw.js','./branding/logo-mark-v057.png'],
   ['sw.js','./branding/splash-1242x2688.png'],
-  ['scripts/generate-brand-assets.py',"branding/favicon-user-v058.b64"],
   ['.github/workflows/generate-brand-assets.yml','branding/favicon-user-v058.b64'],
   ['.github/workflows/generate-brand-assets.yml','branding/header-lockup-v057.png'],
   ['.github/workflows/generate-brand-assets.yml','branding/logo-mark-v057.png'],
@@ -87,6 +85,9 @@ for(const [file,needle] of wiring){
 }
 
 const generator=text('scripts/generate-brand-assets.py');
+if(!generator.includes("BRANDING = ROOT / 'branding'")||!generator.includes("SOURCE_TEXT = BRANDING / 'favicon-user-v058.b64'")){
+  fail('favicon generator no longer resolves canonical branding/favicon-user-v058.b64');
+}
 if(!generator.includes("EXPECTED_SHA256 = 'b0a52f01ae3679515abc10caf1db3a331a49ab57d85928ed3a007696a1f8eb3d'")){
   fail('favicon decoded-source SHA-256 lock changed or disappeared');
 }
