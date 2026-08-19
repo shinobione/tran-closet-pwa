@@ -55,7 +55,7 @@ jobs:
           pr51_merged="$(jq -r '.mergedAt // empty' <<<"$pr51")"
           pr51_head="$(jq -r '.headRefOid // empty' <<<"$pr51")"
           test -n "$pr51_merged"
-          test "$pr51_head" = "78c3fb2d6df704a447555623dc4ec4b031ae6a43"
+          test "$pr51_head" = "78c3fb6908495f69524e5dbe09ba2f86cbbb3301"
 
           for branch in "${stale_branches[@]}"; do
             current_sha="$(git ls-remote origin "refs/heads/$branch" | awk '{print $1}')"
