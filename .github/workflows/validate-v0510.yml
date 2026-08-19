@@ -60,18 +60,19 @@ jobs:
           test ! -e js/i18n-runtime-compat.js
       - name: Check canonical runtime integration
         run: |
-          test -f css/v0510-ux.css
-          grep -q "v0510-ux.css?v=0.5.10" index.html
-          grep -q "photo-picker.js?v=0.5.16" js/bootstrap.js
-          grep -q "closet-search.js?v=0.5.16" js/bootstrap.js
-          grep -q "app.js?v=0.5.16" js/bootstrap.js
-          grep -q "outfit-picker.js?v=0.5.16" js/bootstrap.js
           VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
-          grep -q "build-version.js?v=${VERSION_VALUE#v}" js/bootstrap.js
-          grep -q "sync-diagnostics.js?v=${VERSION_VALUE#v}" js/bootstrap.js
-          grep -q "closet-search-core.mjs?v=0.5.16" sw.js
-          grep -q "closet-search.js?v=0.5.16" sw.js
-          grep -q "i18n-keyed.mjs?v=0.5.16" sw.js
+          RELEASE="${VERSION_VALUE#v}"
+          test -f css/v0510-ux.css
+          grep -q "v0510-ux.css?v=${RELEASE}" index.html
+          grep -q "photo-picker.js?v=${RELEASE}" js/bootstrap.js
+          grep -q "closet-search.js?v=${RELEASE}" js/bootstrap.js
+          grep -q "app.js?v=${RELEASE}" js/bootstrap.js
+          grep -q "outfit-picker.js?v=${RELEASE}" js/bootstrap.js
+          grep -q "build-version.js?v=${RELEASE}" js/bootstrap.js
+          grep -q "sync-diagnostics.js?v=${RELEASE}" js/bootstrap.js
+          grep -q "closet-search-core.mjs?v=${RELEASE}" sw.js
+          grep -q "closet-search.js?v=${RELEASE}" sw.js
+          grep -q "i18n-keyed.mjs?v=${RELEASE}" sw.js
           ! grep -q "i18n-runtime-compat.js" js/bootstrap.js
           ! grep -q "i18n-runtime-compat.js" sw.js
       - name: Check French profile coverage remains canonical

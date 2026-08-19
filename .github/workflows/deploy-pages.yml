@@ -30,6 +30,15 @@ jobs:
         with:
           ref: main
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate release references and PWA cache contract
+        run: |
+          node scripts/normalize-release-refs.mjs
+          node scripts/test-version-cache.mjs
+
       - name: Build exact deployment stamp
         run: |
           node <<'NODE'

@@ -61,14 +61,16 @@ jobs:
           grep -q "colorTaxonomy='v0.5.9'" worker/src/v059.js
       - name: Check canonical runtime integration
         run: |
+          VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
+          RELEASE="${VERSION_VALUE#v}"
           test -f css/v059-ux.css
-          grep -q "v059-ux.css?v=0.5.9" index.html
-          grep -q "closet-search.js?v=0.5.16" js/bootstrap.js
-          grep -q "photo-picker.js?v=0.5.16" js/bootstrap.js
-          grep -q "outfit-picker.js?v=0.5.16" js/bootstrap.js
-          grep -q "i18n.js?v=0.5.1" js/bootstrap.js
-          grep -q "closet-search-core.mjs?v=0.5.16" sw.js
-          grep -q "closet-search.js?v=0.5.16" sw.js
-          grep -q "i18n-keyed.mjs?v=0.5.16" sw.js
+          grep -q "v059-ux.css?v=${RELEASE}" index.html
+          grep -q "closet-search.js?v=${RELEASE}" js/bootstrap.js
+          grep -q "photo-picker.js?v=${RELEASE}" js/bootstrap.js
+          grep -q "outfit-picker.js?v=${RELEASE}" js/bootstrap.js
+          grep -q "i18n.js?v=${RELEASE}" js/bootstrap.js
+          grep -q "closet-search-core.mjs?v=${RELEASE}" sw.js
+          grep -q "closet-search.js?v=${RELEASE}" sw.js
+          grep -q "i18n-keyed.mjs?v=${RELEASE}" sw.js
           test ! -e js/i18n-runtime-compat.js
           grep -q "'daily.openSaved':'Ouvrir dans Tenues'" js/i18n-keyed.mjs

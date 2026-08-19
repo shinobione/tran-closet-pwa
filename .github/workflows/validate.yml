@@ -45,6 +45,9 @@ jobs:
           node --check scripts/test-smart-tags.mjs
           node --check scripts/test-daily-assistant.mjs
           node --check scripts/test-keyed-i18n.mjs
+          node --check scripts/normalize-release-refs.mjs
+          node --check scripts/test-version-cache.mjs
+          node --check scripts/test-pwa-isolation.mjs
           node --check worker/src/index.js
           node --check sw.js
       - name: Run focused unit tests
@@ -53,12 +56,17 @@ jobs:
           node scripts/test-smart-tags.mjs
           node scripts/test-daily-assistant.mjs
           node scripts/test-keyed-i18n.mjs
+          node scripts/normalize-release-refs.mjs
+          node scripts/test-version-cache.mjs
+          node scripts/test-pwa-isolation.mjs
       - name: Check JSON and manifest
         run: |
           python -m json.tool manifest.webmanifest > /dev/null
           python -m json.tool worker/package.json > /dev/null
       - name: Check PWA and sync shell files
         run: |
+          VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
+          RELEASE="${VERSION_VALUE#v}"
           test -f index.html
           test -f css/app.css
           test -f css/outfits.css
@@ -90,24 +98,28 @@ jobs:
           test -f scripts/test-smart-tags.mjs
           test -f scripts/test-daily-assistant.mjs
           test -f scripts/test-keyed-i18n.mjs
+          test -f scripts/normalize-release-refs.mjs
+          test -f scripts/test-version-cache.mjs
+          test -f scripts/test-pwa-isolation.mjs
           test -f scripts/sync-airtable.mjs
           test -f scripts/sync-outfits.mjs
           test -f worker/src/index.js
           test -f worker/wrangler.toml
-          grep -q 'bootstrap.js?v=0.5.1' index.html
-          grep -q 'item-ai-assistant.css?v=0.5.1' index.html
-          grep -q 'duplicate-guard.css?v=0.5.1' index.html
-          grep -q 'daily-assistant.css?v=0.5.1' index.html
-          grep -q 'i18n.css?v=0.5.1' index.html
-          grep -q 'app.js?v=0.5.16' js/bootstrap.js
-          grep -q 'outfit-picker.js?v=0.5.16' js/bootstrap.js
-          grep -q 'item-ai-assistant.js?v=0.5.1' js/bootstrap.js
-          grep -q 'duplicate-guard.js?v=0.5.1' js/bootstrap.js
-          grep -q 'daily-assistant.js?v=0.5.16' js/bootstrap.js
-          grep -q 'sync-diagnostics.js?v=0.5.16' js/bootstrap.js
-          grep -q 'i18n.js?v=0.5.1' js/bootstrap.js
+          grep -Fq "bootstrap.js?v=${RELEASE}" index.html
+          grep -Fq "item-ai-assistant.css?v=${RELEASE}" index.html
+          grep -Fq "duplicate-guard.css?v=${RELEASE}" index.html
+          grep -Fq "daily-assistant.css?v=${RELEASE}" index.html
+          grep -Fq "i18n.css?v=${RELEASE}" index.html
+          grep -Fq "app.js?v=${RELEASE}" js/bootstrap.js
+          grep -Fq "outfit-picker.js?v=${RELEASE}" js/bootstrap.js
+          grep -Fq "item-ai-assistant.js?v=${RELEASE}" js/bootstrap.js
+          grep -Fq "duplicate-guard.js?v=${RELEASE}" js/bootstrap.js
+          grep -Fq "daily-assistant.js?v=${RELEASE}" js/bootstrap.js
+          grep -Fq "sync-diagnostics.js?v=${RELEASE}" js/bootstrap.js
+          grep -Fq "i18n.js?v=${RELEASE}" js/bootstrap.js
           ! grep -q 'i18n-runtime-compat.js' js/bootstrap.js
           grep -q 'serviceWorker' js/app.js
+          grep -Fq "updateViaCache:'none'" js/app.js
           grep -q 'queueMutation' js/app.js
           grep -q "STORE_OUTFITS='outfits'" js/db.js
           grep -q "STORE_OUTFIT_MUTATIONS='outfitMutations'" js/db.js
@@ -125,27 +137,29 @@ jobs:
           grep -q 'MAX_CLIENT_ATTEMPTS=3' js/item-ai-assistant.js
           grep -q 'duplicateGuardMounted' js/duplicate-guard.js
           grep -q 'MAX_VISUAL_CANDIDATES=80' js/duplicate-guard.js
-          grep -q "i18n-keyed.mjs?v=0.5.16" js/duplicate-guard.js
+          grep -Fq "i18n-keyed.mjs?v=${RELEASE}" js/duplicate-guard.js
           grep -q "t('duplicate.continue')" js/duplicate-guard.js
           grep -q 'duplicate.reason.nearlyIdentical' js/duplicate-core.mjs
           ! grep -q 'Vẫn lưu món này' js/duplicate-guard.js
           grep -q 'hammingDistance' js/duplicate-core.mjs
           grep -q 'duplicateAssessment' js/duplicate-core.mjs
-          grep -q "i18n-keyed.mjs?v=0.5.16" js/item-ai-assistant.js
+          grep -Fq "i18n-keyed.mjs?v=${RELEASE}" js/item-ai-assistant.js
           grep -q 'language:currentLanguage()' js/item-ai-assistant.js
           ! grep -q 'TRỢ LÝ ẢNH' js/item-ai-assistant.js
           ! grep -q 'Áp dụng gợi ý' js/item-ai-assistant.js
           grep -q "outputLanguage=language==='fr'?'French':'Vietnamese'" worker/src/index.js
           grep -Fq '${outputLanguage}' worker/src/index.js
-          grep -q 'tran-closet-v0.5.1' sw.js
-          grep -q 'app.js?v=0.5.16' sw.js
-          grep -q 'outfit-picker.js?v=0.5.16' sw.js
-          grep -q 'daily-assistant-core.mjs?v=0.5.16' sw.js
-          grep -q 'daily-assistant.js?v=0.5.16' sw.js
-          grep -q 'i18n-keyed.mjs?v=0.5.16' sw.js
-          grep -q 'i18n.js?v=0.5.1' sw.js
+          grep -q "const CACHE_PREFIX='tran-closet-'" sw.js
+          grep -q 'shortSha' sw.js
+          ! grep -q "const CACHE = 'tran-closet-v0.5.1'" sw.js
+          grep -Fq "app.js?v=${RELEASE}" sw.js
+          grep -Fq "outfit-picker.js?v=${RELEASE}" sw.js
+          grep -Fq "daily-assistant-core.mjs?v=${RELEASE}" sw.js
+          grep -Fq "daily-assistant.js?v=${RELEASE}" sw.js
+          grep -Fq "i18n-keyed.mjs?v=${RELEASE}" sw.js
+          grep -Fq "i18n.js?v=${RELEASE}" sw.js
           ! grep -q 'i18n-runtime-compat.js' sw.js
-          grep -q "FALLBACK_VERSION='v0.5.16'" js/sync-diagnostics.js
+          grep -Fq "const FALLBACK_VERSION='${VERSION_VALUE}';" js/sync-diagnostics.js
           grep -q 'navigator.share' js/outfit-presentation.js
           grep -q '1080' js/outfit-presentation.js
           grep -q '1350' js/outfit-presentation.js
@@ -195,6 +209,8 @@ jobs:
           grep -q 'daily assistant core: PASS' scripts/test-daily-assistant.mjs
       - name: Check bilingual keyed foundation and legacy boundary
         run: |
+          VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
+          RELEASE="${VERSION_VALUE#v}"
           grep -q "LANGUAGE_KEY='tran-closet-language'" js/i18n.js
           grep -q "SUPPORTED=new Set(\['vi','fr'\])" js/i18n.js
           grep -q "searchParams.get('lang')" js/i18n.js
@@ -211,8 +227,8 @@ jobs:
           grep -q "'outfit.picker.reset':'Réinitialiser'" js/i18n-keyed.mjs
           grep -q "'duplicate.continue':'Enregistrer quand même'" js/i18n-keyed.mjs
           grep -q "'ai.card.eyebrow':'ASSISTANT PHOTO'" js/i18n-keyed.mjs
-          grep -q "i18n-keyed.mjs?v=0.5.16" js/app.js
-          grep -q "i18n-keyed.mjs?v=0.5.16" js/outfit-picker.js
+          grep -Fq "i18n-keyed.mjs?v=${RELEASE}" js/app.js
+          grep -Fq "i18n-keyed.mjs?v=${RELEASE}" js/outfit-picker.js
           test ! -e js/i18n-runtime-compat.js
           grep -q 'language-switch' css/i18n.css
       - name: Guard against committed secrets
