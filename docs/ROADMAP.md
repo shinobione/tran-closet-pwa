@@ -5,7 +5,7 @@
 > Current factual runtime state lives in [`PROJECT-STATE.md`](./PROJECT-STATE.md). When chat history and the repository disagree, **verify `main` and follow the repository**.
 
 Last roadmap update: **2026-08-19**  
-Current slice: **V0.5.16 · Slice 16.5 — i18n architecture cleanup**
+Current slice: **V0.5.16 · Slice 16.6 — version / cache normalization**
 
 ---
 
@@ -205,27 +205,24 @@ Historical workflow filenames remain temporarily but relevant checks now target 
 
 **Status:** merged / 12-of-12 PR CI green. Final browser/device regression QA is carried into Slice 16.11.
 
-## Slice 16.5 — i18n architecture cleanup 🔵 CURRENT
+## Slice 16.5 — i18n architecture cleanup 🟡 MERGED / CI GREEN
 
-Problem:
-- `i18n.js` still relies heavily on exact rendered-text replacement;
-- the transitional `i18n-runtime-compat.js` still observes dynamically inserted content;
-- past Profile failures demonstrated the fragility of mutation-based translation.
+PRs **#54**, **#55** and **#56** delivered the architecture migration. Final runtime merge for 16.5C: **`536e7157793e2fc5d237656fc98ebd98ba633b7f`**.
 
-Deliverables:
-- introduce a keyed translation API (`t('...')`) with parameter interpolation;
-- migrate canonical user-visible dynamic surfaces to keys at render time;
-- preserve Vietnamese default and persistent FR QA mode;
-- prioritize high-risk surfaces: navigation/header, Profile/sync, Add/photo/AI, Outfit integrity/presentation, Daily Assistant;
-- remove `i18n-runtime-compat.js` once no covered runtime surface depends on it;
-- retire mutation-based translation for migrated surfaces and eliminate observer feedback risks.
+Delivered:
+- `i18n-keyed.mjs` as the canonical VI/FR keyed translation API;
+- high-risk dynamic surfaces migrated to render-time keys and parameters;
+- Daily Assistant + Duplicate Guard reason descriptors instead of Vietnamese text matching;
+- Outfit Picker and targeted legacy `app.js` output migrated;
+- Photo AI deterministic UI keyed, with Worker semantic explanations generated in the requested FR/VI language;
+- `i18n-runtime-compat.js` deleted;
+- global recursive `i18n.js` DOM observer removed;
+- remaining legacy static route/dialog/toast translation bounded behind explicit app render sinks;
+- final PR #56 passed **12/12** PR workflows.
 
-Exit criteria:
-- no Vietnamese leakage in FR mode for covered product surfaces;
-- no DOM-observer translation loops;
-- FR ↔ VI selection remains persistent and safe;
-- dynamic translated messages are generated from keys/parameters rather than observed text.
+**Status:** engineering merged / CI green. Final browser/device FR↔VI leakage QA is carried into Slice 16.11; do not label VERIFIED PROD yet.
 
+## Slice 16.6 — Version / cache normalization 🔵 CURRENT
 ## Slice 16.6 — Version / cache normalization
 
 Problem:
@@ -282,7 +279,7 @@ Current visual identity must not change during this cleanup.
 
 ## Slice 16.11 — V0.5.16 end-to-end closeout
 
-Required QA accumulates deferred proof from 16.2–16.4 plus final consolidated-runtime verification:
+Required QA accumulates deferred proof from 16.2–16.5 plus final consolidated-runtime verification:
 - Android + iPhone install/open/update sanity;
 - clothing CREATE / UPDATE / DELETE / live cross-device reread;
 - Outfit CREATE / UPDATE / DELETE / live cross-device reread **without manual refresh**;
