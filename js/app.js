@@ -451,7 +451,7 @@ window.addEventListener('appinstalled',()=>{state.installPrompt=null;say('Đã c
 window.addEventListener('online',()=>syncNow(true));
 $('#installButton').onclick=installHelp;
 $$('.nav-item').forEach(n=>n.onclick=()=>setRoute(n.dataset.route));
-if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(console.error));
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).catch(console.error));
 await seed();
 await refresh();
 render();

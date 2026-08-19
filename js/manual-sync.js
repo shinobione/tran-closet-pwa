@@ -1,5 +1,5 @@
 import {flushMutationQueue,pendingMutationCount} from './sync-client.js?v=0.5.16';
-import {flushOutfitQueue,pendingOutfitMutationCount} from './outfit-sync-client.js?v=0.5.1';
+import {flushOutfitQueue,pendingOutfitMutationCount} from './outfit-sync-client.js?v=0.5.16';
 import {t} from './i18n-keyed.mjs?v=0.5.16';
 
 let running=false;

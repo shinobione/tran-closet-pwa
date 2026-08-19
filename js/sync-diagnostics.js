@@ -1,5 +1,5 @@
 import {getSyncConfig,testSyncConnection,flushMutationQueue,pendingMutationCount} from './sync-client.js?v=0.5.16';
-import {flushOutfitQueue,pendingOutfitMutationCount} from './outfit-sync-client.js?v=0.5.1';
+import {flushOutfitQueue,pendingOutfitMutationCount} from './outfit-sync-client.js?v=0.5.16';
 import {syncLiveCanonicalOutfits} from './live-airtable-outfit-sync.js?v=0.5.16';
 import {getAllItems,getAllMutations,getAllOutfits,getAllOutfitMutations,getMeta} from './db.js';
 import {t} from './i18n-keyed.mjs?v=0.5.16';

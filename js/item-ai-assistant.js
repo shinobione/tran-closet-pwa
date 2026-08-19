@@ -1,5 +1,5 @@
 import {TAXONOMY,LABELS,FR_LABELS} from './data.js';
-import {getSyncConfig} from './sync-client.js?v=0.4.6';
+import {getSyncConfig} from './sync-client.js?v=0.5.16';
 import {t,currentLanguage} from './i18n-keyed.mjs?v=0.5.16';
 
 const root=document.querySelector('#mainContent');

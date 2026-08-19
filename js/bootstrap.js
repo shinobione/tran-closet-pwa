@@ -1,6 +1,6 @@
 import {syncSnapshotToLocalDB} from './airtable-bridge.js';
 import {syncOutfitSnapshotToLocalDB} from './airtable-outfit-bridge.js';
-import {syncLiveCanonicalItems,startLiveSyncWatch} from './live-airtable-sync.js?v=0.5.8';
+import {syncLiveCanonicalItems,startLiveSyncWatch} from './live-airtable-sync.js?v=0.5.16';
 import {syncLiveCanonicalOutfits,startLiveOutfitSyncWatch} from './live-airtable-outfit-sync.js?v=0.5.16';
 
 try{await syncSnapshotToLocalDB();}catch(error){console.warn('Airtable clothing snapshot hydration failed; continuing with local closet.',error);}
@@ -13,15 +13,15 @@ await import('./app-refresh.js?v=0.5.16');
 await import('./closet-search.js?v=0.5.16');
 await import('./photo-picker.js?v=0.5.16');
 await import('./outfit-picker.js?v=0.5.16');
-await import('./outfit-sync-client.js?v=0.5.1');
+await import('./outfit-sync-client.js?v=0.5.16');
 await import('./manual-sync.js?v=0.5.16');
 await import('./outfit-presentation.js?v=0.5.16');
 await import('./outfit-integrity-ui.js?v=0.5.16');
-await import('./item-ai-assistant.js?v=0.5.1');
-await import('./duplicate-guard.js?v=0.5.1');
+await import('./item-ai-assistant.js?v=0.5.16');
+await import('./duplicate-guard.js?v=0.5.16');
 await import('./daily-assistant.js?v=0.5.16');
 await import('./sync-diagnostics.js?v=0.5.16');
-await import('./i18n.js?v=0.5.1');
+await import('./i18n.js?v=0.5.16');
 await import('./build-version.js?v=0.5.16');
 
 startLiveSyncWatch();
