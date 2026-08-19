@@ -272,7 +272,7 @@ Branch protection/ruleset was not enabled: the available connector does not expo
 Delivered by PR **#66**:
 - `branding/` now contains exactly four approved visual masters: favicon source, header lockup, hero logo mark and iOS splash;
 - all four masters are byte-locked by exact Git blob SHA in `scripts/test-branding-sources.mjs`;
-- historical/intermediate `logo-lockup-centered.png`, `logo-mark-256.png`, `logo-mark.png` and `logo-source-round.b64.part1` were removed after dependency audit;
+- four historical/intermediate branding sources were removed after dependency audit; exact retired filenames remain documented only in `docs/BRANDING-SOURCES.md`, the intentional audit-history allowlist;
 - strict source guard scans tracked files for retired path/basename references and verifies HTML/CSS/Service Worker/generator wiring;
 - favicon generation keeps decoded source SHA-256 `b0a52f01ae3679515abc10caf1db3a331a49ab57d85928ed3a007696a1f8eb3d`;
 - Python remains 3.12 and Pillow is pinned to **12.3.0**, the exact version proven by the last successful pre-cleanup generator run;
