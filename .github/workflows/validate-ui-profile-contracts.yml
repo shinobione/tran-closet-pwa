@@ -38,6 +38,7 @@ jobs:
           node --check scripts/test-taxonomy.mjs
           node --check scripts/test-ci-topology.mjs
           node --check scripts/test-repository-governance.mjs
+          node --check scripts/test-branding-sources.mjs
           bash -n scripts/commit-generated-artifacts.sh
           node --check sw.js
 
@@ -130,6 +131,9 @@ jobs:
           grep -q "Nouvel essai automatique" js/i18n.js
           grep -q "'diagnostics.title':'Diagnostic de synchronisation'" js/i18n-keyed.mjs
           grep -q "'daily.openSaved':'Ouvrir dans Tenues'" js/i18n-keyed.mjs
+
+      - name: Audit canonical branding sources
+        run: node scripts/test-branding-sources.mjs --audit
 
       - name: Guard consolidated CI topology
         run: node scripts/test-ci-topology.mjs
