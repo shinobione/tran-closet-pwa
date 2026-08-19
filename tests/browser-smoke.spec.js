@@ -64,11 +64,21 @@ async function boot(page,lang='fr'){
   await expect(page.locator(`#languageSwitch [data-lang="${lang}"]`)).toHaveClass(/active/);
 }
 
+async function assertCanonicalBranding(page){
+  const header=page.locator('.topbar-brand-lockup');
+  await expect(header).toHaveAttribute('src','./branding/header-lockup-v057.png');
+  await expect.poll(()=>header.evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
+  const heroLogo=await page.locator('.hero-orb').evaluate(el=>getComputedStyle(el).backgroundImage);
+  expect(heroLogo).toContain('logo-mark-v057.png');
+  await expect(page.locator('link[rel="apple-touch-startup-image"]')).toHaveAttribute('href','./branding/splash-1242x2688.png');
+}
+
 test('core routes stay crash-free in French',async({page})=>{
   const assertRuntimeClean=runtimeGuard(page);
   await boot(page,'fr');
   await expect(page.locator('html')).toHaveAttribute('lang','fr');
   await expect(page.locator('#pageTitle')).toContainText(/dressing/i);
+  await assertCanonicalBranding(page);
 
   const search=page.locator('#searchInput');
   await expect(search).toBeVisible();
