@@ -1,0 +1,101 @@
+name: Checkpoint V0.5.16 i18n docs
+
+on:
+  push:
+    branches: [v0.5.16-state-after-i18n]
+
+permissions:
+  contents: write
+
+jobs:
+  checkpoint:
+    if: ${{ !contains(github.event.head_commit.message, '[skip i18n-docs]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: v0.5.16-state-after-i18n
+          fetch-depth: 0
+      - name: Update canonical state
+        run: |
+          python <<'PY'
+          from pathlib import Path
+
+          def replace_once(text, old, new, label):
+              n=text.count(old)
+              if n != 1:
+                  raise SystemExit(f'{label}: expected 1 occurrence, got {n}')
+              return text.replace(old,new)
+
+          def replace_between(text,start,end,new,label):
+              a=text.find(start)
+              b=text.find(end,a+len(start))
+              if a < 0 or b < 0:
+                  raise SystemExit(f'{label}: boundaries not found')
+              return text[:a]+new+text[b:]
+
+          p=Path('docs/PROJECT-STATE.md')
+          s=p.read_text()
+          s=replace_once(s,
+            '- current runtime-changing main SHA: **`082487fc938bbbed47e37a00727a23989a58a99b`** — Slice 16.4 runtime consolidation',
+            '- current runtime-changing main SHA: **`536e7157793e2fc5d237656fc98ebd98ba633b7f`** — Slice 16.5C dynamic i18n closeout',
+            'runtime sha')
+          s=replace_once(s,
+            '- Slice 16.4 runtime consolidation: PR **#52**, squash merge **`082487fc938bbbed47e37a00727a23989a58a99b`** after **12/12 PR workflows SUCCESS**.',
+            '- Slice 16.4 runtime consolidation: PR **#52**, squash merge **`082487fc938bbbed47e37a00727a23989a58a99b`** after **12/12 PR workflows SUCCESS**;\n- Slice 16.5A keyed i18n foundation: PR **#54**, merge **`add11b112482a3718784b27969e0c0aa84200693`** after **13/13 PR workflows SUCCESS**;\n- Slice 16.5B runtime compat bridge retirement: PR **#55**, merge **`128671489d95177592305d1456e463cd4e24d697`** after **13/13 PR workflows SUCCESS**;\n- Slice 16.5C dynamic i18n closeout: PR **#56**, squash merge **`536e7157793e2fc5d237656fc98ebd98ba633b7f`** after **12/12 final PR workflows SUCCESS**.',
+            'runtime lineage')
+          s=replace_once(s,
+            '  - **16.5 i18n architecture cleanup:** 🔵 NEXT ACTIVE ENGINEERING SLICE',
+            '  - **16.5 i18n architecture cleanup:** 🟡 MERGED / CI GREEN; final FR↔VI browser/device QA deferred to Slice 16.11.\n  - **16.6 version/cache normalization:** 🔵 NEXT ACTIVE ENGINEERING SLICE',
+            'slice status')
+          s=replace_once(s,
+            'Search and photo controllers no longer use subtree observers. The transitional i18n compatibility layer intentionally keeps one child-list subtree observer for dynamically inserted assistant/share copy; it ignores character-data/attribute changes so its own text replacements do not recursively trigger itself. Slice 16.5 owns removing mutation-based translation entirely.',
+            'Search and photo controllers no longer use subtree observers. The transitional `i18n-runtime-compat.js` introduced in 16.4 was removed in Slice 16.5; dynamic Assistant, Duplicate, Outfit and app copy now use keyed or explicit translation sinks rather than a global recursive translation observer.',
+            'runtime i18n paragraph')
+          start='### 16.5 — i18n architecture\n'
+          end='### 16.6 — PWA cache/version debt\n'
+          new='''### 16.5 — i18n architecture — MERGED / CI GREEN\n\nDelivered across PRs #54, #55 and #56:\n- canonical `i18n-keyed.mjs` with VI/FR keys, parameters and persistent language selection;\n- keyed rendering for search, photo, manual sync, Profile diagnostics/build info, Outfit integrity/presentation/picker, Daily Assistant, Duplicate Guard and Photo AI;\n- Daily Assistant and Duplicate Guard reasoning converted from rendered Vietnamese sentences to structured translation descriptors;\n- Photo AI sends the active language to the Worker and free-form `reason` / `tagReason` are generated in that requested language;\n- `i18n-runtime-compat.js` physically removed from runtime and offline shell;\n- body-wide recursive translation `MutationObserver` removed from legacy `i18n.js`;\n- remaining static legacy route/dialog/toast translation uses explicit bounded sinks from `app.js`;\n- final PR #56 passed **12/12** PR workflows on its tested head before merge.\n\nFinal FR↔VI device/browser leakage verification remains part of Slice 16.11, so this is not yet VERIFIED PROD.\n\n'''+end
+          s=replace_between(s,start,end,new,'technical debt 16.5')
+          s=s.replace('strict product QA for 16.2/16.3/16.4 is accumulated','strict product QA for 16.2/16.3/16.4/16.5 is accumulated')
+          s=replace_once(s,
+            '6. **16.5 i18n architecture cleanup — 🔵 NEXT ACTIVE**\n7. 16.6 version/cache normalization',
+            '6. 16.5 i18n architecture cleanup — 🟡 merged / CI green, final browser-device QA deferred to 16.11\n7. **16.6 version/cache normalization — 🔵 NEXT ACTIVE**',
+            'ordered plan')
+          next_start='## Next canonical action\n'
+          verify='## Verification vocabulary\n'
+          next_text='''## Next canonical action\n\n### Slice 16.6 — version / cache normalization\n\n1. inventory all Service Worker cache identities and query-versioned runtime assets;\n2. make `VERSION` / build metadata the canonical release identity instead of the historical `tran-closet-v0.5.1` cache namespace;\n3. normalize current runtime module query versions where they are only stale cache-bust labels, without renaming historical CSS/assets that are intentionally versioned artifacts;\n4. preserve network-first code/update behavior and exact `build-info.json` deployment proof;\n5. add regression coverage proving old cache namespaces are retired safely and current app-shell entries are coherent;\n6. keep installed iPhone/Android update verification for Slice 16.11 unless focused QA is performed earlier.\n\n---\n\n'''+verify
+          s=replace_between(s,next_start,verify,next_text,'next canonical action')
+          p.write_text(s)
+
+          p=Path('docs/ROADMAP.md')
+          r=p.read_text()
+          r=replace_once(r,
+            'Current slice: **V0.5.16 · Slice 16.5 — i18n architecture cleanup**',
+            'Current slice: **V0.5.16 · Slice 16.6 — version / cache normalization**',
+            'roadmap current slice')
+          start='## Slice 16.5 — i18n architecture cleanup 🔵 CURRENT\n'
+          end='## Slice 16.6 — Version / cache normalization\n'
+          replacement='''## Slice 16.5 — i18n architecture cleanup 🟡 MERGED / CI GREEN\n\nPRs **#54**, **#55** and **#56** delivered the architecture migration. Final runtime merge for 16.5C: **`536e7157793e2fc5d237656fc98ebd98ba633b7f`**.\n\nDelivered:\n- `i18n-keyed.mjs` as the canonical VI/FR keyed translation API;\n- high-risk dynamic surfaces migrated to render-time keys and parameters;\n- Daily Assistant + Duplicate Guard reason descriptors instead of Vietnamese text matching;\n- Outfit Picker and targeted legacy `app.js` output migrated;\n- Photo AI deterministic UI keyed, with Worker semantic explanations generated in the requested FR/VI language;\n- `i18n-runtime-compat.js` deleted;\n- global recursive `i18n.js` DOM observer removed;\n- remaining legacy static route/dialog/toast translation bounded behind explicit app render sinks;\n- final PR #56 passed **12/12** PR workflows.\n\n**Status:** engineering merged / CI green. Final browser/device FR↔VI leakage QA is carried into Slice 16.11; do not label VERIFIED PROD yet.\n\n## Slice 16.6 — Version / cache normalization 🔵 CURRENT\n'''
+          r=replace_between(r,start,end,replacement,'roadmap 16.5')
+          r=r.replace('deferred proof from 16.2–16.4 plus final consolidated-runtime verification','deferred proof from 16.2–16.5 plus final consolidated-runtime verification')
+          p.write_text(r)
+          PY
+      - name: Validate checkpoint
+        run: |
+          grep -q '536e7157793e2fc5d237656fc98ebd98ba633b7f' docs/PROJECT-STATE.md
+          grep -q '16.5 i18n architecture cleanup:.*MERGED' docs/PROJECT-STATE.md
+          grep -q '16.6 version/cache normalization:.*NEXT ACTIVE' docs/PROJECT-STATE.md
+          grep -q 'Slice 16.6 — version / cache normalization' docs/PROJECT-STATE.md
+          grep -q 'Current slice: .*Slice 16.6' docs/ROADMAP.md
+          grep -q 'Slice 16.5 — i18n architecture cleanup.*MERGED' docs/ROADMAP.md
+          grep -q 'Slice 16.6 — Version / cache normalization.*CURRENT' docs/ROADMAP.md
+          ! grep -q 'i18n-runtime-compat.js.*still observes' docs/PROJECT-STATE.md
+      - name: Remove one-shot workflow
+        run: rm .github/workflows/checkpoint-i18n-docs.yml
+      - name: Commit checkpoint
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Docs · Close Slice 16.5 and activate 16.6 [skip i18n-docs]"
+          git push origin HEAD:v0.5.16-state-after-i18n
