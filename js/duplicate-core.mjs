@@ -87,17 +87,18 @@ export function duplicateAssessment({distance=null,metadata={score:0,category:0,
   return {level,score,visual,distance,metadata};
 }
 
+const reason=(key,params={})=>({key,params});
 export function duplicateReasons(assessment={}){
   const reasons=[];
   const {distance,metadata={}}=assessment;
   if(Number.isFinite(distance)){
-    if(distance<=6)reasons.push('Ảnh gần như trùng');
-    else if(distance<=12)reasons.push('Ảnh rất giống');
-    else if(distance<=16)reasons.push('Ảnh khá giống');
+    if(distance<=6)reasons.push(reason('duplicate.reason.imageAlmostSame'));
+    else if(distance<=12)reasons.push(reason('duplicate.reason.imageVerySimilar'));
+    else if(distance<=16)reasons.push(reason('duplicate.reason.imageSimilar'));
   }
-  if(metadata.category===1)reasons.push('Cùng loại');
-  if(metadata.colors>=.5)reasons.push('Màu tương tự');
-  if(metadata.styles>=.5)reasons.push('Phong cách tương tự');
-  if(metadata.name>=.86)reasons.push('Tên rất gần');
+  if(metadata.category===1)reasons.push(reason('duplicate.reason.sameCategory'));
+  if(metadata.colors>=.5)reasons.push(reason('duplicate.reason.similarColors'));
+  if(metadata.styles>=.5)reasons.push(reason('duplicate.reason.similarStyles'));
+  if(metadata.name>=.86)reasons.push(reason('duplicate.reason.similarName'));
   return reasons.slice(0,4);
 }
