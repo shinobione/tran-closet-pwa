@@ -1,0 +1,92 @@
+name: Checkpoint V0.5.16 cache docs
+
+on:
+  push:
+    branches: [v0.5.16-state-after-cache]
+
+permissions:
+  contents: write
+
+jobs:
+  checkpoint:
+    if: ${{ !contains(github.event.head_commit.message, '[skip cache-docs]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: v0.5.16-state-after-cache
+          fetch-depth: 0
+      - name: Update canonical state
+        run: |
+          python <<'PY'
+          from pathlib import Path
+
+          def once(text,old,new,label):
+            n=text.count(old)
+            if n!=1: raise SystemExit(f'{label}: expected 1 occurrence, got {n}')
+            return text.replace(old,new)
+
+          def between(text,start,end,replacement,label):
+            a=text.find(start); b=text.find(end,a+len(start))
+            if a<0 or b<0: raise SystemExit(f'{label}: boundaries missing')
+            return text[:a]+replacement+text[b:]
+
+          p=Path('docs/PROJECT-STATE.md'); s=p.read_text()
+          s=once(s,
+            '- current runtime-changing main SHA: **`536e7157793e2fc5d237656fc98ebd98ba633b7f`** — Slice 16.5C dynamic i18n closeout',
+            '- current runtime-changing main SHA: **`1bb94d173d6ae1ad7a7833063a0fe45542a7ec80`** — Slice 16.6 version/cache normalization',
+            'runtime sha')
+          s=once(s,
+            '- Slice 16.5C dynamic i18n closeout: PR **#56**, squash merge **`536e7157793e2fc5d237656fc98ebd98ba633b7f`** after **12/12 final PR workflows SUCCESS**.',
+            '- Slice 16.5C dynamic i18n closeout: PR **#56**, squash merge **`536e7157793e2fc5d237656fc98ebd98ba633b7f`** after **12/12 final PR workflows SUCCESS**;\n- Slice 16.6 version/cache normalization: PR **#58**, tested head **`5259ec530988c2ffa6febd6d4666f68fa920216d`**, squash merge **`1bb94d173d6ae1ad7a7833063a0fe45542a7ec80`** after **14/14 PR workflows SUCCESS**.',
+            'lineage')
+          s=once(s,
+            '  - **16.6 version/cache normalization:** 🔵 NEXT ACTIVE ENGINEERING SLICE',
+            '  - **16.6 version/cache normalization:** 🟡 MERGED / 14/14 CI GREEN; installed-device update/cache QA deferred to Slice 16.11.\n  - **16.7 CI consolidation + browser smoke:** 🔵 NEXT ACTIVE ENGINEERING SLICE',
+            'slice status')
+          start='### 16.6 — PWA cache/version debt\n'
+          end='### 16.7 — CI fossilization / browser smoke\n'
+          replacement='''### 16.6 — PWA cache/version normalization — MERGED / 14/14 CI GREEN\n\nDelivered by PR **#58**:\n- Service Worker cache identity derives from deployed `build-info.json` as `tran-closet-<version>-<shortSha>`;\n- `VERSION` is the source/offline fallback identity and drives runtime `?v=` cache-bust references;\n- the historical static `tran-closet-v0.5.1` namespace is retired;\n- Service Worker registration uses `updateViaCache:'none'`;\n- `scripts/normalize-release-refs.mjs` detects/writes release-ref drift across HTML, manifest, SW, JS and CSS;\n- `scripts/test-version-cache.mjs` validates build identity, manifest/bootstrap/app-shell coherence and fallback versions;\n- PWA cache isolation still deletes only stale `tran-closet-*` caches, never unrelated origin caches;\n- Pages runs version/cache preflight before generating exact `build-info.json`;\n- historical v058/v059/v0510 gates now derive runtime references from `VERSION`;\n- final dedicated contract reported **108 release refs** and **59 app-shell entries** coherent for `v0.5.16`;\n- final tested head **`5259ec530988c2ffa6febd6d4666f68fa920216d`** passed **14/14** PR workflows before merge.\n\nInstalled iOS/Android update/cache behavior remains part of Slice 16.11, so this is not yet VERIFIED PROD.\n\n'''+end
+          s=between(s,start,end,replacement,'16.6 debt section')
+          s=s.replace('strict product QA for 16.2/16.3/16.4/16.5 is accumulated','strict product QA for 16.2/16.3/16.4/16.5/16.6 is accumulated')
+          s=once(s,
+            '7. **16.6 version/cache normalization — 🔵 NEXT ACTIVE**\n8. 16.7 CI consolidation + browser smoke',
+            '7. 16.6 version/cache normalization — 🟡 merged / 14-of-14 PR CI green, installed-device cache QA deferred to 16.11\n8. **16.7 CI consolidation + browser smoke — 🔵 NEXT ACTIVE**',
+            'ordered plan')
+          next_start='## Next canonical action\n'
+          verify='## Verification vocabulary\n'
+          next_text='''## Next canonical action\n\n### Slice 16.7 — CI consolidation + browser smoke\n\n1. inventory the 14 current PR workflows and map each unique product contract before removing any historical gate;\n2. consolidate overlapping static checks into maintainable current-generation suites while preserving behavior coverage;\n3. add a lightweight deterministic browser smoke for boot, search, Add/photo source chooser, Profile/diagnostics, FR↔VI, Daily Assistant and Outfit routes;\n4. stub network dependencies so browser smoke performs no real Worker/Airtable write and does not depend on live weather;\n5. specifically catch page-level exceptions and route/render crashes that grep/syntax guards cannot see;\n6. keep deployment/device verification separate and accumulated in Slice 16.11.\n\n---\n\n'''+verify
+          s=between(s,next_start,verify,next_text,'next action')
+          p.write_text(s)
+
+          p=Path('docs/ROADMAP.md'); r=p.read_text()
+          r=once(r,
+            'Current slice: **V0.5.16 · Slice 16.6 — version / cache normalization**',
+            'Current slice: **V0.5.16 · Slice 16.7 — CI consolidation + browser smoke**',
+            'roadmap current slice')
+          start='## Slice 16.6 — Version / cache normalization 🔵 CURRENT\n'
+          end='## Slice 16.7 — CI consolidation + browser smoke\n'
+          replacement='''## Slice 16.6 — Version / cache normalization 🟡 MERGED / 14/14 CI GREEN\n\nPR **#58**, tested head **`5259ec530988c2ffa6febd6d4666f68fa920216d`**, squash merge **`1bb94d173d6ae1ad7a7833063a0fe45542a7ec80`**.\n\nDelivered:\n- exact cache namespace from deployed version + short SHA;\n- VERSION-driven runtime cache-bust references and manifest icons;\n- source/offline fallback identity from `VERSION`;\n- `updateViaCache:'none'` for Service Worker registration;\n- permanent release-ref normalizer + exact cache/app-shell coherence tests;\n- Pages preflight before exact `build-info.json`;\n- cache namespace isolation preserved;\n- historical v058/v059/v0510 + global PWA gates retargeted away from hard-coded release labels;\n- final contract: **108 release refs**, **59 app-shell entries**, **14/14 PR workflows SUCCESS**.\n\n**Status:** engineering merged / CI green. Installed iOS/Android update/cache verification remains in Slice 16.11; do not label VERIFIED PROD yet.\n\n## Slice 16.7 — CI consolidation + browser smoke 🔵 CURRENT\n'''
+          r=between(r,start,end,replacement,'roadmap 16.6')
+          r=r.replace('deferred proof from 16.2–16.5 plus final consolidated-runtime verification','deferred proof from 16.2–16.6 plus final consolidated-runtime verification')
+          p.write_text(r)
+          PY
+      - name: Validate checkpoint
+        run: |
+          grep -q '1bb94d173d6ae1ad7a7833063a0fe45542a7ec80' docs/PROJECT-STATE.md
+          grep -q '16.6 version/cache normalization:.*MERGED' docs/PROJECT-STATE.md
+          grep -q '16.7 CI consolidation + browser smoke:.*NEXT ACTIVE' docs/PROJECT-STATE.md
+          grep -q 'Slice 16.7 — CI consolidation + browser smoke' docs/PROJECT-STATE.md
+          grep -q 'Current slice: .*Slice 16.7' docs/ROADMAP.md
+          grep -q 'Slice 16.6 — Version / cache normalization.*MERGED' docs/ROADMAP.md
+          grep -q 'Slice 16.7 — CI consolidation + browser smoke.*CURRENT' docs/ROADMAP.md
+          ! grep -q 'Service Worker cache namespace is still historically' docs/PROJECT-STATE.md
+      - name: Remove one-shot workflow
+        run: rm .github/workflows/checkpoint-cache-docs.yml
+      - name: Commit checkpoint
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Docs · Close Slice 16.6 and activate 16.7 [skip cache-docs]"
+          git push origin HEAD:v0.5.16-state-after-cache
