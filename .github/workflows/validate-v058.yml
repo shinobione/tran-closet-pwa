@@ -17,16 +17,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Check new JavaScript modules
+      - name: Check current JavaScript modules
         run: |
           node --check js/live-airtable-sync.js
-          node --check js/photo-picker-mobile.js
+          node --check js/photo-picker.js
           node --check worker/src/v058.js
       - name: Check integration contracts
         run: |
           grep -q "live-airtable-sync.js?v=0.5.8" js/bootstrap.js
-          grep -q "photo-picker-mobile.js?v=0.5.8" js/bootstrap.js
-          grep -q "removeAttribute('capture')" js/photo-picker-mobile.js
+          grep -q "photo-picker.js?v=0.5.16" js/bootstrap.js
+          grep -q "removeAttribute('capture')" js/photo-picker.js
+          grep -q "camera.setAttribute('capture','environment')" js/photo-picker.js
           grep -q "url.pathname==='/v1/items'" worker/src/v058.js
           grep -q "AIRTABLE_READ_PAT" .github/workflows/deploy-worker.yml
           grep -q "icon-192.png?v=0.5.8" manifest.webmanifest
