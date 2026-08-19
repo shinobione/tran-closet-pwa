@@ -22,7 +22,7 @@ jobs:
           node --check js/photo-picker.js
           node --check js/closet-search-core.mjs
           node --check js/closet-search.js
-          node --check js/i18n-runtime-compat.js
+          node --check js/i18n-keyed.mjs
           node --check js/build-version.js
           node --check js/sync-diagnostics.js
           node --check js/bootstrap.js
@@ -57,24 +57,27 @@ jobs:
           grep -q "observe(main,{childList:true})" js/sync-diagnostics.js
           ! grep -q "subtree:true" js/build-version.js
           ! grep -q "subtree:true" js/sync-diagnostics.js
-          test "$(grep -c 'new MutationObserver' js/i18n-runtime-compat.js)" -eq 1
-          grep -q "characterData/attributes" js/i18n-runtime-compat.js
+          test ! -e js/i18n-runtime-compat.js
       - name: Check canonical runtime integration
         run: |
           test -f css/v0510-ux.css
           grep -q "v0510-ux.css?v=0.5.10" index.html
           grep -q "photo-picker.js?v=0.5.16" js/bootstrap.js
           grep -q "closet-search.js?v=0.5.16" js/bootstrap.js
-          grep -q "i18n-runtime-compat.js?v=0.5.16" js/bootstrap.js
+          grep -q "app.js?v=0.5.16" js/bootstrap.js
+          grep -q "outfit-picker.js?v=0.5.16" js/bootstrap.js
           VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
           grep -q "build-version.js?v=${VERSION_VALUE#v}" js/bootstrap.js
           grep -q "sync-diagnostics.js?v=${VERSION_VALUE#v}" js/bootstrap.js
           grep -q "closet-search-core.mjs?v=0.5.16" sw.js
           grep -q "closet-search.js?v=0.5.16" sw.js
-          grep -q "i18n-runtime-compat.js?v=0.5.16" sw.js
+          grep -q "i18n-keyed.mjs?v=0.5.16" sw.js
+          ! grep -q "i18n-runtime-compat.js" js/bootstrap.js
+          ! grep -q "i18n-runtime-compat.js" sw.js
       - name: Check French profile coverage remains canonical
         run: |
           grep -q "Synchronisation configurée" js/i18n.js
           grep -q "Adresse du Worker" js/i18n.js
           grep -q "Clé de synchronisation" js/i18n.js
           grep -q "Réinitialiser les données locales" js/i18n.js
+          grep -q "'diagnostics.title':'Diagnostic de synchronisation'" js/i18n-keyed.mjs
