@@ -12,6 +12,8 @@ const items=[
 ];
 const outfits=[{id:'saved',name:'Work look',itemIds:['top','bottom','shoes'],occasion:'Work',season:'All',favorite:true}];
 
+const reasonKeys=suggestion=>(suggestion?.reasons||[]).map(reason=>reason?.key).filter(Boolean);
+
 const rainy=weatherProfile({temperature:29,apparentTemperature:31,dailyMax:32,dailyMin:26,precipitationProbability:80,weatherCode:61,windSpeed:12});
 assert.equal(rainy.rainy,true);
 assert.equal(rainy.hot,true);
@@ -31,7 +33,7 @@ assert.ok(generated.itemIds.includes('top'));
 assert.ok(generated.itemIds.includes('bottom'));
 assert.ok(generated.itemIds.includes('umbrella'),'rainy generated look should include umbrella when available');
 assert.ok(!generated.itemIds.includes('underwear'),'underwear must never be selected as an outfit core/support item');
-assert.ok(generated.reasons.some(reason=>reason.includes('mưa')));
+assert.ok(reasonKeys(generated).some(key=>['daily.reason.rainReady','daily.reason.rainReminder'].includes(key)),'rainy generated look should expose a structured rain reason');
 
 const work=recommendLooks({items,outfits,weather:{temperature:23,apparentTemperature:23,dailyMax:25,dailyMin:19,precipitationProbability:0,weatherCode:1,windSpeed:8},occasion:'Work',limit:1});
 assert.equal(work.suggestions[0].source,'saved');
@@ -61,7 +63,7 @@ assert.equal(realQa.suggestions[0]?.source,'partial','assistant should fall back
 assert.equal(realQa.suggestions[0]?.complete,false);
 assert.ok(realQa.suggestions[0]?.itemIds.includes('hazard'),'available top must be surfaced in an incomplete look');
 assert.ok(!realQa.suggestions[0]?.itemIds.includes('panty'),'underwear remains excluded from partial suggestions');
-assert.ok(realQa.suggestions[0]?.reasons.some(reason=>reason.includes('thiếu quần/váy')),'partial reason should explain the missing bottom');
+assert.ok(reasonKeys(realQa.suggestions[0]).includes('daily.reason.missingBottom'),'partial reason should structurally explain the missing bottom');
 
 const bottomOnly=recommendLooks({
   items:[
@@ -71,6 +73,6 @@ const bottomOnly=recommendLooks({
   outfits:[],weather:{temperature:27,apparentTemperature:27,dailyMax:29,dailyMin:23,weatherCode:1},occasion:'Everyday',limit:1
 });
 assert.ok(bottomOnly.suggestions[0]?.itemIds.includes('skirt-only'),'available bottom must be surfaced when top is missing');
-assert.ok(bottomOnly.suggestions[0]?.reasons.some(reason=>reason.includes('thiếu áo')),'partial reason should explain the missing top');
+assert.ok(reasonKeys(bottomOnly.suggestions[0]).includes('daily.reason.missingTop'),'partial reason should structurally explain the missing top');
 
 console.log('daily assistant core: PASS');
