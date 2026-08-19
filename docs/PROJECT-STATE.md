@@ -13,7 +13,7 @@ Last state update: **2026-08-19**
 - repository: `shinobione/tran-closet-pwa`
 - canonical branch: `main`
 - version file: **`v0.5.16`**
-- current runtime-changing main SHA: **`536e7157793e2fc5d237656fc98ebd98ba633b7f`** — Slice 16.5C dynamic i18n closeout
+- current runtime-changing main SHA: **`1bb94d173d6ae1ad7a7833063a0fe45542a7ec80`** — Slice 16.6 version/cache normalization
 - PWA: `https://shinobione.github.io/tran-closet-pwa/`
 - Cloudflare Worker: `https://tran-closet-sync.jerryquinet.workers.dev`
 - IndexedDB: `tran-closet`, schema version **4**
@@ -26,7 +26,8 @@ Important recent runtime lineage:
 - Slice 16.4 runtime consolidation: PR **#52**, squash merge **`082487fc938bbbed47e37a00727a23989a58a99b`** after **12/12 PR workflows SUCCESS**;
 - Slice 16.5A keyed i18n foundation: PR **#54**, merge **`add11b112482a3718784b27969e0c0aa84200693`** after **13/13 PR workflows SUCCESS**;
 - Slice 16.5B runtime compat bridge retirement: PR **#55**, merge **`128671489d95177592305d1456e463cd4e24d697`** after **13/13 PR workflows SUCCESS**;
-- Slice 16.5C dynamic i18n closeout: PR **#56**, squash merge **`536e7157793e2fc5d237656fc98ebd98ba633b7f`** after **12/12 final PR workflows SUCCESS**.
+- Slice 16.5C dynamic i18n closeout: PR **#56**, squash merge **`536e7157793e2fc5d237656fc98ebd98ba633b7f`** after **12/12 final PR workflows SUCCESS**;
+- Slice 16.6 version/cache normalization: PR **#58**, tested head **`5259ec530988c2ffa6febd6d4666f68fa920216d`**, squash merge **`1bb94d173d6ae1ad7a7833063a0fe45542a7ec80`** after **14/14 PR workflows SUCCESS**.
 
 **Do not infer deployment from merge.** Post-merge Pages/Worker state must still be independently proven when a claim depends on deployment. The available GitHub connector is reliable for PR-triggered CI but does not consistently expose all push-triggered deployment runs.
 
@@ -62,7 +63,8 @@ The stale clothing DELETE reconciliation bug targeting `rec6sAxfNivkTmiMp` remai
   - **16.3 incomplete Outfit integrity:** 🟡 MERGED / CI GREEN; production UI QA deferred to Slice 16.11.
   - **16.4 runtime consolidation:** 🟡 MERGED / 12/12 CI GREEN; browser/device regression QA deferred to Slice 16.11.
   - **16.5 i18n architecture cleanup:** 🟡 MERGED / CI GREEN; final FR↔VI browser/device QA deferred to Slice 16.11.
-  - **16.6 version/cache normalization:** 🔵 NEXT ACTIVE ENGINEERING SLICE
+  - **16.6 version/cache normalization:** 🟡 MERGED / 14/14 CI GREEN; installed-device update/cache QA deferred to Slice 16.11.
+  - **16.7 CI consolidation + browser smoke:** 🔵 NEXT ACTIVE ENGINEERING SLICE
 - **V0.5-B — Wear history & rotation:** ⏭ blocked until V0.5.16 closeout
 
 Canonical principle:
@@ -188,10 +190,24 @@ Delivered across PRs #54, #55 and #56:
 
 Final FR↔VI device/browser leakage verification remains part of Slice 16.11, so this is not yet VERIFIED PROD.
 
-### 16.6 — PWA cache/version debt
+### 16.6 — PWA cache/version normalization — MERGED / 14/14 CI GREEN
 
-Service Worker cache namespace is still historically `tran-closet-v0.5.1` and app-shell URLs contain mixed query versions. `VERSION`/build metadata must become the single source of cache/version identity.
+Delivered by PR **#58**:
+- Service Worker cache identity derives from deployed `build-info.json` as `tran-closet-<version>-<shortSha>`;
+- `VERSION` is the source/offline fallback identity and drives runtime `?v=` cache-bust references;
+- the historical static `tran-closet-v0.5.1` namespace is retired;
+- Service Worker registration uses `updateViaCache:'none'`;
+- `scripts/normalize-release-refs.mjs` detects/writes release-ref drift across HTML, manifest, SW, JS and CSS;
+- `scripts/test-version-cache.mjs` validates build identity, manifest/bootstrap/app-shell coherence and fallback versions;
+- PWA cache isolation still deletes only stale `tran-closet-*` caches, never unrelated origin caches;
+- Pages runs version/cache preflight before generating exact `build-info.json`;
+- historical v058/v059/v0510 gates now derive runtime references from `VERSION`;
+- final dedicated contract reported **108 release refs** and **59 app-shell entries** coherent for `v0.5.16`;
+- final tested head **`5259ec530988c2ffa6febd6d4666f68fa920216d`** passed **14/14** PR workflows before merge.
 
+Installed iOS/Android update/cache behavior remains part of Slice 16.11, so this is not yet VERIFIED PROD.
+
+### 16.7 — CI fossilization / browser smoke
 ### 16.7 — CI fossilization / browser smoke
 
 Many workflow names remain version-specific even though several were retargeted in 16.4. Static guards did not catch previous browser-only Profile failures. Consolidate the workflows and add a real browser smoke.
@@ -215,7 +231,7 @@ Current visual identity is correct; old/current branding sources still need depe
 
 ### Deferred production proof
 
-Because the user explicitly asked engineering work to continue, strict product QA for 16.2/16.3/16.4/16.5 is accumulated in **Slice 16.11 end-to-end closeout** rather than falsely marked VERIFIED PROD now.
+Because the user explicitly asked engineering work to continue, strict product QA for 16.2/16.3/16.4/16.5/16.6 is accumulated in **Slice 16.11 end-to-end closeout** rather than falsely marked VERIFIED PROD now.
 
 ---
 
@@ -227,8 +243,8 @@ Because the user explicitly asked engineering work to continue, strict product Q
 4. 16.3 incomplete Outfit integrity — 🟡 merged, final device QA deferred to 16.11
 5. 16.4 runtime hotfix consolidation — 🟡 merged / 12-of-12 PR CI green, final browser QA deferred to 16.11
 6. 16.5 i18n architecture cleanup — 🟡 merged / CI green, final browser-device QA deferred to 16.11
-7. **16.6 version/cache normalization — 🔵 NEXT ACTIVE**
-8. 16.7 CI consolidation + browser smoke
+7. 16.6 version/cache normalization — 🟡 merged / 14-of-14 PR CI green, installed-device cache QA deferred to 16.11
+8. **16.7 CI consolidation + browser smoke — 🔵 NEXT ACTIVE**
 9. 16.8 taxonomy unification
 10. 16.9 repo/deployment governance
 11. 16.10 branding source cleanup
@@ -240,17 +256,18 @@ Because the user explicitly asked engineering work to continue, strict product Q
 
 ## Next canonical action
 
-### Slice 16.6 — version / cache normalization
+### Slice 16.7 — CI consolidation + browser smoke
 
-1. inventory all Service Worker cache identities and query-versioned runtime assets;
-2. make `VERSION` / build metadata the canonical release identity instead of the historical `tran-closet-v0.5.1` cache namespace;
-3. normalize current runtime module query versions where they are only stale cache-bust labels, without renaming historical CSS/assets that are intentionally versioned artifacts;
-4. preserve network-first code/update behavior and exact `build-info.json` deployment proof;
-5. add regression coverage proving old cache namespaces are retired safely and current app-shell entries are coherent;
-6. keep installed iPhone/Android update verification for Slice 16.11 unless focused QA is performed earlier.
+1. inventory the 14 current PR workflows and map each unique product contract before removing any historical gate;
+2. consolidate overlapping static checks into maintainable current-generation suites while preserving behavior coverage;
+3. add a lightweight deterministic browser smoke for boot, search, Add/photo source chooser, Profile/diagnostics, FR↔VI, Daily Assistant and Outfit routes;
+4. stub network dependencies so browser smoke performs no real Worker/Airtable write and does not depend on live weather;
+5. specifically catch page-level exceptions and route/render crashes that grep/syntax guards cannot see;
+6. keep deployment/device verification separate and accumulated in Slice 16.11.
 
 ---
 
+## Verification vocabulary
 ## Verification vocabulary
 
 - **implemented** — code exists on a branch;

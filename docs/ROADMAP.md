@@ -5,7 +5,7 @@
 > Current factual runtime state lives in [`PROJECT-STATE.md`](./PROJECT-STATE.md). When chat history and the repository disagree, **verify `main` and follow the repository**.
 
 Last roadmap update: **2026-08-19**  
-Current slice: **V0.5.16 · Slice 16.6 — version / cache normalization**
+Current slice: **V0.5.16 · Slice 16.7 — CI consolidation + browser smoke**
 
 ---
 
@@ -222,21 +222,24 @@ Delivered:
 
 **Status:** engineering merged / CI green. Final browser/device FR↔VI leakage QA is carried into Slice 16.11; do not label VERIFIED PROD yet.
 
-## Slice 16.6 — Version / cache normalization 🔵 CURRENT
+## Slice 16.6 — Version / cache normalization 🟡 MERGED / 14/14 CI GREEN
 
-Problem:
-- service-worker cache and many asset query strings still carry historical labels.
+PR **#58**, tested head **`5259ec530988c2ffa6febd6d4666f68fa920216d`**, squash merge **`1bb94d173d6ae1ad7a7833063a0fe45542a7ec80`**.
 
-Deliverables:
-- one build/version source derived from `VERSION` / build metadata;
-- normalized Service Worker cache identity;
-- remove stale hard-coded cache-bust versions where practical;
-- preserve `build-info.json` as exact deployment proof.
+Delivered:
+- exact cache namespace from deployed version + short SHA;
+- VERSION-driven runtime cache-bust references and manifest icons;
+- source/offline fallback identity from `VERSION`;
+- `updateViaCache:'none'` for Service Worker registration;
+- permanent release-ref normalizer + exact cache/app-shell coherence tests;
+- Pages preflight before exact `build-info.json`;
+- cache namespace isolation preserved;
+- historical v058/v059/v0510 + global PWA gates retargeted away from hard-coded release labels;
+- final contract: **108 release refs**, **59 app-shell entries**, **14/14 PR workflows SUCCESS**.
 
-Exit criteria:
-- no ambiguous old cache namespace serving newer runtime;
-- installed iOS/Android update behavior remains safe.
+**Status:** engineering merged / CI green. Installed iOS/Android update/cache verification remains in Slice 16.11; do not label VERIFIED PROD yet.
 
+## Slice 16.7 — CI consolidation + browser smoke 🔵 CURRENT
 ## Slice 16.7 — CI consolidation + browser smoke
 
 Deliverables:
@@ -278,7 +281,7 @@ Current visual identity must not change during this cleanup.
 
 ## Slice 16.11 — V0.5.16 end-to-end closeout
 
-Required QA accumulates deferred proof from 16.2–16.5 plus final consolidated-runtime verification:
+Required QA accumulates deferred proof from 16.2–16.6 plus final consolidated-runtime verification:
 - Android + iPhone install/open/update sanity;
 - clothing CREATE / UPDATE / DELETE / live cross-device reread;
 - Outfit CREATE / UPDATE / DELETE / live cross-device reread **without manual refresh**;
