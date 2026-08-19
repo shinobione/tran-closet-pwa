@@ -28,7 +28,6 @@ jobs:
           const path='js/app.js';
           let s=fs.readFileSync(path,'utf8');
           function once(from,to){const n=s.split(from).length-1;if(n!==1)throw new Error(`Expected 1 occurrence, got ${n}: ${from}`);s=s.replace(from,to);}
-          function count(from,to,n){const got=s.split(from).length-1;if(got!==n)throw new Error(`Expected ${n} occurrences, got ${got}: ${from}`);s=s.split(from).join(to);}
 
           once(
             "function say(msg){toast.textContent=msg;toast.classList.add('show');clearTimeout(say.t);say.t=setTimeout(()=>toast.classList.remove('show'),2400);}",
@@ -42,10 +41,13 @@ jobs:
             "    </form></div></div>`;\n  if(!itemDialog.open)itemDialog.showModal();",
             "    </form></div></div>`;\n  window.TranClosetI18n?.apply?.(itemDialog);\n  if(!itemDialog.open)itemDialog.showModal();"
           );
-          count(
+          once(
             "    </div></div>`;\n  itemDialog.showModal();",
-            "    </div></div>`;\n  window.TranClosetI18n?.apply?.(itemDialog);\n  itemDialog.showModal();",
-            2
+            "    </div></div>`;\n  window.TranClosetI18n?.apply?.(itemDialog);\n  itemDialog.showModal();"
+          );
+          once(
+            "    <div class=\"detail-actions three\"><button id=\"detailFav\" class=\"secondary-button\">${i.favorite?'♥':'♡'}</button><button id=\"detailEdit\" class=\"secondary-button\">Sửa</button><button id=\"detailDelete\" class=\"danger-button\">Xóa</button></div></div></div>`;\n  itemDialog.showModal();",
+            "    <div class=\"detail-actions three\"><button id=\"detailFav\" class=\"secondary-button\">${i.favorite?'♥':'♡'}</button><button id=\"detailEdit\" class=\"secondary-button\">Sửa</button><button id=\"detailDelete\" class=\"danger-button\">Xóa</button></div></div></div>`;\n  window.TranClosetI18n?.apply?.(itemDialog);\n  itemDialog.showModal();"
           );
           once(
             "    </div></div>`;\n  itemDialog.querySelector('[data-close]').onclick=()=>itemDialog.close();\n  itemDialog.querySelector('#editItemForm')",
