@@ -1,15 +1,15 @@
 # CI coverage map
 
-Canonical validation topology after V0.5.16 Slice 16.7, with taxonomy ownership clarified in Slice 16.8.
+Canonical validation topology after V0.5.16 Slice 16.7, with taxonomy ownership clarified in Slice 16.8 and branding-source ownership clarified in Slice 16.10.
 
 ## Pull-request validation workflows
 
 | Workflow | Primary contract |
 | --- | --- |
 | `validate.yml` | Broad PWA shell, syntax, focused unit tests, canonical taxonomy parity, Smart Tags, Daily Assistant, keyed i18n, secrets guard |
-| `validate-ui-profile-contracts.yml` | Mobile live wiring, Camera/Gallery, search stability, canonical taxonomy/fine-color Worker parity, Profile/build diagnostics, French legacy coverage, CI topology |
+| `validate-ui-profile-contracts.yml` | Mobile live wiring, Camera/Gallery, search stability, canonical taxonomy/fine-color Worker parity, canonical branding-source guard, Profile/build diagnostics, French legacy coverage, CI topology |
 | `validate-sync-delete-contracts.yml` | Manual sync, clothing + Outfit flush behavior, delete reconciliation semantics, canonical reread, CORS-safe no-store behavior |
-| `validate-v0516-browser-smoke.yml` | Real Chromium boot/routes/search/Add/Profile/Outfits/Daily Assistant and FR↔VI crash smoke with external network stubs |
+| `validate-v0516-browser-smoke.yml` | Real Chromium boot/routes/search/Add/Profile/Outfits/Daily Assistant, canonical branding wiring and FR↔VI crash smoke with external network stubs |
 | `validate-v0516-keyed-i18n.yml` | Keyed translation catalog and migrated dynamic-surface contracts |
 | `validate-v0516-outfit-integrity.yml` | Incomplete Outfit invariant and non-destructive UI/recommendation behavior |
 | `validate-v0516-outfit-live-sync.yml` | Live `/v1/outfits` reconciliation, pending/tombstone protection and UI convergence contract |
@@ -30,6 +30,18 @@ Slice 16.8 keeps taxonomy parity inside the existing nine-workflow topology rath
 - `deploy-worker.yml` runs taxonomy parity before any Worker deployment and is triggered when the canonical taxonomy source or generator/tests change.
 
 The historical Airtable storage value `Swimware ` remains an explicit compatibility alias for canonical runtime value `Swimware`; this is compatibility behavior, not a data migration.
+
+## Canonical branding coverage
+
+Slice 16.10 keeps branding protection inside existing validation ownership plus the dedicated asset generator.
+
+- `docs/BRANDING-SOURCES.md` defines the four approved visual masters and their exact Git blob locks.
+- `scripts/test-branding-sources.mjs --strict` requires exactly those four files under `branding/`, byte-locks them, verifies runtime/Service Worker/generator wiring and rejects references to retired source names.
+- `validate-ui-profile-contracts.yml` owns the permanent strict source guard.
+- `validate-v0516-browser-smoke.yml` verifies the canonical header actually loads, the hero uses the canonical logo mark and the iOS splash remains wired.
+- `generate-brand-assets.yml` uses Python 3.12 + Pillow 12.3.0, regenerates favicon/PWA outputs from the exact approved favicon source and requires zero generated-output diff on pull requests.
+
+Passing these guards proves canonical source bytes, deterministic icon outputs and browser wiring are unchanged; it does not replace installed-device cache/visual QA in Slice 16.11.
 
 ## Historical workflows absorbed in Slice 16.7
 
@@ -68,4 +80,4 @@ Deployment/snapshot/asset-generation workflows are not part of the PR-validation
 - `sync-airtable.yml`
 - `generate-brand-assets.yml`
 
-Pages still runs the VERSION/cache preflight before producing the exact `build-info.json` stamp. Worker deploy now additionally runs canonical taxonomy parity before Wrangler deployment.
+Pages still runs the VERSION/cache preflight before producing the exact `build-info.json` stamp. Worker deploy additionally runs canonical taxonomy parity before Wrangler deployment. Branding generation additionally enforces the strict canonical-source contract and zero-diff generated outputs on pull requests.
