@@ -28,6 +28,7 @@ Important recent runtime lineage:
 - Slice 16.5B runtime compat bridge retirement: PR **#55**, merge **`128671489d95177592305d1456e463cd4e24d697`** after **13/13 PR workflows SUCCESS**;
 - Slice 16.5C dynamic i18n closeout: PR **#56**, squash merge **`536e7157793e2fc5d237656fc98ebd98ba633b7f`** after **12/12 final PR workflows SUCCESS**;
 - Slice 16.6 version/cache normalization: PR **#58**, tested head **`5259ec530988c2ffa6febd6d4666f68fa920216d`**, squash merge **`1bb94d173d6ae1ad7a7833063a0fe45542a7ec80`** after **14/14 PR workflows SUCCESS**.
+- Slice 16.7 CI consolidation + browser smoke: PR **#60**, tested head **`845ffa7f9aa56f28a7e09160a85dd803dda4a45a`**, squash merge **`19b32a12de6752b5b610e502789c22f27e2a225d`** after **9/9 final PR workflows SUCCESS**; real system-Chrome smoke passed both deterministic browser scenarios.
 
 **Do not infer deployment from merge.** Post-merge Pages/Worker state must still be independently proven when a claim depends on deployment. The available GitHub connector is reliable for PR-triggered CI but does not consistently expose all push-triggered deployment runs.
 
@@ -64,7 +65,8 @@ The stale clothing DELETE reconciliation bug targeting `rec6sAxfNivkTmiMp` remai
   - **16.4 runtime consolidation:** 🟡 MERGED / 12/12 CI GREEN; browser/device regression QA deferred to Slice 16.11.
   - **16.5 i18n architecture cleanup:** 🟡 MERGED / CI GREEN; final FR↔VI browser/device QA deferred to Slice 16.11.
   - **16.6 version/cache normalization:** 🟡 MERGED / 14/14 CI GREEN; installed-device update/cache QA deferred to Slice 16.11.
-  - **16.7 CI consolidation + browser smoke:** 🔵 NEXT ACTIVE ENGINEERING SLICE
+  - **16.7 CI consolidation + browser smoke:** ✅ MERGED / 9/9 CI + BROWSER SMOKE GREEN.
+  - **16.8 taxonomy unification:** 🔵 NEXT ACTIVE ENGINEERING SLICE
 - **V0.5-B — Wear history & rotation:** ⏭ blocked until V0.5.16 closeout
 
 Canonical principle:
@@ -207,9 +209,21 @@ Delivered by PR **#58**:
 
 Installed iOS/Android update/cache behavior remains part of Slice 16.11, so this is not yet VERIFIED PROD.
 
-### 16.7 — CI fossilization / browser smoke
+### 16.7 — CI consolidation + browser smoke — MERGED / 9/9 GREEN
 
-Many workflow names remain version-specific even though several were retargeted in 16.4. Static guards did not catch previous browser-only Profile failures. Consolidate the workflows and add a real browser smoke.
+Delivered by PR **#60**:
+- PR validation topology reduced from **14 historical/version-specific workflows to 9 current domain validators**;
+- V0.5.8/V0.5.9/Profile/French-AI checks consolidated into `validate-ui-profile-contracts.yml`;
+- manual-sync/delete/CORS reread checks consolidated into `validate-sync-delete-contracts.yml`;
+- standalone PWA-isolation workflow retired while the isolation test remains executed by global PWA + version/cache validation;
+- `scripts/test-ci-topology.mjs` prevents resurrection of 8 retired gates and protects the required 9-workflow topology;
+- `docs/CI-COVERAGE.md` records current ownership and browser-smoke policy;
+- Playwright browser smoke drives the preinstalled system Chrome against a local static server;
+- deterministic smoke covers FR boot, uninterrupted search typing/focus, Add + Camera/Gallery, Profile + diagnostics, Outfits, Daily Assistant with stubbed weather, FR→VI reload, and page-level exception/local asset failure detection;
+- smoke carries no sync token, stubs external network dependencies and performs no canonical write;
+- final tested head **`845ffa7f9aa56f28a7e09160a85dd803dda4a45a`** passed **9/9** PR workflows before squash merge **`19b32a12de6752b5b610e502789c22f27e2a225d`**.
+
+This is deterministic browser regression proof, not Pages deployment or installed-device VERIFIED PROD. Device/deployment proof remains in Slice 16.11.
 
 ### 16.8 — taxonomy drift
 
@@ -243,8 +257,8 @@ Because the user explicitly asked engineering work to continue, strict product Q
 5. 16.4 runtime hotfix consolidation — 🟡 merged / 12-of-12 PR CI green, final browser QA deferred to 16.11
 6. 16.5 i18n architecture cleanup — 🟡 merged / CI green, final browser-device QA deferred to 16.11
 7. 16.6 version/cache normalization — 🟡 merged / 14-of-14 PR CI green, installed-device cache QA deferred to 16.11
-8. **16.7 CI consolidation + browser smoke — 🔵 NEXT ACTIVE**
-9. 16.8 taxonomy unification
+8. 16.7 CI consolidation + browser smoke — ✅ merged / 9-of-9 CI + deterministic browser smoke green
+9. **16.8 taxonomy unification — 🔵 NEXT ACTIVE**
 10. 16.9 repo/deployment governance
 11. 16.10 branding source cleanup
 12. 16.11 end-to-end closeout
@@ -255,14 +269,15 @@ Because the user explicitly asked engineering work to continue, strict product Q
 
 ## Next canonical action
 
-### Slice 16.7 — CI consolidation + browser smoke
+### Slice 16.8 — canonical taxonomy unification
 
-1. inventory the 14 current PR workflows and map each unique product contract before removing any historical gate;
-2. consolidate overlapping static checks into maintainable current-generation suites while preserving behavior coverage;
-3. add a lightweight deterministic browser smoke for boot, search, Add/photo source chooser, Profile/diagnostics, FR↔VI, Daily Assistant and Outfit routes;
-4. stub network dependencies so browser smoke performs no real Worker/Airtable write and does not depend on live weather;
-5. specifically catch page-level exceptions and route/render crashes that grep/syntax guards cannot see;
-6. keep deployment/device verification separate and accumulated in Slice 16.11.
+1. inventory category/color/style/tag definitions across client, Worker, AI schema/fine-color wrapper and recommendation logic;
+2. preserve existing canonical values — including legacy spellings such as `Accessorie`, `Swimware` and `Eye Lens` — unless a separate explicit data migration is approved;
+3. establish one repository-level canonical taxonomy source and make client/Worker definitions consume or be deterministically generated from it;
+4. remove the current color drift where the client/fine-color layer exposes 24 colors while the base Worker classifier schema still exposes only the older subset;
+5. add parity tests for category/color/style/tag values and VI/FR label coverage;
+6. validate Airtable-compatible values without mutating existing records;
+7. keep Daily Assistant role/occasion heuristics as semantic policy layers that reference canonical taxonomy values rather than redefining the taxonomy.
 
 ---
 
