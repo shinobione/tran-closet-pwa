@@ -132,8 +132,8 @@ jobs:
           grep -q "'diagnostics.title':'Diagnostic de synchronisation'" js/i18n-keyed.mjs
           grep -q "'daily.openSaved':'Ouvrir dans Tenues'" js/i18n-keyed.mjs
 
-      - name: Audit canonical branding sources
-        run: node scripts/test-branding-sources.mjs --audit
+      - name: Guard canonical branding sources
+        run: node scripts/test-branding-sources.mjs --strict
 
       - name: Guard consolidated CI topology
         run: node scripts/test-ci-topology.mjs
