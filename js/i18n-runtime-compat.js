@@ -1,4 +1,3 @@
-const root=document.querySelector('#mainContent');
 const LANGUAGE_KEY='tran-closet-language';
 
 const FR_EXACT=new Map([
@@ -67,7 +66,14 @@ function patch(scope=document){cleanVietnameseSourceCopy(scope);translateTree(sc
 
 patch(document.body);
 // Transitional compatibility only. Slice 16.5 replaces this with key-based
-// translations. One observer replaces the historical v059/profile/AI/assistant stack.
-if(root)new MutationObserver(records=>{
-  for(const record of records){for(const node of record.addedNodes)if(node.nodeType===Node.ELEMENT_NODE)patch(node);}
-}).observe(root,{childList:true});
+// translations. One child-list observer replaces the historical v059/profile/
+// AI/assistant stack. It ignores characterData/attributes, so its own text
+// replacements cannot recursively trigger another translation pass.
+new MutationObserver(records=>{
+  for(const record of records){
+    for(const node of record.addedNodes){
+      if(node.nodeType===Node.ELEMENT_NODE)patch(node);
+      else if(node.nodeType===Node.TEXT_NODE&&node.parentElement)patch(node.parentElement);
+    }
+  }
+}).observe(document.body,{childList:true,subtree:true});
