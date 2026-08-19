@@ -32,6 +32,7 @@ jobs:
           node --check js/bootstrap.js
           node --check worker/src/v058.js
           node --check worker/src/v059.js
+          node --check scripts/test-ci-topology.mjs
           node --check sw.js
 
       - name: Check live mobile and photo source contracts
@@ -124,3 +125,6 @@ jobs:
           grep -q "Nouvel essai automatique" js/i18n.js
           grep -q "'diagnostics.title':'Diagnostic de synchronisation'" js/i18n-keyed.mjs
           grep -q "'daily.openSaved':'Ouvrir dans Tenues'" js/i18n-keyed.mjs
+
+      - name: Guard consolidated CI topology
+        run: node scripts/test-ci-topology.mjs
