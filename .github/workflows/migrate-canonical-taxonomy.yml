@@ -1,0 +1,56 @@
+name: Migrate V0.5.16 canonical taxonomy
+
+on:
+  push:
+    branches: [v0.5.16-canonical-taxonomy]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    if: ${{ (github.event_name == 'push' && !contains(github.event.head_commit.message, '[skip taxonomy-migrate]')) || (github.event_name == 'pull_request' && github.head_ref == 'v0.5.16-canonical-taxonomy') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: v0.5.16-canonical-taxonomy
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate taxonomy modules
+        run: node scripts/generate-taxonomy.mjs --write
+      - name: Migrate client Worker and snapshot consumers
+        run: node scripts/migrate-taxonomy-consumers.mjs
+      - name: Validate canonical taxonomy migration
+        run: |
+          node scripts/generate-taxonomy.mjs
+          node scripts/test-taxonomy.mjs
+          node scripts/test-smart-tags.mjs
+          node scripts/normalize-release-refs.mjs
+          node scripts/test-version-cache.mjs
+          node --check js/data.js
+          node --check js/taxonomy.generated.mjs
+          node --check worker/src/taxonomy.generated.mjs
+          node --check worker/src/index.js
+          node --check worker/src/v058.js
+          node --check worker/src/v059.js
+          node --check scripts/sync-airtable.mjs
+          grep -q "canonical-v\${TAXONOMY_SCHEMA_VERSION}" worker/src/v059.js
+          ! grep -q "const TAXONOMY={" worker/src/index.js
+          ! grep -q "export const TAXONOMY = {" js/data.js
+      - name: Remove one-shot migration machinery
+        run: |
+          rm scripts/migrate-taxonomy-consumers.mjs
+          rm .github/workflows/migrate-canonical-taxonomy.yml
+      - name: Commit migrated taxonomy runtime
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m "V0.5.16 · Migrate consumers to canonical taxonomy [skip taxonomy-migrate]"
+          git push origin HEAD:v0.5.16-canonical-taxonomy
