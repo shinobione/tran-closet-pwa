@@ -5,12 +5,17 @@ on:
     branches: [v0.5.16-state-after-branding]
     paths:
       - '.github/workflows/fix-branding-state-reference.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-branding-state-reference.yml'
 
 permissions:
   contents: write
 
 jobs:
   fix:
+    if: ${{ github.event_name != 'pull_request' || github.head_ref == 'v0.5.16-state-after-branding' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
