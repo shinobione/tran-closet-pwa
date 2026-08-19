@@ -1,9 +1,9 @@
 export const AIRTABLE_SNAPSHOT = {
-  "syncedAt": "2026-08-18T18:58:23.211Z",
+  "syncedAt": "2026-08-19T01:54:52.759Z",
   "source": "airtable",
   "baseId": "appw8WNvdDuXUgYvN",
   "tableId": "tblKdCi4MI4AH26y8",
-  "recordCount": 8,
+  "recordCount": 11,
   "items": [
     {
       "id": "airtable-rec1rhHLdY61btiZz",
@@ -25,6 +25,30 @@ export const AIRTABLE_SNAPSHOT = {
       "syncState": "synced",
       "createdAt": "2026-08-17T18:55:32.000Z",
       "updatedAt": "2026-08-17T18:55:32.000Z"
+    },
+    {
+      "id": "airtable-recGavsAE5D3d1mFb",
+      "airtableRecordId": "recGavsAE5D3d1mFb",
+      "name": "Blue Hottie",
+      "category": "Swimware",
+      "colors": [
+        "Blue",
+        "White"
+      ],
+      "styles": [
+        "Classy"
+      ],
+      "tags": [
+        "Cropped",
+        "Fitted",
+        "Summer"
+      ],
+      "photo": "./assets/items/recGavsAE5D3d1mFb.jpg",
+      "favorite": false,
+      "source": "airtable",
+      "syncState": "synced",
+      "createdAt": "2026-08-18T19:26:55.000Z",
+      "updatedAt": "2026-08-18T19:26:55.000Z"
     },
     {
       "id": "airtable-recKr0w0g9A6viuwj",
@@ -68,6 +92,31 @@ export const AIRTABLE_SNAPSHOT = {
       "updatedAt": "2026-08-17T06:33:07.000Z"
     },
     {
+      "id": "airtable-recLifmTNVeUdQ3yN",
+      "airtableRecordId": "recLifmTNVeUdQ3yN",
+      "name": "Ao Dai Dragon",
+      "category": "Coat",
+      "colors": [
+        "Black",
+        "Gold"
+      ],
+      "styles": [
+        "Classy"
+      ],
+      "tags": [
+        "Statement",
+        "Graphic",
+        "Character",
+        "Patterned"
+      ],
+      "photo": "./assets/items/recLifmTNVeUdQ3yN.jpg",
+      "favorite": false,
+      "source": "airtable",
+      "syncState": "synced",
+      "createdAt": "2026-08-18T19:32:32.000Z",
+      "updatedAt": "2026-08-18T19:32:32.000Z"
+    },
+    {
       "id": "airtable-recOVCsfXOTsu68At",
       "airtableRecordId": "recOVCsfXOTsu68At",
       "name": "Slagao Shirt",
@@ -92,6 +141,30 @@ export const AIRTABLE_SNAPSHOT = {
       "syncState": "synced",
       "createdAt": "2026-08-18T17:33:13.000Z",
       "updatedAt": "2026-08-18T17:33:13.000Z"
+    },
+    {
+      "id": "airtable-recRcHtuHYKl0IbQr",
+      "airtableRecordId": "recRcHtuHYKl0IbQr",
+      "name": "Black Classy",
+      "category": "Swimware",
+      "colors": [
+        "Black",
+        "White"
+      ],
+      "styles": [
+        "Classy"
+      ],
+      "tags": [
+        "Neutral",
+        "Fitted",
+        "Summer"
+      ],
+      "photo": "./assets/items/recRcHtuHYKl0IbQr.jpg",
+      "favorite": false,
+      "source": "airtable",
+      "syncState": "synced",
+      "createdAt": "2026-08-18T19:29:45.000Z",
+      "updatedAt": "2026-08-18T19:29:45.000Z"
     },
     {
       "id": "airtable-recZFFx4HaeVHOrTc",
