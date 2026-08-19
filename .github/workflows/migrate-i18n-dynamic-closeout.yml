@@ -3,13 +3,15 @@ name: Migrate V0.5.16 dynamic i18n closeout
 on:
   push:
     branches: [v0.5.16-i18n-dynamic-closeout]
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: write
 
 jobs:
   migrate:
-    if: ${{ !contains(github.event.head_commit.message, '[skip dynamic-i18n-migrate]') }}
+    if: ${{ (github.event_name == 'push' && !contains(github.event.head_commit.message, '[skip dynamic-i18n-migrate]')) || (github.event_name == 'pull_request' && github.head_ref == 'v0.5.16-i18n-dynamic-closeout') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
