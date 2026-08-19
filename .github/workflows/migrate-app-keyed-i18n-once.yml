@@ -1,0 +1,43 @@
+name: One-shot app keyed i18n migration
+
+on:
+  push:
+    branches:
+      - v0.5.16-keyed-i18n-legacy-bridge
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: v0.5.16-keyed-i18n-legacy-bridge
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply exact guarded migration
+        run: python scripts/migrate-app-keyed-i18n.py
+      - name: Validate migrated sources
+        run: |
+          node --check js/app.js
+          node --check js/i18n-keyed.mjs
+          grep -q "i18n-keyed.mjs?v=0.5.16" js/app.js
+          grep -q "t('app.edit.eyebrow')" js/app.js
+          grep -q "t(navigator.onLine?'app.delete.syncing':'app.delete.offline')" js/app.js
+          grep -q "t('app.privacy')" js/app.js
+          ! grep -q 'Vêtements, nhãn' js/app.js
+          ! grep -q 'đồng bộ canonique' js/app.js
+      - name: Remove one-shot migration machinery
+        run: git rm scripts/migrate-app-keyed-i18n.py .github/workflows/migrate-app-keyed-i18n-once.yml
+      - name: Commit migrated app
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add js/app.js js/i18n-keyed.mjs
+          git commit -m 'V0.5.16 · Migrate legacy app copy to keyed i18n [skip app-i18n-migrate]'
+          git push origin HEAD:v0.5.16-keyed-i18n-legacy-bridge
