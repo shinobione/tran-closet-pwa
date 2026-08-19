@@ -404,6 +404,22 @@ async function syncNow(silent=true){
   render();
 }
 
+let silentSyncOnSearchBlur=false;
+function syncWhenSearchIdle(){
+  const search=document.querySelector('#searchInput');
+  if(state.route==='closet'&&search&&document.activeElement===search){
+    if(!silentSyncOnSearchBlur){
+      silentSyncOnSearchBlur=true;
+      search.addEventListener('blur',()=>{
+        silentSyncOnSearchBlur=false;
+        syncNow(true);
+      },{once:true});
+    }
+    return;
+  }
+  syncNow(true);
+}
+
 function installHelp(){
   if(standalone())return say(t('app.install.installed'));
   if(state.installPrompt)return state.installPrompt.prompt();
@@ -448,11 +464,11 @@ async function resetLocal(){
 
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();state.installPrompt=e;});
 window.addEventListener('appinstalled',()=>{state.installPrompt=null;say('Đã cài Trân Closet ✓');});
-window.addEventListener('online',()=>syncNow(true));
+window.addEventListener('online',syncWhenSearchIdle);
 $('#installButton').onclick=installHelp;
 $$('.nav-item').forEach(n=>n.onclick=()=>setRoute(n.dataset.route));
 if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).catch(console.error));
 await seed();
 await refresh();
 render();
-setTimeout(()=>syncNow(true),700);
+setTimeout(syncWhenSearchIdle,700);
