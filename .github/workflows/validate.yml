@@ -21,6 +21,7 @@ jobs:
         run: |
           node --check js/app.js
           node --check js/data.js
+          node --check js/taxonomy.generated.mjs
           node --check js/db.js
           node --check js/bootstrap.js
           node --check js/airtable-bridge.js
@@ -45,9 +46,12 @@ jobs:
           node --check scripts/test-smart-tags.mjs
           node --check scripts/test-daily-assistant.mjs
           node --check scripts/test-keyed-i18n.mjs
+          node --check scripts/generate-taxonomy.mjs
+          node --check scripts/test-taxonomy.mjs
           node --check scripts/normalize-release-refs.mjs
           node --check scripts/test-version-cache.mjs
           node --check scripts/test-pwa-isolation.mjs
+          node --check worker/src/taxonomy.generated.mjs
           node --check worker/src/index.js
           node --check sw.js
       - name: Run focused unit tests
@@ -56,12 +60,15 @@ jobs:
           node scripts/test-smart-tags.mjs
           node scripts/test-daily-assistant.mjs
           node scripts/test-keyed-i18n.mjs
+          node scripts/generate-taxonomy.mjs
+          node scripts/test-taxonomy.mjs
           node scripts/normalize-release-refs.mjs
           node scripts/test-version-cache.mjs
           node scripts/test-pwa-isolation.mjs
       - name: Check JSON and manifest
         run: |
           python -m json.tool manifest.webmanifest > /dev/null
+          python -m json.tool shared/taxonomy.json > /dev/null
           python -m json.tool worker/package.json > /dev/null
       - name: Check PWA and sync shell files
         run: |
@@ -93,11 +100,16 @@ jobs:
           test -f js/daily-assistant.js
           test -f js/i18n.js
           test -f js/i18n-keyed.mjs
+          test -f js/taxonomy.generated.mjs
+          test -f worker/src/taxonomy.generated.mjs
+          test -f shared/taxonomy.json
           test ! -e js/i18n-runtime-compat.js
           test -f scripts/test-duplicate-core.mjs
           test -f scripts/test-smart-tags.mjs
           test -f scripts/test-daily-assistant.mjs
           test -f scripts/test-keyed-i18n.mjs
+          test -f scripts/generate-taxonomy.mjs
+          test -f scripts/test-taxonomy.mjs
           test -f scripts/normalize-release-refs.mjs
           test -f scripts/test-version-cache.mjs
           test -f scripts/test-pwa-isolation.mjs
@@ -130,10 +142,10 @@ jobs:
           grep -q '@cf/meta/llama-4-scout-17b-16e-instruct' worker/src/index.js
           grep -q '@cf/llava-hf/llava-1.5-7b-hf' worker/src/index.js
           grep -q 'guided_json' worker/src/index.js
-          grep -q "Underwear" js/data.js
-          grep -q "Headwear" js/data.js
-          grep -q "Umbrella" js/data.js
-          grep -q "Brown:'Nâu'" js/data.js
+          grep -q "taxonomy.generated.mjs?v=${RELEASE}" js/data.js
+          grep -q "./js/taxonomy.generated.mjs?v=${RELEASE}" sw.js
+          grep -q "from './taxonomy.generated.mjs'" worker/src/index.js
+          grep -q "from './taxonomy.generated.mjs'" worker/src/v059.js
           grep -q 'MAX_CLIENT_ATTEMPTS=3' js/item-ai-assistant.js
           grep -q 'duplicateGuardMounted' js/duplicate-guard.js
           grep -q 'MAX_VISUAL_CANDIDATES=80' js/duplicate-guard.js
@@ -165,9 +177,7 @@ jobs:
           grep -q '1350' js/outfit-presentation.js
       - name: Check V0.4-C Smart Tags contract
         run: |
-          grep -q "tags: \['Minimal','Statement'" js/data.js
-          grep -q "Minimal:'Tối giản'" js/data.js
-          grep -q "'Travel-friendly':'Du lịch'" js/data.js
+          node scripts/test-taxonomy.mjs
           grep -q 'name="tags"' js/app.js
           grep -q "tags:f.getAll('tags')" js/app.js
           grep -q "label('tag',v)" js/app.js
@@ -206,6 +216,7 @@ jobs:
           grep -q "Rain-ready" js/daily-assistant-core.mjs
           grep -q 'sameItemSet' js/daily-assistant-core.mjs
           grep -q "daily.reason.rainReady" js/daily-assistant-core.mjs
+          grep -q 'Daily Assistant subsets canonical' scripts/test-taxonomy.mjs
           grep -q 'daily assistant core: PASS' scripts/test-daily-assistant.mjs
       - name: Check bilingual keyed foundation and legacy boundary
         run: |
