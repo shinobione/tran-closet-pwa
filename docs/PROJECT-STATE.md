@@ -13,7 +13,7 @@ Last state update: **2026-08-19**
 - repository: `shinobione/tran-closet-pwa`
 - canonical branch: `main`
 - version file: **`v0.5.16`**
-- current runtime-changing main SHA: **`082487fc938bbbed47e37a00727a23989a58a99b`** — Slice 16.4 runtime consolidation
+- current runtime-changing main SHA: **`536e7157793e2fc5d237656fc98ebd98ba633b7f`** — Slice 16.5C dynamic i18n closeout
 - PWA: `https://shinobione.github.io/tran-closet-pwa/`
 - Cloudflare Worker: `https://tran-closet-sync.jerryquinet.workers.dev`
 - IndexedDB: `tran-closet`, schema version **4**
@@ -23,7 +23,10 @@ Important recent runtime lineage:
 - Slice 16.2 initial live Outfit parity: PR **#49**, merge/runtime **`183a2650f1cfe95320bb6fde9c3d9768ea31f07c`**;
 - Slice 16.2 visible UI convergence follow-up: PR **#50**, merge **`6ed2bcd345fcaf8c98ba03abdad9ad876ee6a21f`**;
 - Slice 16.3 incomplete Outfit integrity: PR **#51**, squash merge **`f3cf862d94c7186773a35f0fca511838d68bd5d8`**;
-- Slice 16.4 runtime consolidation: PR **#52**, squash merge **`082487fc938bbbed47e37a00727a23989a58a99b`** after **12/12 PR workflows SUCCESS**.
+- Slice 16.4 runtime consolidation: PR **#52**, squash merge **`082487fc938bbbed47e37a00727a23989a58a99b`** after **12/12 PR workflows SUCCESS**;
+- Slice 16.5A keyed i18n foundation: PR **#54**, merge **`add11b112482a3718784b27969e0c0aa84200693`** after **13/13 PR workflows SUCCESS**;
+- Slice 16.5B runtime compat bridge retirement: PR **#55**, merge **`128671489d95177592305d1456e463cd4e24d697`** after **13/13 PR workflows SUCCESS**;
+- Slice 16.5C dynamic i18n closeout: PR **#56**, squash merge **`536e7157793e2fc5d237656fc98ebd98ba633b7f`** after **12/12 final PR workflows SUCCESS**.
 
 **Do not infer deployment from merge.** Post-merge Pages/Worker state must still be independently proven when a claim depends on deployment. The available GitHub connector is reliable for PR-triggered CI but does not consistently expose all push-triggered deployment runs.
 
@@ -58,7 +61,8 @@ The stale clothing DELETE reconciliation bug targeting `rec6sAxfNivkTmiMp` remai
   - **16.2 live Outfit sync parity:** 🟡 ENGINEERING MERGED; strict two-device VERIFIED-PROD proof not recorded. User elected to continue consolidation; final cross-device verification is carried into Slice 16.11.
   - **16.3 incomplete Outfit integrity:** 🟡 MERGED / CI GREEN; production UI QA deferred to Slice 16.11.
   - **16.4 runtime consolidation:** 🟡 MERGED / 12/12 CI GREEN; browser/device regression QA deferred to Slice 16.11.
-  - **16.5 i18n architecture cleanup:** 🔵 NEXT ACTIVE ENGINEERING SLICE
+  - **16.5 i18n architecture cleanup:** 🟡 MERGED / CI GREEN; final FR↔VI browser/device QA deferred to Slice 16.11.
+  - **16.6 version/cache normalization:** 🔵 NEXT ACTIVE ENGINEERING SLICE
 - **V0.5-B — Wear history & rotation:** ⏭ blocked until V0.5.16 closeout
 
 Canonical principle:
@@ -146,7 +150,7 @@ Physically removed historical runtime files:
 - `assistant-ui-hotfix.js`;
 - `live-outfit-ui-bridge.js`.
 
-Search and photo controllers no longer use subtree observers. The transitional i18n compatibility layer intentionally keeps one child-list subtree observer for dynamically inserted assistant/share copy; it ignores character-data/attribute changes so its own text replacements do not recursively trigger itself. Slice 16.5 owns removing mutation-based translation entirely.
+Search and photo controllers no longer use subtree observers. The transitional `i18n-runtime-compat.js` introduced in 16.4 was removed in Slice 16.5; dynamic Assistant, Duplicate, Outfit and app copy now use keyed or explicit translation sinks rather than a global recursive translation observer.
 
 Historical workflow filenames remain temporarily, but their checks now point at the canonical runtime modules. Full workflow consolidation remains Slice 16.7.
 
@@ -170,16 +174,19 @@ Pages generates `build-info.json` from the exact deployed SHA and `VERSION`. Pro
 
 ## Current technical debt / blockers
 
-### 16.5 — i18n architecture
+### 16.5 — i18n architecture — MERGED / CI GREEN
 
-Current translation is still fundamentally DOM-text replacement. Slice 16.4 reduced the number of compatibility layers, but `i18n.js` still has a body-wide mutation translator and `i18n-runtime-compat.js` is explicitly transitional.
+Delivered across PRs #54, #55 and #56:
+- canonical `i18n-keyed.mjs` with VI/FR keys, parameters and persistent language selection;
+- keyed rendering for search, photo, manual sync, Profile diagnostics/build info, Outfit integrity/presentation/picker, Daily Assistant, Duplicate Guard and Photo AI;
+- Daily Assistant and Duplicate Guard reasoning converted from rendered Vietnamese sentences to structured translation descriptors;
+- Photo AI sends the active language to the Worker and free-form `reason` / `tagReason` are generated in that requested language;
+- `i18n-runtime-compat.js` physically removed from runtime and offline shell;
+- body-wide recursive translation `MutationObserver` removed from legacy `i18n.js`;
+- remaining static legacy route/dialog/toast translation uses explicit bounded sinks from `app.js`;
+- final PR #56 passed **12/12** PR workflows on its tested head before merge.
 
-Target for 16.5:
-- translation keys with parameters at render time;
-- Vietnamese default preserved;
-- persistent FR QA mode preserved;
-- dynamic messages translated by key, not observed text;
-- remove `i18n-runtime-compat.js` and mutation-based translation when covered surfaces are migrated.
+Final FR↔VI device/browser leakage verification remains part of Slice 16.11, so this is not yet VERIFIED PROD.
 
 ### 16.6 — PWA cache/version debt
 
@@ -208,7 +215,7 @@ Current visual identity is correct; old/current branding sources still need depe
 
 ### Deferred production proof
 
-Because the user explicitly asked engineering work to continue, strict product QA for 16.2/16.3/16.4 is accumulated in **Slice 16.11 end-to-end closeout** rather than falsely marked VERIFIED PROD now.
+Because the user explicitly asked engineering work to continue, strict product QA for 16.2/16.3/16.4/16.5 is accumulated in **Slice 16.11 end-to-end closeout** rather than falsely marked VERIFIED PROD now.
 
 ---
 
@@ -219,8 +226,8 @@ Because the user explicitly asked engineering work to continue, strict product Q
 3. 16.2 live Outfit sync parity — 🟡 merged, final two-device proof deferred to 16.11
 4. 16.3 incomplete Outfit integrity — 🟡 merged, final device QA deferred to 16.11
 5. 16.4 runtime hotfix consolidation — 🟡 merged / 12-of-12 PR CI green, final browser QA deferred to 16.11
-6. **16.5 i18n architecture cleanup — 🔵 NEXT ACTIVE**
-7. 16.6 version/cache normalization
+6. 16.5 i18n architecture cleanup — 🟡 merged / CI green, final browser-device QA deferred to 16.11
+7. **16.6 version/cache normalization — 🔵 NEXT ACTIVE**
 8. 16.7 CI consolidation + browser smoke
 9. 16.8 taxonomy unification
 10. 16.9 repo/deployment governance
@@ -233,15 +240,14 @@ Because the user explicitly asked engineering work to continue, strict product Q
 
 ## Next canonical action
 
-### Slice 16.5 — key-based FR / VI rendering
+### Slice 16.6 — version / cache normalization
 
-1. inventory canonical user-visible strings and dynamic messages by product surface;
-2. introduce a keyed translation API with parameter interpolation;
-3. migrate highest-risk dynamic surfaces first: navigation/header, Profile/sync diagnostics, Add/photo/AI, Outfit integrity/presentation, Daily Assistant;
-4. preserve VI default and persistent FR selection;
-5. replace text-observer translation only after migrated surfaces have behavior tests;
-6. delete `i18n-runtime-compat.js` once no runtime surface relies on it;
-7. keep final FR/VI leak/browser verification for Slice 16.11 unless a focused QA is performed earlier.
+1. inventory all Service Worker cache identities and query-versioned runtime assets;
+2. make `VERSION` / build metadata the canonical release identity instead of the historical `tran-closet-v0.5.1` cache namespace;
+3. normalize current runtime module query versions where they are only stale cache-bust labels, without renaming historical CSS/assets that are intentionally versioned artifacts;
+4. preserve network-first code/update behavior and exact `build-info.json` deployment proof;
+5. add regression coverage proving old cache namespaces are retired safely and current app-shell entries are coherent;
+6. keep installed iPhone/Android update verification for Slice 16.11 unless focused QA is performed earlier.
 
 ---
 
