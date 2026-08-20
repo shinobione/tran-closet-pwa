@@ -199,7 +199,7 @@ jobs:
           grep -q 'name="tags"' js/app.js
           grep -q "tags:f.getAll('tags')" js/app.js
           grep -q "label('tag',v)" js/app.js
-          grep -q 'version:4' js/app.js
+          grep -q 'version:5' js/app.js
           grep -q 'item.tags||\[\]' js/sync-client.js
           grep -q "tags: 'fld9hV9qirpfVfJmM'" scripts/sync-airtable.mjs
           grep -q 'tags: cleanMulti' scripts/sync-airtable.mjs
