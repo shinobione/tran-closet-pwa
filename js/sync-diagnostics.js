@@ -1,8 +1,10 @@
 import {getSyncConfig,testSyncConnection,flushMutationQueue,pendingMutationCount} from './sync-client.js?v=0.5.17';
 import {flushOutfitQueue,pendingOutfitMutationCount} from './outfit-sync-client.js?v=0.5.17';
+import {flushWearQueue,pendingWearMutationCount,getWearMutationQueue} from './wear-sync-client.js?v=0.5.17';
 import {syncLiveCanonicalItems} from './live-airtable-sync.js?v=0.5.17';
 import {syncLiveCanonicalOutfits} from './live-airtable-outfit-sync.js?v=0.5.17';
-import {getAllItems,getAllMutations,getAllOutfits,getAllOutfitMutations,getMeta} from './db.js';
+import {syncLiveCanonicalWearEvents} from './live-airtable-wear-sync.js?v=0.5.17';
+import {getAllItems,getAllMutations,getAllOutfits,getAllOutfitMutations,getAllWearEvents,getMeta} from './db.js';
 import {t} from './i18n-keyed.mjs?v=0.5.17';
 
 const FALLBACK_VERSION='v0.5.17';
@@ -25,6 +27,11 @@ function orphanCount(items,mutations,idKey='localItemId'){
   return items.filter(i=>!i.airtableRecordId&&!queued.has(i.id)).length;
 }
 
+function orphanWearCount(events,mutations){
+  const queued=new Set(mutations.map(m=>m.eventId));
+  return events.filter(event=>!event.airtableRecordId&&!queued.has(event.id)).length;
+}
+
 function safeResult(value){
   if(value instanceof Error)return value.message;
   if(Array.isArray(value))return value.map(safeResult);
@@ -41,13 +48,15 @@ function safeResult(value){
 
 async function snapshot(){
   const [
-    cfg,items,mutations,outfits,outfitMutations,health,
+    cfg,items,mutations,outfits,outfitMutations,wearEvents,wearMutations,health,
     itemLiveLastSync,itemLiveRecordCount,itemLiveLastError,
-    outfitLiveLastSync,outfitLiveRecordCount,outfitLiveLastError
+    outfitLiveLastSync,outfitLiveRecordCount,outfitLiveLastError,
+    wearLiveLastSync,wearLiveRecordCount,wearLiveLastError
   ]=await Promise.all([
-    getSyncConfig(),getAllItems(),getAllMutations(),getAllOutfits(),getAllOutfitMutations(),testSyncConnection(),
+    getSyncConfig(),getAllItems(),getAllMutations(),getAllOutfits(),getAllOutfitMutations(),getAllWearEvents(),getWearMutationQueue(),testSyncConnection(),
     getMeta('airtable-live-last-sync'),getMeta('airtable-live-record-count'),getMeta('airtable-live-last-error'),
-    getMeta('airtable-outfit-live-last-sync'),getMeta('airtable-outfit-live-record-count'),getMeta('airtable-outfit-live-last-error')
+    getMeta('airtable-outfit-live-last-sync'),getMeta('airtable-outfit-live-record-count'),getMeta('airtable-outfit-live-last-error'),
+    getMeta('airtable-wear-live-last-sync'),getMeta('airtable-wear-live-record-count'),getMeta('airtable-wear-live-last-error')
   ]);
   const build=buildInfo();
   return {
@@ -59,6 +68,7 @@ async function snapshot(){
     health:safeResult(health),
     itemCount:items.length,
     outfitCount:outfits.length,
+    wearEventCount:wearEvents.length,
     liveItems:{
       lastSync:itemLiveLastSync||null,
       recordCount:Number.isFinite(Number(itemLiveRecordCount))?Number(itemLiveRecordCount):null,
@@ -69,19 +79,31 @@ async function snapshot(){
       recordCount:Number.isFinite(Number(outfitLiveRecordCount))?Number(outfitLiveRecordCount):null,
       lastError:safeResult(outfitLiveLastError)
     },
+    liveWear:{
+      lastSync:wearLiveLastSync||null,
+      recordCount:Number.isFinite(Number(wearLiveRecordCount))?Number(wearLiveRecordCount):null,
+      lastError:safeResult(wearLiveLastError)
+    },
     taggedItemCount:items.filter(item=>Array.isArray(item.tags)&&item.tags.length).length,
     pendingMutations:mutations.length,
     pendingOutfitMutations:outfitMutations.length,
+    pendingWearMutations:wearMutations.length,
     orphanedLocalCreates:orphanCount(items,mutations),
     orphanedLocalOutfits:orphanCount(outfits,outfitMutations,'localOutfitId'),
+    orphanedLocalWearEvents:orphanWearCount(wearEvents,wearMutations),
     mutationOps:mutations.map(m=>m.operation),
     outfitMutationOps:outfitMutations.map(m=>m.operation),
+    wearMutationOps:wearMutations.map(m=>m.operation),
     mutationStates:mutations.map(m=>({
       id:m.id,operation:m.operation,localItemId:m.localItemId||null,
       airtableRecordId:m.airtableRecordId||null,createdAt:m.createdAt||null
     })),
     outfitMutationStates:outfitMutations.map(m=>({
       id:m.id,operation:m.operation,localOutfitId:m.localOutfitId||null,
+      airtableRecordId:m.airtableRecordId||null,createdAt:m.createdAt||null
+    })),
+    wearMutationStates:wearMutations.map(m=>({
+      id:m.id,operation:m.operation,eventId:m.eventId||null,
       airtableRecordId:m.airtableRecordId||null,createdAt:m.createdAt||null
     })),
     itemStates:items.map(i=>({
@@ -93,6 +115,12 @@ async function snapshot(){
       name:o.name,id:o.id,airtableRecordId:o.airtableRecordId||null,
       itemCount:Array.isArray(o.itemIds)?o.itemIds.length:0,source:o.source||null,
       syncState:o.syncState||null,cloudWriteAt:o.cloudWriteAt||null
+    })),
+    wearStates:wearEvents.map(event=>({
+      id:event.id,outfitId:event.outfitId,airtableRecordId:event.airtableRecordId||null,
+      itemCount:Array.isArray(event.itemIds)?event.itemIds.length:0,
+      canonicalItemCount:Array.isArray(event.itemRecordIds)?event.itemRecordIds.length:0,
+      wornDate:event.wornDate||null,source:event.source||null,syncState:event.syncState||null
     }))
   };
 }
@@ -131,14 +159,20 @@ function mount(){
       const before=await snapshot();
       const clothingFlush=await flushMutationQueue();
       const outfitFlush=await flushOutfitQueue();
+      const wearFlush=await flushWearQueue();
       const clothingLive=await syncLiveCanonicalItems();
       const outfitLive=await syncLiveCanonicalOutfits();
+      const wearLive=await syncLiveCanonicalWearEvents();
       const after=await snapshot();
-      const pending={clothing:await pendingMutationCount(),outfits:await pendingOutfitMutationCount()};
+      const pending={
+        clothing:await pendingMutationCount(),
+        outfits:await pendingOutfitMutationCount(),
+        wear:await pendingWearMutationCount()
+      };
       out.textContent=JSON.stringify({
         before,
-        flush:{clothing:safeResult(clothingFlush),outfits:safeResult(outfitFlush)},
-        live:{clothing:safeResult(clothingLive),outfits:safeResult(outfitLive)},
+        flush:{clothing:safeResult(clothingFlush),outfits:safeResult(outfitFlush),wear:safeResult(wearFlush)},
+        live:{clothing:safeResult(clothingLive),outfits:safeResult(outfitLive),wear:safeResult(wearLive)},
         after,
         pending
       },null,2);
