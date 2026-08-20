@@ -1,9 +1,9 @@
 export const AIRTABLE_OUTFIT_SNAPSHOT = {
-  "syncedAt": "2026-08-20T13:12:29.111Z",
+  "syncedAt": "2026-08-20T19:01:46.661Z",
   "source": "airtable",
   "baseId": "appw8WNvdDuXUgYvN",
   "tableId": "tblhtL2UlsgCAh6E7",
-  "recordCount": 3,
+  "recordCount": 2,
   "outfits": [
     {
       "id": "ec8b91c9-a612-4db0-a499-200165e41a75",
@@ -30,33 +30,18 @@ export const AIRTABLE_OUTFIT_SNAPSHOT = {
         "recOVCsfXOTsu68At",
         "recnRlYbNVFoEbl2A",
         "recggyUrLuO9x880t",
-        "recZFFx4HaeVHOrTc",
-        "recLYZZgUOsE33ddz"
+        "recKr0w0g9A6viuwj",
+        "recLYZZgUOsE33ddz",
+        "recZFFx4HaeVHOrTc"
       ],
       "occasion": "Everyday",
       "season": "Rainy",
-      "note": "Trợ lý hôm nay · nóng · có mưa 100%",
+      "note": "Assistant du jour · chaud · pluie 100%",
       "favorite": false,
       "source": "airtable",
       "syncState": "synced",
       "createdAt": "2026-08-19T13:22:47.703Z",
-      "updatedAt": "2026-08-19T13:22:47.703Z"
-    },
-    {
-      "id": "acdad40d-3ddf-486e-8c79-2d60f2f1c8b1",
-      "airtableRecordId": "recNEapky2t6u52HC",
-      "name": "Lookbook Test",
-      "itemRecordIds": [
-        "recrtzfBVgQOYfAQN"
-      ],
-      "occasion": "Everyday",
-      "season": "All",
-      "note": "",
-      "favorite": false,
-      "source": "airtable",
-      "syncState": "synced",
-      "createdAt": "2026-08-16T21:58:48.984Z",
-      "updatedAt": "2026-08-18T17:35:15.710Z"
+      "updatedAt": "2026-08-20T16:40:47.184Z"
     }
   ]
 };

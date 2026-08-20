@@ -1,9 +1,9 @@
 export const AIRTABLE_SNAPSHOT = {
-  "syncedAt": "2026-08-20T13:12:25.499Z",
+  "syncedAt": "2026-08-20T19:01:45.012Z",
   "source": "airtable",
   "baseId": "appw8WNvdDuXUgYvN",
   "tableId": "tblKdCi4MI4AH26y8",
-  "recordCount": 12,
+  "recordCount": 11,
   "items": [
     {
       "id": "airtable-rec1rhHLdY61btiZz",
@@ -252,21 +252,6 @@ export const AIRTABLE_SNAPSHOT = {
       "syncState": "synced",
       "createdAt": "2026-07-23T12:04:10.000Z",
       "updatedAt": "2026-07-23T12:04:10.000Z"
-    },
-    {
-      "id": "airtable-recxtaoRIIcuCV91F",
-      "airtableRecordId": "recxtaoRIIcuCV91F",
-      "name": "EYE OUTFIT TEST",
-      "category": "Shirt",
-      "colors": [],
-      "styles": [],
-      "tags": [],
-      "photo": null,
-      "favorite": false,
-      "source": "airtable",
-      "syncState": "synced",
-      "createdAt": "2026-08-20T12:44:27.000Z",
-      "updatedAt": "2026-08-20T12:44:27.000Z"
     }
   ]
 };
