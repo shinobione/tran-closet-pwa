@@ -60,6 +60,7 @@ jobs:
           HEALTH_URL="$BASE_URL/health"
           ITEMS_URL="$BASE_URL/v1/items"
           OUTFITS_URL="$BASE_URL/v1/outfits"
+          WEAR_URL="$BASE_URL/v1/wear-events"
 
           for attempt in $(seq 1 12); do
             STATUS="$(curl --silent --show-error --output /tmp/worker-health.json --write-out '%{http_code}' \
@@ -83,10 +84,11 @@ jobs:
           from pathlib import Path
           body=json.loads(Path('/tmp/worker-health.json').read_text())
           assert body.get('ok') is True, body
-          assert body.get('workerRevision')=='v059', body
+          assert body.get('workerRevision')=='v060', body
+          assert body.get('wearHistory')=='canonical-v1', body
           assert body.get('taxonomy')=='canonical-v1', body
           assert body.get('taxonomyCounts')=={'categories':17,'colors':24,'styles':6,'tags':22}, body
-          print('Canonical Worker identity verified: v059 / canonical-v1 / 17-24-6-22')
+          print('Canonical Worker identity verified: v060 / wear canonical-v1 / taxonomy canonical-v1 / 17-24-6-22')
           PY
 
           STATUS="$(curl --silent --show-error --output /tmp/worker-items.json --write-out '%{http_code}' \
@@ -120,4 +122,20 @@ jobs:
           assert body.get('recordCount')==len(outfits), body
           assert all(outfit.get('airtableRecordId') and outfit.get('id') for outfit in outfits), body
           print(f"Canonical Worker Outfit read verified: {len(outfits)} Airtable outfits")
+          PY
+
+          STATUS="$(curl --silent --show-error --output /tmp/worker-wear.json --write-out '%{http_code}' \
+            -H "Authorization: Bearer $CLOSET_SYNC_KEY" \
+            "$WEAR_URL" || true)"
+          test "$STATUS" = "200"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          body=json.loads(Path('/tmp/worker-wear.json').read_text())
+          assert body.get('ok') is True, body
+          events=body.get('events')
+          assert isinstance(events,list), body
+          assert body.get('recordCount')==len(events), body
+          assert all(event.get('airtableRecordId') and event.get('id') and event.get('wornDate') for event in events), body
+          print(f"Canonical Worker wear-history read verified: {len(events)} Airtable events")
           PY

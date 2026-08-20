@@ -1,6 +1,6 @@
 import {getAllItems} from './db.js';
-import {closetSearchMatches} from './closet-search-core.mjs?v=0.5.17';
-import {t} from './i18n-keyed.mjs?v=0.5.17';
+import {closetSearchMatches} from './closet-search-core.mjs?v=0.5.18';
+import {t} from './i18n-keyed.mjs?v=0.5.18';
 
 const root=document.querySelector('#mainContent');
 let currentQuery='';

@@ -1,5 +1,5 @@
 name = "tran-closet-sync"
-main = "src/v059.js"
+main = "src/v060.js"
 compatibility_date = "2026-08-16"
 
 [vars]

@@ -1,4 +1,4 @@
-import {TAXONOMY,LABELS,FR_LABELS} from './taxonomy.generated.mjs?v=0.5.17';
+import {TAXONOMY,LABELS,FR_LABELS} from './taxonomy.generated.mjs?v=0.5.18';
 export {TAXONOMY,LABELS,FR_LABELS};
 
 export const SEED_ITEMS = [

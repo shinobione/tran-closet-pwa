@@ -1,5 +1,5 @@
 import {TAXONOMY,LABELS,SEED_ITEMS} from './data.js';
-import {t} from './i18n-keyed.mjs?v=0.5.17';
+import {t} from './i18n-keyed.mjs?v=0.5.18';
 import {getAllItems,putItem,deleteItem,bulkPutItems,getMeta,setMeta,clearItems,clearMutations,getAllOutfits,putOutfit,deleteOutfit,clearOutfits,bulkPutOutfits,getAllWearEvents,clearWearEvents,bulkPutWearEvents} from './db.js';
 import {queueMutation,flushMutationQueue,pendingMutationCount,getSyncConfig,saveSyncConfig,testSyncConnection} from './sync-client.js';
 

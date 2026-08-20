@@ -1,6 +1,6 @@
 import {TAXONOMY,LABELS,FR_LABELS} from './data.js';
-import {getSyncConfig} from './sync-client.js?v=0.5.17';
-import {t,currentLanguage} from './i18n-keyed.mjs?v=0.5.17';
+import {getSyncConfig} from './sync-client.js?v=0.5.18';
+import {t,currentLanguage} from './i18n-keyed.mjs?v=0.5.18';
 
 const root=document.querySelector('#mainContent');
 const MAX_CLIENT_ATTEMPTS=3;

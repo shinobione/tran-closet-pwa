@@ -25,12 +25,19 @@ jobs:
           node --check js/wear-history-core.mjs
           node --check js/wear-history-i18n.mjs
           node --check js/wear-history.js
+          node --check js/wear-sync-client.js
+          node --check js/live-wear-sync-core.mjs
+          node --check js/live-airtable-wear-sync.js
           node --check js/daily-assistant-core.mjs
           node --check js/i18n-keyed.mjs
           node --check js/bootstrap.js
           node --check js/db.js
+          node --check js/manual-sync.js
+          node --check js/sync-diagnostics.js
+          node --check worker/src/v060.js
           node --check scripts/test-outfit-integrity.mjs
           node --check scripts/test-wear-history.mjs
+          node --check scripts/test-wear-sync.mjs
           node --check sw.js
 
       - name: Test incomplete Outfit behavior
@@ -38,6 +45,9 @@ jobs:
 
       - name: Test wear-event behavior
         run: node scripts/test-wear-history.mjs
+
+      - name: Test wear-history live reconciliation
+        run: node scripts/test-wear-sync.mjs
 
       - name: Check non-destructive integrity contract
         run: |
@@ -60,7 +70,7 @@ jobs:
           grep -q "outfit-presentation-actions" js/outfit-integrity-ui.js
           grep -q "outfit-integrity-ui.js?v=${RELEASE}" js/bootstrap.js
 
-      - name: Check wear-history local event contract
+      - name: Check wear-history event model contract
         run: |
           VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
           RELEASE="${VERSION_VALUE#v}"
@@ -78,9 +88,48 @@ jobs:
           grep -q "data-wear-today" js/wear-history.js
           grep -q "data-wear-undo" js/wear-history.js
           grep -q "integrity.resolvedItemIds" js/wear-history.js
+          grep -q "queueWearEventCreate" js/wear-history.js
+          grep -q "queueWearEventDelete" js/wear-history.js
           grep -q "wear-history.js?v=${RELEASE}" js/bootstrap.js
-          if grep -Eq "putOutfit\(|putItem\(|queueMutation\(|fetch\(" js/wear-history-core.mjs js/wear-history.js; then
-            echo 'B.1 wear history must not mutate clothing/Outfit canonical records or call cloud APIs.'
+          if grep -Eq "putOutfit\(|putItem\(" js/wear-history-core.mjs js/wear-history.js; then
+            echo 'Wear history must not mutate clothing or Outfit canonical records.'
+            exit 1
+          fi
+
+      - name: Check canonical wear-history sync contract
+        run: |
+          VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
+          RELEASE="${VERSION_VALUE#v}"
+          grep -q "QUEUE_KEY='wear-mutation-queue'" js/wear-sync-client.js
+          grep -q "/v1/wear-mutations" js/wear-sync-client.js
+          grep -q "item.airtableRecordId" js/wear-sync-client.js
+          grep -q "itemRecordIds.length<2" worker/src/v060.js
+          grep -q "WEAR_TABLE_ID='tblnkYdIz1dVZZhEF'" worker/src/v060.js
+          grep -q "url.pathname==='/v1/wear-events'" worker/src/v060.js
+          grep -q "url.pathname==='/v1/wear-mutations'" worker/src/v060.js
+          grep -q "performUpsert:{fieldsToMergeOn:\[WEAR_FIELDS.eventId\]}" worker/src/v060.js
+          grep -q "wearHistory:'canonical-v1'" worker/src/v060.js
+          grep -q "workerRevision:'v060'" worker/src/v060.js
+          grep -q 'main = "src/v060.js"' worker/wrangler.toml
+          grep -q "syncLiveCanonicalWearEvents" js/bootstrap.js
+          grep -q "startLiveWearSyncWatch" js/bootstrap.js
+          grep -q "wear-sync-client.js?v=${RELEASE}" js/bootstrap.js
+          grep -q "live-airtable-wear-sync.js?v=${RELEASE}" js/bootstrap.js
+          grep -q "flushWearQueue" js/manual-sync.js
+          grep -q "pendingWearMutations" js/sync-diagnostics.js
+          grep -q "liveWear" js/sync-diagnostics.js
+
+      - name: Check wear-history live anti-resurrection contract
+        run: |
+          grep -q "pendingDeleteEventIds" js/live-wear-sync-core.mjs
+          grep -q "nextTombstones" js/live-wear-sync-core.mjs
+          grep -q "deleteLocalIds" js/live-wear-sync-core.mjs
+          grep -q "airtable-wear-delete-tombstones" js/live-airtable-wear-sync.js
+          grep -q "tran:wear-history-live-changed" js/live-airtable-wear-sync.js
+          grep -q "window.addEventListener('focus',check)" js/live-airtable-wear-sync.js
+          grep -q "window.addEventListener('pageshow',check)" js/live-airtable-wear-sync.js
+          if grep -q "location.reload()" js/live-airtable-wear-sync.js; then
+            echo 'Wear-history convergence must not reload the browser.'
             exit 1
           fi
 
@@ -90,10 +139,14 @@ jobs:
           grep -q "'wear.action':'✓ Porté aujourd’hui'" js/wear-history-i18n.mjs
           grep -q "currentLanguage" js/wear-history-i18n.mjs
 
-      - name: Check assistant excludes incomplete saved Outfits
+      - name: Check assistant excludes incomplete saved Outfits and has no B.2 ranking change
         run: |
           grep -q "const integrity=outfitIntegrity(outfit,items)" js/daily-assistant-core.mjs
           grep -q "if(integrity.incomplete)continue" js/daily-assistant-core.mjs
+          if grep -Eq "wear-history|wear-sync|live-airtable-wear|deriveWearStats|lastWorn|rotationScore|rotationPenalty|rotationBoost" js/daily-assistant-core.mjs; then
+            echo 'B.2 must not import wear history or change Daily Assistant rotation ranking.'
+            exit 1
+          fi
 
       - name: Check offline wiring and version
         run: |
@@ -105,4 +158,14 @@ jobs:
           grep -q "wear-history-core.mjs?v=${RELEASE}" sw.js
           grep -q "wear-history-i18n.mjs?v=${RELEASE}" sw.js
           grep -q "wear-history.js?v=${RELEASE}" sw.js
+          grep -q "wear-sync-client.js?v=${RELEASE}" sw.js
+          grep -q "live-wear-sync-core.mjs?v=${RELEASE}" sw.js
+          grep -q "live-airtable-wear-sync.js?v=${RELEASE}" sw.js
           grep -q "i18n-keyed.mjs?v=${RELEASE}" sw.js
+
+      - name: Check Worker deploy smoke includes wear history
+        run: |
+          grep -q 'WEAR_URL="$BASE_URL/v1/wear-events"' .github/workflows/deploy-worker.yml
+          grep -q "worker-wear.json" .github/workflows/deploy-worker.yml
+          grep -q "body.get('workerRevision')=='v060'" .github/workflows/deploy-worker.yml
+          grep -q "body.get('wearHistory')=='canonical-v1'" .github/workflows/deploy-worker.yml

@@ -98,7 +98,21 @@ export const getAllWearEvents=()=>request(STORE_WEAR_EVENTS,'readonly',s=>s.getA
 export const getWearEvent=id=>request(STORE_WEAR_EVENTS,'readonly',s=>s.get(id));
 export const putWearEvent=event=>request(STORE_WEAR_EVENTS,'readwrite',s=>s.put(event));
 export const deleteWearEvent=id=>request(STORE_WEAR_EVENTS,'readwrite',s=>s.delete(id));
-export const clearWearEvents=()=>request(STORE_WEAR_EVENTS,'readwrite',s=>s.clear());
+export async function clearWearEvents(){
+  const db=await openDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction([STORE_WEAR_EVENTS,STORE_META],'readwrite');
+    tx.objectStore(STORE_WEAR_EVENTS).clear();
+    const meta=tx.objectStore(STORE_META);
+    meta.put({key:'wear-mutation-queue',value:[]});
+    meta.put({key:'airtable-wear-delete-tombstones',value:{}});
+    meta.put({key:'airtable-wear-live-last-sync',value:null});
+    meta.put({key:'airtable-wear-live-record-count',value:null});
+    meta.put({key:'airtable-wear-live-last-error',value:null});
+    tx.oncomplete=resolve;
+    tx.onerror=()=>reject(tx.error);
+  });
+}
 
 export async function bulkPutWearEvents(events){
   const db=await openDB();

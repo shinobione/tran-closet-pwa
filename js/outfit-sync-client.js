@@ -1,4 +1,4 @@
-import {getSyncConfig} from './sync-client.js?v=0.5.17';
+import {getSyncConfig} from './sync-client.js?v=0.5.18';
 import {
   getAllItems,
   getAllOutfits,

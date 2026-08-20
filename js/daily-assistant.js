@@ -1,7 +1,7 @@
 import {getAllItems,getAllOutfits,putOutfit,getMeta,setMeta} from './db.js';
-import {recommendLooks,weatherSummaryParts,OCCASIONS} from './daily-assistant-core.mjs?v=0.5.17';
+import {recommendLooks,weatherSummaryParts,OCCASIONS} from './daily-assistant-core.mjs?v=0.5.18';
 import {LABELS,FR_LABELS} from './data.js';
-import {currentLanguage,t} from './i18n-keyed.mjs?v=0.5.17';
+import {currentLanguage,t} from './i18n-keyed.mjs?v=0.5.18';
 
 const root=document.querySelector('#mainContent');
 const DEFAULT_LOCATION={name:'TP. Hồ Chí Minh',latitude:10.7769,longitude:106.7009,timezone:'Asia/Ho_Chi_Minh'};

@@ -1,4 +1,4 @@
-import {currentLanguage,normalizeLanguage} from './i18n-keyed.mjs?v=0.5.17';
+import {currentLanguage,normalizeLanguage} from './i18n-keyed.mjs?v=0.5.18';
 
 const MESSAGES={
   vi:{
@@ -12,7 +12,7 @@ const MESSAGES={
     'wear.last':({date})=>`Lần gần nhất: ${date}`,
     'wear.saved':'Đã ghi nhận hôm nay ✓',
     'wear.undone':'Đã hoàn tác lần mặc hôm nay',
-    'wear.local':'B.1 lưu cục bộ/offline · đồng bộ cloud sẽ đến ở B.2.'
+    'wear.local':'Lưu ngoại tuyến và đồng bộ lịch sử mặc an toàn qua Airtable.'
   },
   fr:{
     'wear.eyebrow':'HISTORIQUE DE PORT',
@@ -25,7 +25,7 @@ const MESSAGES={
     'wear.last':({date})=>`Dernière fois : ${date}`,
     'wear.saved':'Port d’aujourd’hui enregistré ✓',
     'wear.undone':'Port d’aujourd’hui annulé',
-    'wear.local':'B.1 reste local/offline · la synchronisation cloud arrive en B.2.'
+    'wear.local':'Historique conservé hors ligne et synchronisé en sécurité via Airtable.'
   }
 };
 

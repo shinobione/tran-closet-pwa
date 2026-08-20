@@ -1,6 +1,7 @@
-import {flushMutationQueue,pendingMutationCount} from './sync-client.js?v=0.5.17';
-import {flushOutfitQueue,pendingOutfitMutationCount} from './outfit-sync-client.js?v=0.5.17';
-import {t} from './i18n-keyed.mjs?v=0.5.17';
+import {flushMutationQueue,pendingMutationCount} from './sync-client.js?v=0.5.18';
+import {flushOutfitQueue,pendingOutfitMutationCount} from './outfit-sync-client.js?v=0.5.18';
+import {flushWearQueue,pendingWearMutationCount} from './wear-sync-client.js?v=0.5.18';
+import {t} from './i18n-keyed.mjs?v=0.5.18';
 
 let running=false;
 
@@ -17,17 +18,17 @@ async function safeManualSync(button){
   const previous=button.textContent;
   button.disabled=true;button.textContent=t('sync.running');
   try{
-    const [clothing,outfits]=await Promise.all([flushMutationQueue(),flushOutfitQueue()]);
-    const [clothingPending,outfitPending]=await Promise.all([pendingMutationCount(),pendingOutfitMutationCount()]);
-    const pending=clothingPending+outfitPending;
-    if(clothing?.ok&&outfits?.ok&&pending===0){
+    const [clothing,outfits,wear]=await Promise.all([flushMutationQueue(),flushOutfitQueue(),flushWearQueue()]);
+    const [clothingPending,outfitPending,wearPending]=await Promise.all([pendingMutationCount(),pendingOutfitMutationCount(),pendingWearMutationCount()]);
+    const pending=clothingPending+outfitPending+wearPending;
+    if(clothing?.ok&&outfits?.ok&&wear?.ok&&pending===0){
       toast(t('sync.done'));
       window.dispatchEvent(new Event('online'));
       return;
     }
-    if(clothing?.offline||outfits?.offline)toast(t('sync.offline'));
-    else if(clothing?.configured===false||outfits?.configured===false)toast(t('sync.config'));
-    else if(clothing?.status===401||outfits?.status===401)toast(t('sync.auth'));
+    if(clothing?.offline||outfits?.offline||wear?.offline)toast(t('sync.offline'));
+    else if(clothing?.configured===false||outfits?.configured===false||wear?.configured===false)toast(t('sync.config'));
+    else if(clothing?.status===401||outfits?.status===401||wear?.status===401)toast(t('sync.auth'));
     else toast(t('sync.pending',{count:pending}));
     button.disabled=false;
     button.textContent=previous.replace(/\s*\(\d+\)\s*$/,'')+(pending?` (${pending})`:'');

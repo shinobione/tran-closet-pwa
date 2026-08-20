@@ -1,6 +1,6 @@
 import {getAllItems,getAllOutfits} from './db.js';
-import {outfitIntegrity,OUTFIT_MIN_ITEMS} from './outfit-integrity.mjs?v=0.5.17';
-import {t} from './i18n-keyed.mjs?v=0.5.17';
+import {outfitIntegrity,OUTFIT_MIN_ITEMS} from './outfit-integrity.mjs?v=0.5.18';
+import {t} from './i18n-keyed.mjs?v=0.5.18';
 
 const root=document.querySelector('#mainContent');
 const dialog=document.querySelector('#itemDialog');
