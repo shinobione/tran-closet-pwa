@@ -66,6 +66,13 @@ const itemLocalByRemote=new Map([
   assert.deepEqual(plan.deleteLocalIds,[],'remote absence must not delete a locally pending wear event');
 }
 
-assert.equal(canonicalWearSignature([remoteEvent]),canonicalWearSignature([remoteEvent, {...remoteEvent}]),'signature should be deterministic for equivalent canonical rows');
+{
+  const second={...remoteEvent,id:'wear:outfit-2:2026-08-20',airtableRecordId:'recWear0000000002',outfitId:'outfit-2'};
+  assert.equal(
+    canonicalWearSignature([remoteEvent,second]),
+    canonicalWearSignature([second,remoteEvent]),
+    'canonical signature must be independent of event ordering'
+  );
+}
 
 console.log('Wear-history live reconciliation: PASS');
