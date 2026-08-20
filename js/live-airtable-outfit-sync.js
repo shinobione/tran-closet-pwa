@@ -7,8 +7,8 @@ import {
   getMeta,
   setMeta
 } from './db.js';
-import {getSyncConfig} from './sync-client.js?v=0.5.16';
-import {canonicalOutfitSignature,planCanonicalOutfitReconciliation} from './live-outfit-sync-core.mjs?v=0.5.16';
+import {getSyncConfig} from './sync-client.js?v=0.5.17';
+import {canonicalOutfitSignature,planCanonicalOutfitReconciliation} from './live-outfit-sync-core.mjs?v=0.5.17';
 
 const TOMBSTONES_KEY='airtable-outfit-delete-tombstones';
 let running=false;

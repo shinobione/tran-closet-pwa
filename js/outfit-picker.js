@@ -1,6 +1,6 @@
 import {getAllItems} from './db.js';
 import {LABELS,FR_LABELS} from './data.js';
-import {currentLanguage,t} from './i18n-keyed.mjs?v=0.5.16';
+import {currentLanguage,t} from './i18n-keyed.mjs?v=0.5.17';
 
 const root=document.querySelector('#mainContent');
 const categoryOrder=['Shirt','Pant','Skirt','Dress','Combo','Jumpsuit','Coat','Bag','Shoes','Headwear','Umbrella','Accessorie','Belt','Underwear','Socks','Swimware','Eye Lens'];

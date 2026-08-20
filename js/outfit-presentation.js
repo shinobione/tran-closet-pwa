@@ -1,4 +1,4 @@
-import {t} from './i18n-keyed.mjs?v=0.5.16';
+import {t} from './i18n-keyed.mjs?v=0.5.17';
 
 const dialog=document.querySelector('#itemDialog');
 const prepared=new WeakMap();
