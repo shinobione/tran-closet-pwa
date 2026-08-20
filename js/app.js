@@ -1,6 +1,6 @@
 import {TAXONOMY,LABELS,SEED_ITEMS} from './data.js';
-import {t} from './i18n-keyed.mjs?v=0.5.16';
-import {getAllItems,putItem,deleteItem,bulkPutItems,getMeta,setMeta,clearItems,clearMutations,getAllOutfits,putOutfit,deleteOutfit,clearOutfits,bulkPutOutfits} from './db.js';
+import {t} from './i18n-keyed.mjs?v=0.5.17';
+import {getAllItems,putItem,deleteItem,bulkPutItems,getMeta,setMeta,clearItems,clearMutations,getAllOutfits,putOutfit,deleteOutfit,clearOutfits,bulkPutOutfits,getAllWearEvents,clearWearEvents,bulkPutWearEvents} from './db.js';
 import {queueMutation,flushMutationQueue,pendingMutationCount,getSyncConfig,saveSyncConfig,testSyncConnection} from './sync-client.js';
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -430,8 +430,9 @@ function installHelp(){
   installDialog.querySelector('[data-close]').onclick=()=>installDialog.close();
 }
 
-function exportBackup(){
-  const blob=new Blob([JSON.stringify({version:4,exportedAt:new Date().toISOString(),items:state.items,outfits:state.outfits},null,2)],{type:'application/json'}),a=document.createElement('a');
+async function exportBackup(){
+  const wearEvents=await getAllWearEvents();
+  const blob=new Blob([JSON.stringify({version:5,exportedAt:new Date().toISOString(),items:state.items,outfits:state.outfits,wearEvents},null,2)],{type:'application/json'}),a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
   a.download=`tran-closet-backup-${new Date().toISOString().slice(0,10)}.json`;
   a.click();
@@ -447,8 +448,10 @@ async function importBackup(e){
     await clearItems();
     await clearMutations();
     await clearOutfits();
+    await clearWearEvents();
     await bulkPutItems(p.items);
     if(Array.isArray(p.outfits))await bulkPutOutfits(p.outfits);
+    if(Array.isArray(p.wearEvents))await bulkPutWearEvents(p.wearEvents);
     await refresh();say('Đã khôi phục dữ liệu ✓');render();
   }catch{say('File sao lưu không hợp lệ');}
 }
@@ -458,6 +461,7 @@ async function resetLocal(){
   await clearItems();
   await clearMutations();
   await clearOutfits();
+  await clearWearEvents();
   await setMeta('seeded-v1',false);
   location.reload();
 }

@@ -83,9 +83,11 @@ jobs:
 
       - name: Check canonical taxonomy and fine-color Worker
         run: |
+          VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
+          RELEASE="${VERSION_VALUE#v}"
           node scripts/generate-taxonomy.mjs
           node scripts/test-taxonomy.mjs
-          grep -q "taxonomy.generated.mjs?v=0.5.16" js/data.js
+          grep -q "taxonomy.generated.mjs?v=${RELEASE}" js/data.js
           grep -q "from './taxonomy.generated.mjs'" worker/src/index.js
           grep -q "from './taxonomy.generated.mjs'" worker/src/v059.js
           grep -q "const COLORS=TAXONOMY.colors" worker/src/v059.js

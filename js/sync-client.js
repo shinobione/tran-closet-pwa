@@ -1,5 +1,5 @@
 import {getAllMutations,deleteMutation,putMutation,getMeta,setMeta,getAllItems,putItem} from './db.js';
-import {reconcileDeleteResults} from './delete-reconciliation.mjs?v=0.5.16';
+import {reconcileDeleteResults} from './delete-reconciliation.mjs?v=0.5.17';
 
 const DEFAULT_ENDPOINT='https://tran-closet-sync.jerryquinet.workers.dev';
 const ENDPOINT_KEY='sync-endpoint';

@@ -33,6 +33,11 @@ jobs:
           node --check js/sync-diagnostics.js
           node --check js/outfit-picker.js
           node --check js/outfit-presentation.js
+          node --check js/outfit-integrity.mjs
+          node --check js/outfit-integrity-ui.js
+          node --check js/wear-history-core.mjs
+          node --check js/wear-history-i18n.mjs
+          node --check js/wear-history.js
           node --check js/item-ai-assistant.js
           node --check js/duplicate-core.mjs
           node --check js/duplicate-guard.js
@@ -46,6 +51,7 @@ jobs:
           node --check scripts/test-smart-tags.mjs
           node --check scripts/test-daily-assistant.mjs
           node --check scripts/test-keyed-i18n.mjs
+          node --check scripts/test-wear-history.mjs
           node --check scripts/generate-taxonomy.mjs
           node --check scripts/test-taxonomy.mjs
           node --check scripts/normalize-release-refs.mjs
@@ -60,6 +66,7 @@ jobs:
           node scripts/test-smart-tags.mjs
           node scripts/test-daily-assistant.mjs
           node scripts/test-keyed-i18n.mjs
+          node scripts/test-wear-history.mjs
           node scripts/generate-taxonomy.mjs
           node scripts/test-taxonomy.mjs
           node scripts/normalize-release-refs.mjs
@@ -93,6 +100,11 @@ jobs:
           test -f js/sync-diagnostics.js
           test -f js/outfit-picker.js
           test -f js/outfit-presentation.js
+          test -f js/outfit-integrity.mjs
+          test -f js/outfit-integrity-ui.js
+          test -f js/wear-history-core.mjs
+          test -f js/wear-history-i18n.mjs
+          test -f js/wear-history.js
           test -f js/item-ai-assistant.js
           test -f js/duplicate-core.mjs
           test -f js/duplicate-guard.js
@@ -108,6 +120,7 @@ jobs:
           test -f scripts/test-smart-tags.mjs
           test -f scripts/test-daily-assistant.mjs
           test -f scripts/test-keyed-i18n.mjs
+          test -f scripts/test-wear-history.mjs
           test -f scripts/generate-taxonomy.mjs
           test -f scripts/test-taxonomy.mjs
           test -f scripts/normalize-release-refs.mjs
@@ -124,6 +137,7 @@ jobs:
           grep -Fq "i18n.css?v=${RELEASE}" index.html
           grep -Fq "app.js?v=${RELEASE}" js/bootstrap.js
           grep -Fq "outfit-picker.js?v=${RELEASE}" js/bootstrap.js
+          grep -Fq "wear-history.js?v=${RELEASE}" js/bootstrap.js
           grep -Fq "item-ai-assistant.js?v=${RELEASE}" js/bootstrap.js
           grep -Fq "duplicate-guard.js?v=${RELEASE}" js/bootstrap.js
           grep -Fq "daily-assistant.js?v=${RELEASE}" js/bootstrap.js
@@ -135,7 +149,8 @@ jobs:
           grep -q 'queueMutation' js/app.js
           grep -q "STORE_OUTFITS='outfits'" js/db.js
           grep -q "STORE_OUTFIT_MUTATIONS='outfitMutations'" js/db.js
-          grep -q 'DB_VERSION=4' js/db.js
+          grep -q "STORE_WEAR_EVENTS='wearEvents'" js/db.js
+          grep -q 'DB_VERSION=5' js/db.js
           grep -q 'tblhtL2UlsgCAh6E7' scripts/sync-outfits.mjs
           grep -q '/v1/outfit-mutations' worker/src/index.js
           grep -q '/v1/analyze-item' worker/src/index.js
@@ -144,6 +159,9 @@ jobs:
           grep -q 'guided_json' worker/src/index.js
           grep -q "taxonomy.generated.mjs?v=${RELEASE}" js/data.js
           grep -q "./js/taxonomy.generated.mjs?v=${RELEASE}" sw.js
+          grep -Fq "wear-history-core.mjs?v=${RELEASE}" sw.js
+          grep -Fq "wear-history-i18n.mjs?v=${RELEASE}" sw.js
+          grep -Fq "wear-history.js?v=${RELEASE}" sw.js
           grep -q "from './taxonomy.generated.mjs'" worker/src/index.js
           grep -q "from './taxonomy.generated.mjs'" worker/src/v059.js
           grep -q 'MAX_CLIENT_ATTEMPTS=3' js/item-ai-assistant.js
@@ -181,7 +199,7 @@ jobs:
           grep -q 'name="tags"' js/app.js
           grep -q "tags:f.getAll('tags')" js/app.js
           grep -q "label('tag',v)" js/app.js
-          grep -q 'version:4' js/app.js
+          grep -q 'version:5' js/app.js
           grep -q 'item.tags||\[\]' js/sync-client.js
           grep -q "tags: 'fld9hV9qirpfVfJmM'" scripts/sync-airtable.mjs
           grep -q 'tags: cleanMulti' scripts/sync-airtable.mjs

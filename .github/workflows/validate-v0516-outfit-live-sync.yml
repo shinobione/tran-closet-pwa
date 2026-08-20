@@ -63,6 +63,8 @@ jobs:
 
       - name: Check live UI convergence contract
         run: |
+          VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
+          RELEASE="${VERSION_VALUE#v}"
           grep -q "tran:outfits-live-changed" js/live-airtable-outfit-sync.js
           grep -q "refreshUiOnChange:true" js/live-airtable-outfit-sync.js
           grep -q "window.addEventListener('focus',check)" js/live-airtable-outfit-sync.js
@@ -73,22 +75,24 @@ jobs:
           fi
           grep -q "tran:outfits-live-changed" js/app-refresh.js
           grep -q "window.dispatchEvent(new Event('online'))" js/app-refresh.js
-          grep -q "app-refresh.js?v=0.5.16" js/bootstrap.js
-          grep -q "app-refresh.js?v=0.5.16" sw.js
+          grep -q "app-refresh.js?v=${RELEASE}" js/bootstrap.js
+          grep -q "app-refresh.js?v=${RELEASE}" sw.js
 
       - name: Check bootstrap, diagnostics and offline wiring
         run: |
-          test "$(tr -d '\r\n' < VERSION)" = "v0.5.16"
+          VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
+          RELEASE="${VERSION_VALUE#v}"
+          echo "$VERSION_VALUE" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'
           grep -q "syncLiveCanonicalOutfits,startLiveOutfitSyncWatch" js/bootstrap.js
           grep -q "await syncLiveCanonicalOutfits()" js/bootstrap.js
           grep -q "startLiveOutfitSyncWatch()" js/bootstrap.js
           grep -q "liveOutfits" js/sync-diagnostics.js
           grep -q "const outfitLive=await syncLiveCanonicalOutfits()" js/sync-diagnostics.js
-          grep -q "live-airtable-outfit-sync.js?v=0.5.16" sw.js
-          grep -q "live-outfit-sync-core.mjs?v=0.5.16" sw.js
-          grep -q "sync-client.js?v=0.5.16" sw.js
-          grep -q "build-version.js?v=0.5.16" sw.js
-          grep -q "version:'v0.5.16'" js/build-version.js
+          grep -q "live-airtable-outfit-sync.js?v=${RELEASE}" sw.js
+          grep -q "live-outfit-sync-core.mjs?v=${RELEASE}" sw.js
+          grep -q "sync-client.js?v=${RELEASE}" sw.js
+          grep -q "build-version.js?v=${RELEASE}" sw.js
+          grep -q "version:'${VERSION_VALUE}'" js/build-version.js
 
       - name: Check Worker deploy smoke covers both canonical reads
         run: |

@@ -1,11 +1,11 @@
-import {getSyncConfig,testSyncConnection,flushMutationQueue,pendingMutationCount} from './sync-client.js?v=0.5.16';
-import {flushOutfitQueue,pendingOutfitMutationCount} from './outfit-sync-client.js?v=0.5.16';
-import {syncLiveCanonicalItems} from './live-airtable-sync.js?v=0.5.16';
-import {syncLiveCanonicalOutfits} from './live-airtable-outfit-sync.js?v=0.5.16';
+import {getSyncConfig,testSyncConnection,flushMutationQueue,pendingMutationCount} from './sync-client.js?v=0.5.17';
+import {flushOutfitQueue,pendingOutfitMutationCount} from './outfit-sync-client.js?v=0.5.17';
+import {syncLiveCanonicalItems} from './live-airtable-sync.js?v=0.5.17';
+import {syncLiveCanonicalOutfits} from './live-airtable-outfit-sync.js?v=0.5.17';
 import {getAllItems,getAllMutations,getAllOutfits,getAllOutfitMutations,getMeta} from './db.js';
-import {t} from './i18n-keyed.mjs?v=0.5.16';
+import {t} from './i18n-keyed.mjs?v=0.5.17';
 
-const FALLBACK_VERSION='v0.5.16';
+const FALLBACK_VERSION='v0.5.17';
 let running=false;
 
 function buildInfo(){

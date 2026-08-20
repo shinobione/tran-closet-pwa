@@ -40,8 +40,10 @@ jobs:
 
       - name: Check high-risk surfaces use keyed rendering
         run: |
+          VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
+          RELEASE="${VERSION_VALUE#v}"
           for file in app outfit-picker closet-search photo-picker manual-sync outfit-integrity-ui outfit-presentation daily-assistant build-version sync-diagnostics; do
-            grep -q "i18n-keyed.mjs?v=0.5.16" "js/${file}.js"
+            grep -q "i18n-keyed.mjs?v=${RELEASE}" "js/${file}.js"
           done
           grep -q "daily.reason.saved" js/daily-assistant-core.mjs
           grep -q "weatherSummaryParts" js/daily-assistant-core.mjs
@@ -73,21 +75,25 @@ jobs:
 
       - name: Check offline/runtime wiring
         run: |
-          test "$(tr -d '\r\n' < VERSION)" = "v0.5.16"
-          grep -q "i18n-keyed.mjs?v=0.5.16" sw.js
-          grep -q "app.js?v=0.5.16" sw.js
-          grep -q "outfit-picker.js?v=0.5.16" sw.js
-          grep -q "daily-assistant-core.mjs?v=0.5.16" sw.js
-          grep -q "daily-assistant.js?v=0.5.16" sw.js
-          grep -q "outfit-presentation.js?v=0.5.16" sw.js
-          grep -q "app.js?v=0.5.16" js/bootstrap.js
-          grep -q "outfit-picker.js?v=0.5.16" js/bootstrap.js
-          grep -q "daily-assistant.js?v=0.5.16" js/bootstrap.js
-          grep -q "outfit-presentation.js?v=0.5.16" js/bootstrap.js
+          VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
+          RELEASE="${VERSION_VALUE#v}"
+          echo "$VERSION_VALUE" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'
+          grep -q "i18n-keyed.mjs?v=${RELEASE}" sw.js
+          grep -q "app.js?v=${RELEASE}" sw.js
+          grep -q "outfit-picker.js?v=${RELEASE}" sw.js
+          grep -q "daily-assistant-core.mjs?v=${RELEASE}" sw.js
+          grep -q "daily-assistant.js?v=${RELEASE}" sw.js
+          grep -q "outfit-presentation.js?v=${RELEASE}" sw.js
+          grep -q "app.js?v=${RELEASE}" js/bootstrap.js
+          grep -q "outfit-picker.js?v=${RELEASE}" js/bootstrap.js
+          grep -q "daily-assistant.js?v=${RELEASE}" js/bootstrap.js
+          grep -q "outfit-presentation.js?v=${RELEASE}" js/bootstrap.js
 
       - name: Keep legacy DOM translator explicitly bounded
         run: |
+          VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
+          RELEASE="${VERSION_VALUE#v}"
           # app.js and the migrated dynamic modules now use keyed rendering.
           # The old i18n.js remains temporarily for broad static legacy route copy
           # and AI/duplicate surfaces; its retirement is the remaining 16.5 work.
-          grep -q "i18n.js?v=0.5.1" js/bootstrap.js
+          grep -q "i18n.js?v=${RELEASE}" js/bootstrap.js

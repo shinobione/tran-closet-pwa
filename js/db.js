@@ -1,4 +1,4 @@
-const DB_NAME='tran-closet', DB_VERSION=4, STORE_ITEMS='items', STORE_META='meta', STORE_MUTATIONS='mutations', STORE_OUTFITS='outfits', STORE_OUTFIT_MUTATIONS='outfitMutations';
+const DB_NAME='tran-closet', DB_VERSION=5, STORE_ITEMS='items', STORE_META='meta', STORE_MUTATIONS='mutations', STORE_OUTFITS='outfits', STORE_OUTFIT_MUTATIONS='outfitMutations', STORE_WEAR_EVENTS='wearEvents';
 
 function openDB(){
   return new Promise((resolve,reject)=>{
@@ -25,6 +25,12 @@ function openDB(){
         const om=db.createObjectStore(STORE_OUTFIT_MUTATIONS,{keyPath:'id'});
         om.createIndex('createdAt','createdAt');
         om.createIndex('localOutfitId','localOutfitId');
+      }
+      if(!db.objectStoreNames.contains(STORE_WEAR_EVENTS)){
+        const wear=db.createObjectStore(STORE_WEAR_EVENTS,{keyPath:'id'});
+        wear.createIndex('wornAt','wornAt');
+        wear.createIndex('wornDate','wornDate');
+        wear.createIndex('outfitId','outfitId');
       }
     };
     r.onsuccess=()=>resolve(r.result);
@@ -87,6 +93,22 @@ export const deleteOutfitMutation=id=>request(STORE_OUTFIT_MUTATIONS,'readwrite'
 export const clearOutfitMutations=()=>request(STORE_OUTFIT_MUTATIONS,'readwrite',s=>s.clear());
 export const putOutfitCloudState=putOutfitRaw;
 export const deleteOutfitCloudState=deleteOutfitRaw;
+
+export const getAllWearEvents=()=>request(STORE_WEAR_EVENTS,'readonly',s=>s.getAll());
+export const getWearEvent=id=>request(STORE_WEAR_EVENTS,'readonly',s=>s.get(id));
+export const putWearEvent=event=>request(STORE_WEAR_EVENTS,'readwrite',s=>s.put(event));
+export const deleteWearEvent=id=>request(STORE_WEAR_EVENTS,'readwrite',s=>s.delete(id));
+export const clearWearEvents=()=>request(STORE_WEAR_EVENTS,'readwrite',s=>s.clear());
+
+export async function bulkPutWearEvents(events){
+  const db=await openDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(STORE_WEAR_EVENTS,'readwrite'),s=tx.objectStore(STORE_WEAR_EVENTS);
+    events.forEach(event=>s.put(event));
+    tx.oncomplete=resolve;
+    tx.onerror=()=>reject(tx.error);
+  });
+}
 
 function outfitPayload(outfit){
   return {
