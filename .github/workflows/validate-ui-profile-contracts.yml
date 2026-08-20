@@ -23,6 +23,7 @@ jobs:
           node --check js/data.js
           node --check js/taxonomy.generated.mjs
           node --check js/live-airtable-sync.js
+          node --check js/app-refresh.js
           node --check js/photo-picker.js
           node --check js/closet-search-core.mjs
           node --check js/closet-search.js
@@ -50,6 +51,16 @@ jobs:
           grep -q "photo-picker.js?v=${RELEASE}" js/bootstrap.js
           grep -q "url.pathname==='/v1/items'" worker/src/v058.js
           grep -q "AIRTABLE_READ_PAT" .github/workflows/deploy-worker.yml
+          grep -q "tran:items-live-changed" js/live-airtable-sync.js
+          grep -q "refreshUiOnChange:true" js/live-airtable-sync.js
+          grep -q "window.addEventListener('focus',check)" js/live-airtable-sync.js
+          grep -q "window.addEventListener('pageshow',check)" js/live-airtable-sync.js
+          grep -q "setTimeout(check,0)" js/live-airtable-sync.js
+          ! grep -q "location.reload()" js/live-airtable-sync.js
+          grep -q "tran:items-live-changed" js/app-refresh.js
+          grep -q "syncLiveCanonicalItems" js/sync-diagnostics.js
+          grep -q "liveItems:" js/sync-diagnostics.js
+          grep -q "clothing:safeResult(clothingLive)" js/sync-diagnostics.js
           grep -q "camera.id='cameraInput'" js/photo-picker.js
           grep -q "camera.setAttribute('capture','environment')" js/photo-picker.js
           grep -q "input.removeAttribute('capture')" js/photo-picker.js

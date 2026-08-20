@@ -1,5 +1,6 @@
 import {getSyncConfig,testSyncConnection,flushMutationQueue,pendingMutationCount} from './sync-client.js?v=0.5.16';
 import {flushOutfitQueue,pendingOutfitMutationCount} from './outfit-sync-client.js?v=0.5.16';
+import {syncLiveCanonicalItems} from './live-airtable-sync.js?v=0.5.16';
 import {syncLiveCanonicalOutfits} from './live-airtable-outfit-sync.js?v=0.5.16';
 import {getAllItems,getAllMutations,getAllOutfits,getAllOutfitMutations,getMeta} from './db.js';
 import {t} from './i18n-keyed.mjs?v=0.5.16';
@@ -41,9 +42,11 @@ function safeResult(value){
 async function snapshot(){
   const [
     cfg,items,mutations,outfits,outfitMutations,health,
+    itemLiveLastSync,itemLiveRecordCount,itemLiveLastError,
     outfitLiveLastSync,outfitLiveRecordCount,outfitLiveLastError
   ]=await Promise.all([
     getSyncConfig(),getAllItems(),getAllMutations(),getAllOutfits(),getAllOutfitMutations(),testSyncConnection(),
+    getMeta('airtable-live-last-sync'),getMeta('airtable-live-record-count'),getMeta('airtable-live-last-error'),
     getMeta('airtable-outfit-live-last-sync'),getMeta('airtable-outfit-live-record-count'),getMeta('airtable-outfit-live-last-error')
   ]);
   const build=buildInfo();
@@ -56,6 +59,11 @@ async function snapshot(){
     health:safeResult(health),
     itemCount:items.length,
     outfitCount:outfits.length,
+    liveItems:{
+      lastSync:itemLiveLastSync||null,
+      recordCount:Number.isFinite(Number(itemLiveRecordCount))?Number(itemLiveRecordCount):null,
+      lastError:safeResult(itemLiveLastError)
+    },
     liveOutfits:{
       lastSync:outfitLiveLastSync||null,
       recordCount:Number.isFinite(Number(outfitLiveRecordCount))?Number(outfitLiveRecordCount):null,
@@ -123,10 +131,17 @@ function mount(){
       const before=await snapshot();
       const clothingFlush=await flushMutationQueue();
       const outfitFlush=await flushOutfitQueue();
+      const clothingLive=await syncLiveCanonicalItems();
       const outfitLive=await syncLiveCanonicalOutfits();
       const after=await snapshot();
       const pending={clothing:await pendingMutationCount(),outfits:await pendingOutfitMutationCount()};
-      out.textContent=JSON.stringify({before,flush:{clothing:safeResult(clothingFlush),outfits:safeResult(outfitFlush)},live:{outfits:safeResult(outfitLive)},after,pending},null,2);
+      out.textContent=JSON.stringify({
+        before,
+        flush:{clothing:safeResult(clothingFlush),outfits:safeResult(outfitFlush)},
+        live:{clothing:safeResult(clothingLive),outfits:safeResult(outfitLive)},
+        after,
+        pending
+      },null,2);
     }catch(error){
       out.textContent=JSON.stringify({version:buildInfo().version,build:buildInfo(),error:String(error?.message||error)},null,2);
     }finally{
