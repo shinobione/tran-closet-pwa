@@ -123,6 +123,14 @@ async function readCanonicalWearEvents(env){
   });
 }
 
+async function findWearRecordIdByEventId(eventId,env){
+  const target=String(eventId||'').trim();
+  if(!target)return null;
+  const records=await airtableRead(env);
+  const match=records.find(record=>String(record?.fields?.[WEAR_FIELDS.eventId]||'').trim()===target);
+  return match?.id||null;
+}
+
 async function applyWearMutation(mutation,env){
   const operation=mutation?.operation;
   if(operation==='create'){
@@ -137,10 +145,11 @@ async function applyWearMutation(mutation,env){
     return {mutationId:mutation.id,ok:true,airtableRecordId:recordId};
   }
   if(operation==='delete'){
-    if(!mutation.airtableRecordId)return {mutationId:mutation.id,ok:true,skipped:true};
-    try{await airtableWrite(`/${mutation.airtableRecordId}`,env,{method:'DELETE'});}
+    const recordId=mutation.airtableRecordId||await findWearRecordIdByEventId(mutation.eventId,env);
+    if(!recordId)return {mutationId:mutation.id,ok:true,skipped:true,eventId:mutation.eventId||null};
+    try{await airtableWrite(`/${recordId}`,env,{method:'DELETE'});}
     catch(error){if(error?.status!==404)throw error;}
-    return {mutationId:mutation.id,ok:true,airtableRecordId:mutation.airtableRecordId};
+    return {mutationId:mutation.id,ok:true,airtableRecordId:recordId,eventId:mutation.eventId||null};
   }
   throw new Error(`Unsupported wear operation: ${operation}`);
 }
