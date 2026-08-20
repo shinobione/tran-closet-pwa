@@ -11,6 +11,9 @@ import {
 import {TAXONOMY as WORKER_TAXONOMY} from '../worker/src/taxonomy.generated.mjs';
 
 const source=JSON.parse(fs.readFileSync('shared/taxonomy.json','utf8'));
+const version=fs.readFileSync('VERSION','utf8').trim();
+assert.match(version,/^v\d+\.\d+\.\d+$/,'VERSION must be a semantic release');
+const release=version.slice(1);
 
 assert.equal(TAXONOMY_SCHEMA_VERSION,1);
 assert.deepEqual(CLIENT_TAXONOMY.categories,source.categories);
@@ -49,7 +52,7 @@ assert.ok(!workerIndex.includes("const TAXONOMY={"),'base Worker must not redefi
 assert.ok(workerFine.includes("from './taxonomy.generated.mjs'"),'fine-color Worker must import generated taxonomy');
 assert.ok(workerFine.includes('const COLORS=TAXONOMY.colors;'),'fine-color Worker must consume canonical colors');
 assert.ok(!workerFine.includes("const COLORS=['Blue'"),'fine-color Worker must not redefine canonical colors');
-assert.ok(clientData.includes("from './taxonomy.generated.mjs?v=0.5.16'"),'client data module must import generated taxonomy');
+assert.ok(clientData.includes(`from './taxonomy.generated.mjs?v=${release}'`),'client data module must import generated taxonomy for current VERSION');
 assert.ok(!clientData.includes('export const TAXONOMY = {'),'client data module must not redefine taxonomy');
 
 // Recommendation policy is allowed to define semantic subsets, but every

@@ -50,16 +50,20 @@ jobs:
 
       - name: Check incomplete keyed UI and repair path
         run: |
+          VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
+          RELEASE="${VERSION_VALUE#v}"
           grep -q "t('outfit.incomplete.card')" js/outfit-integrity-ui.js
           grep -q "t('outfit.incomplete.title')" js/outfit-integrity-ui.js
           grep -q "'outfit.incomplete.title':'Outfit chưa hoàn chỉnh'" js/i18n-keyed.mjs
           grep -q "'outfit.incomplete.title':'Tenue incomplète'" js/i18n-keyed.mjs
           grep -q "outfit-integrity-incomplete" js/outfit-integrity-ui.js
           grep -q "outfit-presentation-actions" js/outfit-integrity-ui.js
-          grep -q "outfit-integrity-ui.js?v=0.5.16" js/bootstrap.js
+          grep -q "outfit-integrity-ui.js?v=${RELEASE}" js/bootstrap.js
 
       - name: Check wear-history local event contract
         run: |
+          VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
+          RELEASE="${VERSION_VALUE#v}"
           grep -q "DB_VERSION=5" js/db.js
           grep -q "STORE_WEAR_EVENTS='wearEvents'" js/db.js
           grep -q "wear.createIndex('wornAt','wornAt')" js/db.js
@@ -74,7 +78,7 @@ jobs:
           grep -q "data-wear-today" js/wear-history.js
           grep -q "data-wear-undo" js/wear-history.js
           grep -q "integrity.resolvedItemIds" js/wear-history.js
-          grep -q "wear-history.js?v=0.5.16" js/bootstrap.js
+          grep -q "wear-history.js?v=${RELEASE}" js/bootstrap.js
           if grep -Eq "putOutfit\(|putItem\(|queueMutation\(|fetch\(" js/wear-history-core.mjs js/wear-history.js; then
             echo 'B.1 wear history must not mutate clothing/Outfit canonical records or call cloud APIs.'
             exit 1
@@ -93,10 +97,12 @@ jobs:
 
       - name: Check offline wiring and version
         run: |
-          test "$(tr -d '\r\n' < VERSION)" = "v0.5.16"
-          grep -q "outfit-integrity.mjs?v=0.5.16" sw.js
-          grep -q "outfit-integrity-ui.js?v=0.5.16" sw.js
-          grep -q "wear-history-core.mjs?v=0.5.16" sw.js
-          grep -q "wear-history-i18n.mjs?v=0.5.16" sw.js
-          grep -q "wear-history.js?v=0.5.16" sw.js
-          grep -q "i18n-keyed.mjs?v=0.5.16" sw.js
+          VERSION_VALUE="$(tr -d '\r\n' < VERSION)"
+          RELEASE="${VERSION_VALUE#v}"
+          echo "$VERSION_VALUE" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'
+          grep -q "outfit-integrity.mjs?v=${RELEASE}" sw.js
+          grep -q "outfit-integrity-ui.js?v=${RELEASE}" sw.js
+          grep -q "wear-history-core.mjs?v=${RELEASE}" sw.js
+          grep -q "wear-history-i18n.mjs?v=${RELEASE}" sw.js
+          grep -q "wear-history.js?v=${RELEASE}" sw.js
+          grep -q "i18n-keyed.mjs?v=${RELEASE}" sw.js
