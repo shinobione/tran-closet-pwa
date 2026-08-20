@@ -1,0 +1,32 @@
+name: One-shot V0.5.17 normalize
+
+on:
+  push:
+    branches: [v0.5.17-wear-event-foundation]
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: v0.5.17-wear-event-foundation
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Normalize V0.5.17 release boundary
+        run: |
+          printf 'v0.5.17\n' > VERSION
+          sed -i "s/grep -q 'version:4' js\/app.js/grep -q 'version:5' js\/app.js/" .github/workflows/validate.yml
+          node scripts/normalize-release-refs.mjs --write
+          rm .github/workflows/_one-shot-v0517-normalize.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --check
+          git commit -m 'V0.5.17 · Normalize release boundary'
+          git push origin HEAD:v0.5.17-wear-event-foundation
