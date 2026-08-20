@@ -74,12 +74,10 @@ export async function queueWearEventDelete(event){
     const recordId=event.airtableRecordId||pendingCreate?.airtableRecordId||null;
     const next=queue.filter(item=>item.eventId!==event.id);
 
-    // A purely local create followed by undo never needs to reach the cloud.
-    if(!recordId){
-      await setWearMutationQueue(next);
-      return;
-    }
-
+    // Always persist an explicit delete intent, even when we do not yet know the
+    // Airtable record id. A prior idempotent create may have committed while its
+    // response was lost; the Worker resolves the stable Wear Event ID before
+    // deleting so Undo cannot leave a ghost cloud event.
     next.push({
       id:crypto.randomUUID(),
       operation:'delete',
