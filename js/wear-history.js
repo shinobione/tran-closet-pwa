@@ -1,6 +1,7 @@
 import {getAllItems,getAllOutfits,getAllWearEvents,getWearEvent,putWearEvent,deleteWearEvent} from './db.js';
 import {outfitIntegrity} from './outfit-integrity.mjs?v=0.5.17';
 import {createWearEvent,deriveWearStats,eventForOutfitDate,localDateKey,wearEventId} from './wear-history-core.mjs?v=0.5.17';
+import {queueWearEventCreate,queueWearEventDelete} from './wear-sync-client.js?v=0.5.17';
 import {currentLanguage} from './i18n-keyed.mjs?v=0.5.17';
 import {wearT} from './wear-history-i18n.mjs?v=0.5.17';
 
@@ -99,7 +100,10 @@ async function enhanceOutfit(detail,data){
       const eventId=wearEventId(outfit.id,localDateKey(now));
       const existing=await getWearEvent(eventId);
       const wearEvent=createWearEvent({outfit,itemIds:integrity.resolvedItemIds,now,existing});
-      if(!existing)await putWearEvent(wearEvent);
+      if(!existing){
+        await putWearEvent({...wearEvent,syncState:'pending-create'});
+        await queueWearEventCreate(wearEvent);
+      }
       window.dispatchEvent(new CustomEvent('tran:wear-history-changed',{detail:{outfitId:outfit.id,eventId:wearEvent.id,operation:existing?'noop':'create'}}));
       button.textContent=wearT('wear.saved');
       await enhance();
@@ -113,6 +117,7 @@ async function enhanceOutfit(detail,data){
     const button=event.currentTarget;
     button.disabled=true;
     try{
+      await queueWearEventDelete(todayEvent);
       await deleteWearEvent(todayEvent.id);
       window.dispatchEvent(new CustomEvent('tran:wear-history-changed',{detail:{outfitId:outfit.id,eventId:todayEvent.id,operation:'delete'}}));
       button.textContent=wearT('wear.undone');
@@ -168,6 +173,7 @@ document.addEventListener('keydown',event=>{
   if(itemCard){activeItemId=itemCard.dataset.open;activeOutfitId=null;schedule();}
 });
 window.addEventListener('tran:wear-history-changed',schedule);
+window.addEventListener('tran:wear-history-live-changed',schedule);
 window.addEventListener('tran:outfits-live-changed',schedule);
 window.addEventListener('tran:items-live-changed',schedule);
 
