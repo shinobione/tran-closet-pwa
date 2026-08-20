@@ -1,4 +1,4 @@
-name: Validate V0.5.16 version and cache identity
+name: Validate V0.5.17 version and cache identity
 
 on:
   pull_request:
@@ -25,6 +25,26 @@ jobs:
           node --check scripts/test-pwa-isolation.mjs
           node --check sw.js
           node --check js/app.js
+
+      - name: Generate canonical V0.5.17 normalized tree
+        run: |
+          sed -i "s/grep -q 'version:4' js\/app.js/grep -q 'version:5' js\/app.js/" .github/workflows/validate.yml
+          node scripts/normalize-release-refs.mjs --write
+          tar -czf /tmp/v0517-normalized.tgz \
+            index.html manifest.webmanifest sw.js \
+            js/app.js js/bootstrap.js js/build-version.js js/closet-search.js \
+            js/daily-assistant-core.mjs js/daily-assistant.js js/data.js js/duplicate-guard.js \
+            js/item-ai-assistant.js js/live-airtable-outfit-sync.js js/manual-sync.js \
+            js/outfit-integrity-ui.js js/outfit-picker.js js/outfit-presentation.js js/outfit-sync-client.js \
+            js/photo-picker.js js/sync-client.js js/sync-diagnostics.js js/wear-history-i18n.mjs js/wear-history.js \
+            .github/workflows/validate.yml
+
+      - name: Upload canonical normalized tree
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0517-normalized-tree
+          path: /tmp/v0517-normalized.tgz
+          retention-days: 1
 
       - name: Reject release reference drift
         run: node scripts/normalize-release-refs.mjs
