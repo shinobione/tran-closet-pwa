@@ -12,7 +12,7 @@ Last state update: **2026-08-20**
 
 - repository: `shinobione/tran-closet-pwa`
 - canonical branch: `main`
-- current production/runtime release boundary: **`v0.5.17`**
+- current **production/runtime** release boundary: **`v0.5.17`**
 - current `main` at B.1 closeout: **`6c2f3051bf06a91bef98b31496e2905412737602`**
 - B.1 merge: PR **#71** — `V0.5-B.1 · Wear-event foundation`
 - IndexedDB: `tran-closet`, schema version **5**
@@ -21,6 +21,8 @@ Last state update: **2026-08-20**
 - canonical taxonomy: `canonical-v1`, **17 categories / 24 colors / 6 styles / 22 tags**
 - active engineering branch: **`v0.5.18-wear-history-sync`**
 - active PR: **#72 — `V0.5-B.2 · Canonical wear-history sync`** (draft)
+- B.2 release candidate identity on the PR branch: **`v0.5.18`**
+- B.2 release-reference normalization commit: **`2ba841f319f36c04ae1c90f0dabc796c13f15026`**
 
 **Do not infer deployment from merge.** `MERGED`, `PAGES DEPLOYED`, `WORKER DEPLOYED` and `VERIFIED PROD` are separate claims.
 
@@ -36,7 +38,7 @@ Last state update: **2026-08-20**
 - **V0.5.16 — Consolidation & Hardening:** ✅ CLOSED / VERIFIED PROD
 - **V0.5-B — Wear history & rotation:** 🔵 ACTIVE
   - **B.1 — Wear-event foundation:** ✅ **VERIFIED PROD**
-  - **B.2 — Canonical wear-history sync:** 🔵 **CURRENT / ENGINEERING**
+  - **B.2 — Canonical wear-history sync:** 🔵 **CURRENT / RELEASE CANDIDATE**
   - B.3 — Rotation signal in Daily Assistant: ⏭ NEXT after B.2 production proof
   - B.4 — History UX / closeout: ⏭ later
 
@@ -143,10 +145,11 @@ The table was created empty. Creating the schema did **not** modify Clothes or O
 
 Design rule: history stores stable canonical IDs/snapshots rather than relying only on Airtable links, so old history survives later Outfit/item edits or deletion.
 
-### B.2 engineering candidate
+### B.2 engineering / release candidate
 
 Active branch: **`v0.5.18-wear-history-sync`**  
-Draft PR: **#72**
+Draft PR: **#72**  
+Candidate release: **`v0.5.18`**
 
 Candidate architecture includes:
 
@@ -156,28 +159,46 @@ Candidate architecture includes:
 - Worker **v060** candidate;
 - authenticated `GET /v1/wear-events`;
 - idempotent `POST /v1/wear-mutations` with upsert on `Wear Event ID`;
+- delete fallback by stable `Wear Event ID` when a CREATE may have committed but its response was lost;
 - live wear reread with focus/pageshow/visibility/30-second checks;
 - pending mutation + tombstone anti-resurrection protection;
 - cross-device remapping of canonical clothing record IDs back to each device's local item IDs;
+- reset/restore clears wear history queue + tombstones with local history;
 - manual Sync Now extended to wear history;
 - Profile diagnostics extended with wear pending/orphan/live/flush state;
 - Service Worker offline shell wiring;
 - Worker deployment smoke candidate requires `workerRevision:v060`, `wearHistory:canonical-v1` and a canonical `/v1/wear-events` read;
 - Daily Assistant ranking intentionally unchanged in B.2.
 
+Engineering gate completed before the release bump:
+
+- PR head **`a060fac2600a9c395cfecc5e35a33f07fd18ba38`**: **9/9 PR workflows green**;
+- wear-event model test: green;
+- live wear reconciliation test: green;
+- pending/tombstone anti-resurrection guards: green;
+- browser smoke: green;
+- existing clothing / Outfit / i18n / Profile / runtime / version-cache gates: green.
+
+Release normalization is now complete:
+
+- `VERSION = v0.5.18`;
+- all 25 runtime release references were normalized by the repository's canonical `normalize-release-refs.mjs --write` tool;
+- bootstrap imports and Service Worker app shell now consistently use `0.5.18`;
+- the one-shot normalizer workflow deleted itself and is **not** a permanent repository writer.
+
 ### B.2 verification boundary
 
-Do **not** call B.2 deployed or verified yet.
+Do **not** call B.2 merged, deployed or verified yet.
 
-Required sequence:
+Sequence status:
 
-1. PR #72 engineering CI green;
-2. release boundary normalized to **v0.5.18**;
-3. final PR 9/9 green;
-4. merge to `main`;
-5. independently verify Pages deployment;
-6. independently verify Worker v060 deployment + `/v1/wear-events`;
-7. real PC ↔ phone QA:
+1. PR #72 engineering CI green — ✅ **9/9** on `a060fac…`;
+2. release boundary normalized to **v0.5.18** — ✅ on `2ba841f…`;
+3. final PR 9/9 green — 🔵 **CURRENT GATE**;
+4. merge to `main` — pending;
+5. independently verify Pages deployment — pending;
+6. independently verify Worker v060 deployment + `/v1/wear-events` — pending;
+7. real PC ↔ phone QA — pending:
    - device A marks a complete Outfit worn;
    - device B auto-sees wear stats without refresh/manual sync;
    - device B undoes it;
@@ -229,13 +250,11 @@ Do **not** reconstruct status from an earlier chat reply when these sources are 
 
 Continue **PR #72 / B.2** only:
 
-1. classify/fix any real CI failure;
-2. keep B.2 wear sync independent from Daily Assistant ranking;
-3. after engineering green, normalize release refs to **v0.5.18**;
-4. obtain final 9/9 PR green;
-5. merge and independently verify Pages + Worker;
-6. run one focused PC ↔ phone wear create/undo + offline recovery QA;
-7. close B.2 only after a clean wear diagnostic.
+1. obtain final **v0.5.18** 9/9 PR green;
+2. if green, mark #72 ready and merge through the normal repository path;
+3. independently verify Pages + Worker v060 deployment;
+4. run one focused PC ↔ phone wear create/undo + offline recovery QA;
+5. close B.2 only after a clean wear diagnostic.
 
 Do not start B.3 before B.2 canonical sync is proven.
 
