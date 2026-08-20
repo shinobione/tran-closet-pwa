@@ -1,4 +1,4 @@
-import {outfitIntegrity} from './outfit-integrity.mjs?v=0.5.17';
+import {outfitIntegrity} from './outfit-integrity.mjs?v=0.5.18';
 
 const ROLES={
   top:new Set(['Shirt','Coat']),bottom:new Set(['Pant','Skirt']),one:new Set(['Dress','Combo','Jumpsuit']),

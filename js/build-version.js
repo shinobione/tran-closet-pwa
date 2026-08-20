@@ -1,6 +1,6 @@
-import {currentLanguage,t} from './i18n-keyed.mjs?v=0.5.17';
+import {currentLanguage,t} from './i18n-keyed.mjs?v=0.5.18';
 
-const FALLBACK={version:'v0.5.17',sha:null,shortSha:'local',builtAt:null,runId:null,source:'fallback'};
+const FALLBACK={version:'v0.5.18',sha:null,shortSha:'local',builtAt:null,runId:null,source:'fallback'};
 let info=FALLBACK;
 
 function isValid(value){

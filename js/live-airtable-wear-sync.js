@@ -1,7 +1,7 @@
 import {getAllItems,getAllWearEvents,bulkPutWearEvents,deleteWearEvent,getMeta,setMeta} from './db.js';
-import {getSyncConfig} from './sync-client.js?v=0.5.17';
-import {getWearMutationQueue} from './wear-sync-client.js?v=0.5.17';
-import {canonicalWearSignature,planCanonicalWearReconciliation} from './live-wear-sync-core.mjs?v=0.5.17';
+import {getSyncConfig} from './sync-client.js?v=0.5.18';
+import {getWearMutationQueue} from './wear-sync-client.js?v=0.5.18';
+import {canonicalWearSignature,planCanonicalWearReconciliation} from './live-wear-sync-core.mjs?v=0.5.18';
 
 const TOMBSTONES_KEY='airtable-wear-delete-tombstones';
 let running=false;

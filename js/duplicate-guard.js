@@ -1,7 +1,7 @@
 import {getAllItems} from './db.js';
 import {LABELS,FR_LABELS} from './data.js';
-import {metadataSimilarity,hammingDistance,duplicateAssessment,duplicateReasons} from './duplicate-core.mjs?v=0.5.17';
-import {t,currentLanguage} from './i18n-keyed.mjs?v=0.5.17';
+import {metadataSimilarity,hammingDistance,duplicateAssessment,duplicateReasons} from './duplicate-core.mjs?v=0.5.18';
+import {t,currentLanguage} from './i18n-keyed.mjs?v=0.5.18';
 
 const root=document.querySelector('#mainContent');
 const hashMemory=new Map();

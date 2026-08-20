@@ -1,9 +1,9 @@
 import {getAllItems,getAllOutfits,getAllWearEvents,getWearEvent,putWearEvent,deleteWearEvent} from './db.js';
-import {outfitIntegrity} from './outfit-integrity.mjs?v=0.5.17';
-import {createWearEvent,deriveWearStats,eventForOutfitDate,localDateKey,wearEventId} from './wear-history-core.mjs?v=0.5.17';
-import {queueWearEventCreate,queueWearEventDelete} from './wear-sync-client.js?v=0.5.17';
-import {currentLanguage} from './i18n-keyed.mjs?v=0.5.17';
-import {wearT} from './wear-history-i18n.mjs?v=0.5.17';
+import {outfitIntegrity} from './outfit-integrity.mjs?v=0.5.18';
+import {createWearEvent,deriveWearStats,eventForOutfitDate,localDateKey,wearEventId} from './wear-history-core.mjs?v=0.5.18';
+import {queueWearEventCreate,queueWearEventDelete} from './wear-sync-client.js?v=0.5.18';
+import {currentLanguage} from './i18n-keyed.mjs?v=0.5.18';
+import {wearT} from './wear-history-i18n.mjs?v=0.5.18';
 
 const dialog=document.querySelector('#itemDialog');
 let activeOutfitId=null;

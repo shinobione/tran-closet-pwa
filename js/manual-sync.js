@@ -1,7 +1,7 @@
-import {flushMutationQueue,pendingMutationCount} from './sync-client.js?v=0.5.17';
-import {flushOutfitQueue,pendingOutfitMutationCount} from './outfit-sync-client.js?v=0.5.17';
-import {flushWearQueue,pendingWearMutationCount} from './wear-sync-client.js?v=0.5.17';
-import {t} from './i18n-keyed.mjs?v=0.5.17';
+import {flushMutationQueue,pendingMutationCount} from './sync-client.js?v=0.5.18';
+import {flushOutfitQueue,pendingOutfitMutationCount} from './outfit-sync-client.js?v=0.5.18';
+import {flushWearQueue,pendingWearMutationCount} from './wear-sync-client.js?v=0.5.18';
+import {t} from './i18n-keyed.mjs?v=0.5.18';
 
 let running=false;
 

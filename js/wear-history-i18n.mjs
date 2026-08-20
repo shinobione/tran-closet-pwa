@@ -1,4 +1,4 @@
-import {currentLanguage,normalizeLanguage} from './i18n-keyed.mjs?v=0.5.17';
+import {currentLanguage,normalizeLanguage} from './i18n-keyed.mjs?v=0.5.18';
 
 const MESSAGES={
   vi:{

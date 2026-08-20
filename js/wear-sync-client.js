@@ -1,5 +1,5 @@
 import {getAllItems,getAllWearEvents,getMeta,setMeta,putWearEvent} from './db.js';
-import {getSyncConfig} from './sync-client.js?v=0.5.17';
+import {getSyncConfig} from './sync-client.js?v=0.5.18';
 
 const QUEUE_KEY='wear-mutation-queue';
 const TOMBSTONES_KEY='airtable-wear-delete-tombstones';
