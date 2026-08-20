@@ -1,4 +1,4 @@
-name: Publish V0.5.17 release normalization
+name: Publish V0.5.17 runtime normalization
 
 on:
   pull_request:
@@ -20,13 +20,11 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Normalize and publish the canonical release boundary
+      - name: Normalize and publish runtime files
         run: |
           test "$(tr -d '\r\n' < VERSION)" = "v0.5.17"
-          sed -i "s/grep -q 'version:4' js\/app.js/grep -q 'version:5' js\/app.js/" .github/workflows/validate.yml
           node scripts/normalize-release-refs.mjs --write
-          rm -f .github/workflows/_one-shot-v0517-normalize.yml .ci-v0517-kick
-          git checkout origin/main -- .github/workflows/validate-v0516-version-cache.yml
+          rm -f .ci-v0517-kick
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -- VERSION index.html manifest.webmanifest sw.js \
@@ -34,11 +32,10 @@ jobs:
             js/daily-assistant-core.mjs js/daily-assistant.js js/data.js js/duplicate-guard.js \
             js/item-ai-assistant.js js/live-airtable-outfit-sync.js js/manual-sync.js \
             js/outfit-integrity-ui.js js/outfit-picker.js js/outfit-presentation.js js/outfit-sync-client.js \
-            js/photo-picker.js js/sync-client.js js/sync-diagnostics.js js/wear-history-i18n.mjs js/wear-history.js \
-            .github/workflows/validate.yml .github/workflows/validate-v0516-version-cache.yml
-          git add -u -- .github/workflows/_one-shot-v0517-normalize.yml .ci-v0517-kick || true
+            js/photo-picker.js js/sync-client.js js/sync-diagnostics.js js/wear-history-i18n.mjs js/wear-history.js
+          git add -u -- .ci-v0517-kick || true
           git diff --cached --check
           git diff --cached --stat
           git diff --cached --quiet && exit 0
-          git commit -m 'V0.5.17 · Normalize release boundary'
+          git commit -m 'V0.5.17 · Normalize runtime release boundary'
           git push origin HEAD:v0.5.17-wear-event-foundation
