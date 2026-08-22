@@ -1,9 +1,9 @@
 export const AIRTABLE_SNAPSHOT = {
-  "syncedAt": "2026-08-22T07:01:09.044Z",
+  "syncedAt": "2026-08-22T13:02:28.427Z",
   "source": "airtable",
   "baseId": "appw8WNvdDuXUgYvN",
   "tableId": "tblKdCi4MI4AH26y8",
-  "recordCount": 11,
+  "recordCount": 12,
   "items": [
     {
       "id": "airtable-rec1rhHLdY61btiZz",
@@ -25,6 +25,25 @@ export const AIRTABLE_SNAPSHOT = {
       "syncState": "synced",
       "createdAt": "2026-08-17T18:55:32.000Z",
       "updatedAt": "2026-08-17T18:55:32.000Z"
+    },
+    {
+      "id": "airtable-recEE7lknZUp3JwcV",
+      "airtableRecordId": "recEE7lknZUp3JwcV",
+      "name": "Dc Shoes",
+      "category": "Shoes",
+      "colors": [
+        "Brown"
+      ],
+      "styles": [
+        "Casual"
+      ],
+      "tags": [],
+      "photo": "./assets/items/recEE7lknZUp3JwcV.jpg",
+      "favorite": false,
+      "source": "airtable",
+      "syncState": "synced",
+      "createdAt": "2026-08-22T10:23:26.000Z",
+      "updatedAt": "2026-08-22T10:23:26.000Z"
     },
     {
       "id": "airtable-recGavsAE5D3d1mFb",
