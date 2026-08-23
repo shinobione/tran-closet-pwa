@@ -36,6 +36,7 @@ jobs:
           node --check worker/src/v058.js
           node --check worker/src/v059.js
           node --check worker/src/v060.js
+          node --check worker/src/v061.js
           node --check scripts/generate-taxonomy.mjs
           node --check scripts/test-taxonomy.mjs
           node --check scripts/test-ci-topology.mjs
@@ -94,18 +95,22 @@ jobs:
           grep -q "const COLORS=TAXONOMY.colors" worker/src/v059.js
           grep -q 'canonical-v${TAXONOMY_SCHEMA_VERSION}' worker/src/v059.js
           grep -q "import v059 from './v059.js'" worker/src/v060.js
-          grep -q "main = \"src/v060.js\"" worker/wrangler.toml
+          grep -q "import v060 from './v060.js'" worker/src/v061.js
+          grep -q "main = \"src/v061.js\"" worker/wrangler.toml
           grep -q "detectFineColors" worker/src/v059.js
           grep -q "Use Navy for very dark blue" worker/src/v059.js
           grep -q "Distinguish Beige, Cream and White" worker/src/v059.js
           grep -q "function canonicalHealth" worker/src/v059.js
           grep -q "workerRevision:'v059'" worker/src/v059.js
           grep -q "workerRevision:'v060'" worker/src/v060.js
+          grep -q "workerRevision:'v061'" worker/src/v061.js
           grep -q "wearHistory:'canonical-v1'" worker/src/v060.js
+          grep -q "apiCache:'durable-object-v1'" worker/src/v061.js
           grep -q "taxonomyCounts" worker/src/v059.js
-          grep -q "assert body.get('workerRevision')=='v060'" .github/workflows/deploy-worker.yml
+          grep -q "assert body.get('workerRevision')=='v061'" .github/workflows/deploy-worker.yml
           grep -q "assert body.get('wearHistory')=='canonical-v1'" .github/workflows/deploy-worker.yml
           grep -q "assert body.get('taxonomy')=='canonical-v1'" .github/workflows/deploy-worker.yml
+          grep -q "assert body.get('apiCache')=='durable-object-v1'" .github/workflows/deploy-worker.yml
           grep -q "Verify canonical taxonomy parity" .github/workflows/deploy-worker.yml
           grep -q "node scripts/test-taxonomy.mjs" .github/workflows/deploy-worker.yml
 

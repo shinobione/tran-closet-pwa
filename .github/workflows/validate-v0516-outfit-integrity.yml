@@ -35,6 +35,7 @@ jobs:
           node --check js/manual-sync.js
           node --check js/sync-diagnostics.js
           node --check worker/src/v060.js
+          node --check worker/src/v061.js
           node --check scripts/test-outfit-integrity.mjs
           node --check scripts/test-wear-history.mjs
           node --check scripts/test-wear-sync.mjs
@@ -110,7 +111,9 @@ jobs:
           grep -q "performUpsert:{fieldsToMergeOn:\[WEAR_FIELDS.eventId\]}" worker/src/v060.js
           grep -q "wearHistory:'canonical-v1'" worker/src/v060.js
           grep -q "workerRevision:'v060'" worker/src/v060.js
-          grep -q 'main = "src/v060.js"' worker/wrangler.toml
+          grep -q "import v060 from './v060.js'" worker/src/v061.js
+          grep -q "workerRevision:'v061'" worker/src/v061.js
+          grep -q 'main = "src/v061.js"' worker/wrangler.toml
           grep -q "syncLiveCanonicalWearEvents" js/bootstrap.js
           grep -q "startLiveWearSyncWatch" js/bootstrap.js
           grep -q "wear-sync-client.js?v=${RELEASE}" js/bootstrap.js
@@ -163,9 +166,10 @@ jobs:
           grep -q "live-airtable-wear-sync.js?v=${RELEASE}" sw.js
           grep -q "i18n-keyed.mjs?v=${RELEASE}" sw.js
 
-      - name: Check Worker deploy smoke includes wear history
+      - name: Check Worker deploy smoke includes wear history and API cache
         run: |
           grep -q 'WEAR_URL="$BASE_URL/v1/wear-events"' .github/workflows/deploy-worker.yml
           grep -q "worker-wear.json" .github/workflows/deploy-worker.yml
-          grep -q "body.get('workerRevision')=='v060'" .github/workflows/deploy-worker.yml
+          grep -q "body.get('workerRevision')=='v061'" .github/workflows/deploy-worker.yml
           grep -q "body.get('wearHistory')=='canonical-v1'" .github/workflows/deploy-worker.yml
+          grep -q "body.get('apiCache')=='durable-object-v1'" .github/workflows/deploy-worker.yml
