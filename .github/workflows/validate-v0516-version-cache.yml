@@ -23,6 +23,7 @@ jobs:
           node --check scripts/normalize-release-refs.mjs
           node --check scripts/test-version-cache.mjs
           node --check scripts/test-pwa-isolation.mjs
+          node --check worker/src/v061.js
           node --check sw.js
           node --check js/app.js
 
@@ -34,6 +35,24 @@ jobs:
 
       - name: Test PWA namespace isolation
         run: node scripts/test-pwa-isolation.mjs
+
+      - name: Check Airtable API budget cache contract
+        run: |
+          grep -q 'main = "src/v061.js"' worker/wrangler.toml
+          grep -q 'name = "SYNC_CACHE"' worker/wrangler.toml
+          grep -q 'class_name = "CanonicalSyncCache"' worker/wrangler.toml
+          grep -q 'new_sqlite_classes = \["CanonicalSyncCache"\]' worker/wrangler.toml
+          grep -q 'CACHE_TTL_MS = 12 \* 60 \* 60 \* 1000' worker/src/v061.js
+          grep -q "\['/v1/items', 'items'\]" worker/src/v061.js
+          grep -q "\['/v1/outfits', 'outfits'\]" worker/src/v061.js
+          grep -q "\['/v1/wear-events', 'wear-events'\]" worker/src/v061.js
+          grep -q "\['/v1/mutations', 'items'\]" worker/src/v061.js
+          grep -q "\['/v1/outfit-mutations', 'outfits'\]" worker/src/v061.js
+          grep -q "\['/v1/wear-mutations', 'wear-events'\]" worker/src/v061.js
+          grep -q "'x-tran-cache':'HIT'" worker/src/v061.js
+          grep -q "'x-tran-cache':'MISS'" worker/src/v061.js
+          grep -q "cron: '17 3 \* \* \*'" .github/workflows/sync-airtable.yml
+          ! grep -q "cron: '17 \*/6 \* \* \*'" .github/workflows/sync-airtable.yml
 
       - name: Check deployment proof contract
         run: |
