@@ -1,5 +1,5 @@
 export const AIRTABLE_OUTFIT_SNAPSHOT = {
-  "syncedAt": "2026-08-26T04:02:38.541Z",
+  "syncedAt": "2026-08-27T14:11:11.684Z",
   "source": "airtable",
   "baseId": "appw8WNvdDuXUgYvN",
   "tableId": "tblhtL2UlsgCAh6E7",
