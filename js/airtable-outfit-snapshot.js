@@ -1,5 +1,5 @@
 export const AIRTABLE_OUTFIT_SNAPSHOT = {
-  "syncedAt": "2026-08-30T09:13:33.275Z",
+  "syncedAt": "2026-08-31T09:43:41.833Z",
   "source": "airtable",
   "baseId": "appw8WNvdDuXUgYvN",
   "tableId": "tblhtL2UlsgCAh6E7",
@@ -29,9 +29,6 @@ export const AIRTABLE_OUTFIT_SNAPSHOT = {
       "itemRecordIds": [
         "recOVCsfXOTsu68At",
         "recnRlYbNVFoEbl2A",
-        "recggyUrLuO9x880t",
-        "recKr0w0g9A6viuwj",
-        "recLYZZgUOsE33ddz",
         "recZFFx4HaeVHOrTc"
       ],
       "occasion": "Everyday",
@@ -41,7 +38,7 @@ export const AIRTABLE_OUTFIT_SNAPSHOT = {
       "source": "airtable",
       "syncState": "synced",
       "createdAt": "2026-08-19T13:22:47.703Z",
-      "updatedAt": "2026-08-20T16:40:47.184Z"
+      "updatedAt": "2026-08-31T05:32:11.246Z"
     }
   ]
 };
