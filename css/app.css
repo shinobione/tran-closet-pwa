@@ -131,153 +131,347 @@ legend { font-size:.82rem; font-weight:700; margin-bottom:9px; }
 @media (prefers-reduced-motion:no-preference) { .item-card,.filter-chip,.nav-item,.primary-button { transition:transform .16s ease, background .16s ease, border-color .16s ease; } .item-card:active,.primary-button:active { transform:scale(.985); } }
 
 /*
- * Obsidian Atelier — wardrobe collection visual pass 01.
- * Stitch-inspired presentation only: no data, workflow or navigation changes.
- * Local system fonts, existing approved branding, no external dependencies.
+ * Obsidian Atelier — wardrobe collection visual pass 02.
+ * Exact Stitch layout cues, real user photos and approved branding.
+ * Presentation-only: no fake actions or cloud/wear state.
+ * Scoped to the wardrobe/favorites; no external CSS or font dependencies.
  */
-.main-content {
-  --atelier-surface: #211a29;
-  --atelier-deep: #17131d;
-  --atelier-outline: rgba(239, 187, 226, .16);
-  --atelier-rose: #f4afd6;
-  --atelier-lilac: #d7b2ee;
+.app-shell:has(.item-grid) {
+  --atelier-bg: #0b0a0f;
+  --atelier-panel: #17131e;
+  --atelier-panel-up: #211a2b;
+  --atelier-line: #332b41;
+  --atelier-pink: #ffaedb;
+  --atelier-lilac: #ddb8ff;
+  --atelier-subtle: #bfb2c9;
+  background: var(--atelier-bg);
+  color: #f5effa;
+}
+body:has(.item-grid) {
+  background: var(--atelier-bg);
+}
+.app-shell:has(.item-grid) .topbar {
+  background: rgba(17, 14, 23, .96);
+  border-bottom: 1px solid var(--atelier-line);
+  backdrop-filter: blur(20px);
+  padding-bottom: 14px;
+}
+.app-shell:has(.item-grid) .topbar-brand-lockup {
+  /* Keep the existing approved transparent HEADER art, never replace it. */
+  max-width: min(60vw, 286px);
+}
+.app-shell:has(.item-grid) .main-content {
+  padding-top: 18px;
+  padding-bottom: 32px;
 }
 
-/* Keep real clothes above the fold; never replace the approved HEADER/LOGO. */
-.main-content > .hero-card:has(+ .search-wrap) {
-  padding: 16px 18px;
-  border-radius: 22px;
-  border-color: var(--atelier-outline);
-  background: linear-gradient(118deg, rgba(63, 39, 72, .63), rgba(30, 23, 37, .96) 72%);
-  box-shadow: 0 12px 30px rgba(7, 4, 11, .24);
+/* Hero and daily CTA visually form a single premium card. */
+.main-content:has(.item-grid) > .hero-card {
+  min-height: 165px;
+  padding: 22px 21px 14px;
+  border: 1px solid var(--atelier-line);
+  border-bottom: 0;
+  border-radius: 25px 25px 0 0;
+  background:
+    radial-gradient(circle at 95% 10%, rgba(157, 65, 194, .2), transparent 41%),
+    linear-gradient(120deg, #1b1724 0%, #140f1b 100%);
+  box-shadow: none;
+  position: relative;
+  gap: 9px;
 }
-.main-content > .hero-card:has(+ .search-wrap) h2 {
-  font-size: clamp(1.27rem, 4.6vw, 1.52rem);
-  letter-spacing: -.025em;
+.main-content:has(.item-grid) > .hero-card .hero-kicker {
+  color: #efb3d6;
+  font-size: .69rem;
+  font-weight: 800;
+  letter-spacing: .11em;
+  margin-bottom: 9px;
 }
-.main-content > .hero-card:has(+ .search-wrap) p:not(.hero-kicker) {
-  font-size: .86rem;
-  line-height: 1.4;
+.main-content:has(.item-grid) > .hero-card .hero-kicker::before {
+  content: "";
+  display: inline-block;
+  vertical-align: 1px;
+  width: 9px;
+  height: 9px;
+  margin-right: 9px;
+  border-radius: 50%;
+  background: #4dd6aa;
+  box-shadow: 0 0 0 4px rgba(77,214,170,.08);
+}
+.main-content:has(.item-grid) > .hero-card h2 {
+  font-size: clamp(1.53rem, 5.1vw, 1.96rem);
+  line-height: 1.16;
+  letter-spacing: -.04em;
+  margin: 0 0 11px;
+  color: #fdf5fc;
+}
+.main-content:has(.item-grid) > .hero-card p:not(.hero-kicker) {
+  color: #c8bdd0;
+  font-size: .9rem;
+  line-height: 1.5;
+  max-width: 390px;
+}
+.main-content:has(.item-grid) > .hero-card .hero-orb {
+  width: 72px;
+  height: 72px;
+  flex-basis: 72px;
+  filter: drop-shadow(0 0 14px rgba(216,84,206,.32));
 }
 
-/* Readable native search, including iOS keyboard behaviour. */
-.main-content > .search-wrap { margin: 14px 0 12px; }
-.main-content > .search-wrap input {
-  min-height: 50px;
+/* The assistant remains the real app action; not a fake weather display. */
+.main-content:has(.item-grid) > .daily-assistant-launch {
+  display: grid;
+  width: 100%;
+  margin: 0 0 21px;
+  min-height: 65px;
+  padding: 15px 19px;
+  border: 1px solid var(--atelier-line);
+  border-top: 1px solid rgba(255,174,219,.09);
+  border-radius: 0 0 25px 25px;
+  background: linear-gradient(115deg, #1c1522, #211326);
+  color: #f9edf8;
+  box-shadow: 0 12px 24px rgba(5,2,9,.28);
+}
+.main-content:has(.item-grid) > .daily-assistant-launch > span {
+  color: var(--atelier-pink);
+}
+.main-content:has(.item-grid) > .daily-assistant-launch > div strong {
+  font-size: .91rem;
+  color: #f6e6f6;
+}
+.main-content:has(.item-grid) > .daily-assistant-launch > div small {
+  font-size: .76rem;
+  color: #c3b2c8;
+  opacity: 1;
+}
+.main-content:has(.item-grid) > .daily-assistant-launch > b {
+  color: var(--atelier-pink);
+  font-size: 1.5rem;
+}
+
+/* Significant Stitch-like search and filter refresh. */
+.main-content:has(.item-grid) > .search-wrap {
+  position: relative;
+  margin: 2px 0 15px;
+}
+.main-content:has(.item-grid) > .search-wrap::before {
+  content: "⌕";
+  position: absolute;
+  left: 17px;
+  top: 50%;
+  transform: translateY(-55%);
+  font-size: 1.75rem;
+  line-height: 1;
+  font-weight: 400;
+  color: #a89bb5;
+  pointer-events: none;
+}
+.main-content:has(.item-grid) > .search-wrap input {
+  width: 100%;
+  height: 59px;
+  min-height: 59px;
+  padding: 13px 16px 13px 51px;
+  border: 1px solid var(--atelier-line);
+  border-radius: 16px;
+  background: #1e1927;
+  color: #fff8fe;
+  font-size: 16px; /* iOS never auto-zooms */
+  caret-color: var(--atelier-pink);
+  box-shadow: 0 7px 16px rgba(0,0,0,.12);
+}
+.main-content:has(.item-grid) > .search-wrap input::placeholder {
+  color: #aa9eb5;
+  opacity: 1;
+}
+.main-content:has(.item-grid) > .search-wrap input:focus-visible {
+  outline: 2px solid var(--atelier-pink);
+  outline-offset: 2px;
+  border-color: var(--atelier-pink);
+}
+
+.main-content:has(.item-grid) > .filter-row {
+  gap: 10px;
+  padding: 0 0 11px;
+  margin-bottom: 4px;
+}
+.main-content:has(.item-grid) > .filter-row .filter-chip {
+  min-height: 47px;
+  flex: 0 0 auto;
+  padding: 11px 17px;
+  border: 1px solid var(--atelier-line);
   border-radius: 15px;
-  border-color: var(--atelier-outline);
-  background: #211b29;
-  padding: 12px 15px;
-  color: #fdf8fe;
-  font-size: 16px;
-  caret-color: var(--atelier-rose);
-}
-.main-content > .search-wrap input::placeholder { color: #b8a9bf; opacity: 1; }
-.main-content > .search-wrap input:focus-visible {
-  border-color: var(--atelier-rose);
-  box-shadow: 0 0 0 3px rgba(244, 175, 214, .14);
-}
-
-/* Native category buttons remain keyboard-accessible and horizontally scrollable. */
-.main-content > .filter-row { gap: 8px; padding-bottom: 9px; }
-.main-content > .filter-row .filter-chip {
-  min-height: 44px;
-  padding: 10px 14px;
-  border-color: var(--atelier-outline);
-  background: #211b2a;
-  color: #eee5f0;
-  font-size: .84rem;
+  background: #1d1926;
+  color: #d4c6dc;
+  font-size: .87rem;
   font-weight: 650;
+  line-height: 1.2;
 }
-.main-content > .filter-row .filter-chip.active {
-  border-color: transparent;
-  background: linear-gradient(120deg, var(--atelier-rose), var(--atelier-lilac));
-  color: #2d1b2c;
-  box-shadow: 0 4px 14px rgba(237, 134, 201, .18);
+.main-content:has(.item-grid) > .filter-row .filter-chip.active {
+  background: var(--atelier-pink);
+  color: #2e1630;
+  border-color: var(--atelier-pink);
+  box-shadow: 0 5px 15px rgba(255,174,219,.19);
+  font-weight: 850;
 }
-.main-content > .filter-row .filter-chip:focus-visible {
-  outline: 2px solid var(--atelier-rose);
+.main-content:has(.item-grid) > .filter-row .filter-chip:focus-visible {
+  outline: 2px solid var(--atelier-pink);
   outline-offset: 2px;
 }
 
-.main-content > .section-heading { margin: 16px 2px 11px; }
-.main-content > .section-heading h2 { font-size: 1.03rem; letter-spacing: -.015em; }
-.main-content > .section-heading span { color: #c8b6cb; }
+/* More obvious collection heading with an actual filtered count. */
+.main-content:has(.item-grid) > .section-heading {
+  padding-top: 2px;
+  margin: 16px 1px 14px;
+}
+.main-content:has(.item-grid) > .section-heading h2 {
+  font-size: 1.18rem;
+  font-weight: 800;
+  letter-spacing: -.02em;
+}
+.main-content:has(.item-grid) > .section-heading span {
+  min-width: 29px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #251c2f;
+  color: var(--atelier-pink);
+  font-size: .79rem;
+  text-align: center;
+  font-weight: 800;
+}
 
-/* Photo-first catalogue: two columns on iPhone, three on wider viewports. */
-.main-content > .item-grid { gap: 12px; }
-.item-grid > .item-card {
-  background: var(--atelier-surface);
-  border-color: var(--atelier-outline);
-  border-radius: 19px;
-  box-shadow: 0 8px 22px rgba(5, 3, 8, .21);
+/* Two-column editorial gallery, including when DevTools resizes the viewport. */
+.main-content:has(.item-grid) > .item-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+}
+.main-content:has(.item-grid) > .item-grid > .item-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--atelier-line);
+  border-radius: 22px;
+  background: #1f1a29;
+  box-shadow: 0 10px 22px rgba(0,0,0,.3);
   cursor: pointer;
 }
-.item-grid > .item-card:focus-visible {
-  outline: 2px solid var(--atelier-rose);
+.main-content:has(.item-grid) > .item-grid > .item-card[hidden] {
+  display: none !important; /* prevent CSS grid from undoing search filter state */
+}
+.main-content:has(.item-grid) > .item-grid > .item-card:focus-visible {
+  outline: 2px solid var(--atelier-pink);
   outline-offset: 3px;
 }
-.item-grid > .item-card .item-media {
+.main-content:has(.item-grid) .item-media {
   aspect-ratio: 4 / 5;
-  background: #19141f;
+  background: linear-gradient(135deg,#292332,#131018);
 }
-/* Garments must remain fully visible rather than being cropped. */
-.item-grid > .item-card .item-media img {
-  object-fit: contain;
+.main-content:has(.item-grid) .item-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* real original photos; never use mocked Stitch imagery */
   object-position: center;
 }
-.item-grid > .item-card .heart-button {
-  top: 8px;
-  right: 8px;
-  width: 44px;
-  height: 44px;
-  border-color: rgba(255,255,255,.16);
-  background: rgba(22, 17, 27, .81);
-  color: #f6eaf4;
+.main-content:has(.item-grid) .heart-button {
+  top: 11px;
+  right: 11px;
+  width: 45px;
+  height: 45px;
+  border: 1px solid rgba(247,220,240,.18);
+  border-radius: 50%;
+  background: rgba(15,12,20,.87);
+  color: #eee0f0;
+  font-size: 1.4rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 5px 16px rgba(0,0,0,.3);
 }
-.item-grid > .item-card .heart-button.is-favorite { color: #ff9dce; }
-.item-grid > .item-card .heart-button:focus-visible {
-  outline: 2px solid #ffc1e0;
+.main-content:has(.item-grid) .heart-button.is-favorite { color: var(--atelier-pink); }
+.main-content:has(.item-grid) .heart-button:focus-visible {
+  outline: 2px solid var(--atelier-pink);
   outline-offset: 2px;
 }
-.item-grid > .item-card .item-info { padding: 12px 12px 13px; }
-.item-grid > .item-card .item-info h3 {
-  color: #fff6fc;
-  font-size: .94rem;
-  line-height: 1.35;
-  letter-spacing: -.01em;
+.main-content:has(.item-grid) .item-info {
+  padding: 16px 16px 17px;
+  min-height: 115px;
 }
-.item-grid > .item-card .item-info p {
-  color: #c6b8cc;
-  font-size: .78rem;
-  line-height: 1.4;
+.main-content:has(.item-grid) .item-info h3 {
+  margin: 0 0 7px;
+  font-size: 1.05rem;
+  line-height: 1.28;
+  color: #fff5fd;
+  letter-spacing: -.02em;
 }
-.item-grid > .item-card .chips span {
-  border-color: rgba(237, 175, 219, .18);
-  background: rgba(220, 147, 205, .09);
-  color: #eed5e9;
+.main-content:has(.item-grid) .item-info p {
+  margin-bottom: 10px;
+  color: #bcb0c8;
+  font-size: .84rem;
+}
+.main-content:has(.item-grid) .chips span {
+  border: 1px solid rgba(249,185,223,.17);
+  border-radius: 9px;
+  background: #33233a;
+  color: #f7c9e4;
+  font-size: .75rem;
+  padding: 6px 9px;
 }
 
-/* Bring the existing + action closer to the approved Stitch direction. */
-.bottom-nav .add-nav span {
-  width: 44px;
-  height: 40px;
-  border-radius: 20px;
-  background: linear-gradient(125deg, #f0a3d5, #c99cef);
-  box-shadow: 0 5px 19px rgba(239, 136, 208, .22);
+.app-shell:has(.item-grid) .bottom-nav {
+  border-top: 1px solid #342b40;
+  background: rgba(18,14,23,.97);
+  padding-top: 10px;
+  padding-bottom: calc(10px + var(--safe-bottom));
 }
-.bottom-nav .nav-item.active { color: #f4afd6; }
-.bottom-nav .nav-item:focus-visible {
-  outline: 2px solid #f4afd6;
+.app-shell:has(.item-grid) .bottom-nav .nav-item.active {
+  color: var(--atelier-pink);
+  font-weight: 800;
+}
+.app-shell:has(.item-grid) .bottom-nav .add-nav span {
+  width: 49px;
+  height: 49px;
+  border-radius: 50%;
+  background: linear-gradient(135deg,#f89dd4,#cf94fa);
+  color: #3a1639;
+  box-shadow: 0 5px 26px rgba(235,130,214,.4);
+  font-size: 1.85rem;
+}
+.app-shell:has(.item-grid) .bottom-nav .nav-item:focus-visible {
+  outline: 2px solid var(--atelier-pink);
   outline-offset: -2px;
-  border-radius: 12px;
+  border-radius: 11px;
 }
-@media (hover: hover) {
-  .item-grid > .item-card:hover { border-color: rgba(245, 175, 218, .38); }
+@media (max-width: 430px) {
+  .app-shell:has(.item-grid) .topbar-brand-lockup {
+    max-width: min(57vw, 245px);
+  }
+  .app-shell:has(.item-grid) .main-content {
+    padding-inline: 16px;
+  }
+  .main-content:has(.item-grid) > .hero-card {
+    padding: 19px 17px 13px;
+  }
+  .main-content:has(.item-grid) > .hero-card h2 {
+    font-size: 1.5rem;
+  }
+  .main-content:has(.item-grid) > .hero-card .hero-orb {
+    flex-basis: 58px;
+    width: 58px;
+    height: 58px;
+  }
+  .main-content:has(.item-grid) > .item-grid {
+    gap: 12px;
+  }
+  .main-content:has(.item-grid) .item-info {
+    padding: 12px 11px 14px;
+  }
+  .main-content:has(.item-grid) .item-info h3 {
+    font-size: .91rem;
+  }
+  .main-content:has(.item-grid) .chips span {
+    font-size: .68rem;
+  }
 }
-@media (max-width: 390px) {
-  .main-content > .item-grid { gap: 10px; }
-  .item-grid > .item-card .item-info { padding: 10px; }
-  .item-grid > .item-card .item-info h3 { font-size: .88rem; }
-  .main-content > .filter-row .filter-chip { padding-inline: 12px; }
+@media (prefers-reduced-motion: no-preference) and (hover: hover) {
+  .main-content:has(.item-grid) > .item-grid > .item-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255,174,219,.45);
+  }
 }
