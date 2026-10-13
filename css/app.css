@@ -129,3 +129,155 @@ legend { font-size:.82rem; font-weight:700; margin-bottom:9px; }
 .toast.show { opacity:1; transform:translate(-50%,0); }
 @media (min-width:620px) { .item-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } .main-content { padding-inline:22px; } }
 @media (prefers-reduced-motion:no-preference) { .item-card,.filter-chip,.nav-item,.primary-button { transition:transform .16s ease, background .16s ease, border-color .16s ease; } .item-card:active,.primary-button:active { transform:scale(.985); } }
+
+/*
+ * Obsidian Atelier — wardrobe collection visual pass 01.
+ * Stitch-inspired presentation only: no data, workflow or navigation changes.
+ * Local system fonts, existing approved branding, no external dependencies.
+ */
+.main-content {
+  --atelier-surface: #211a29;
+  --atelier-deep: #17131d;
+  --atelier-outline: rgba(239, 187, 226, .16);
+  --atelier-rose: #f4afd6;
+  --atelier-lilac: #d7b2ee;
+}
+
+/* Keep real clothes above the fold; never replace the approved HEADER/LOGO. */
+.main-content > .hero-card:has(+ .search-wrap) {
+  padding: 16px 18px;
+  border-radius: 22px;
+  border-color: var(--atelier-outline);
+  background: linear-gradient(118deg, rgba(63, 39, 72, .63), rgba(30, 23, 37, .96) 72%);
+  box-shadow: 0 12px 30px rgba(7, 4, 11, .24);
+}
+.main-content > .hero-card:has(+ .search-wrap) h2 {
+  font-size: clamp(1.27rem, 4.6vw, 1.52rem);
+  letter-spacing: -.025em;
+}
+.main-content > .hero-card:has(+ .search-wrap) p:not(.hero-kicker) {
+  font-size: .86rem;
+  line-height: 1.4;
+}
+
+/* Readable native search, including iOS keyboard behaviour. */
+.main-content > .search-wrap { margin: 14px 0 12px; }
+.main-content > .search-wrap input {
+  min-height: 50px;
+  border-radius: 15px;
+  border-color: var(--atelier-outline);
+  background: #211b29;
+  padding: 12px 15px;
+  color: #fdf8fe;
+  font-size: 16px;
+  caret-color: var(--atelier-rose);
+}
+.main-content > .search-wrap input::placeholder { color: #b8a9bf; opacity: 1; }
+.main-content > .search-wrap input:focus-visible {
+  border-color: var(--atelier-rose);
+  box-shadow: 0 0 0 3px rgba(244, 175, 214, .14);
+}
+
+/* Native category buttons remain keyboard-accessible and horizontally scrollable. */
+.main-content > .filter-row { gap: 8px; padding-bottom: 9px; }
+.main-content > .filter-row .filter-chip {
+  min-height: 44px;
+  padding: 10px 14px;
+  border-color: var(--atelier-outline);
+  background: #211b2a;
+  color: #eee5f0;
+  font-size: .84rem;
+  font-weight: 650;
+}
+.main-content > .filter-row .filter-chip.active {
+  border-color: transparent;
+  background: linear-gradient(120deg, var(--atelier-rose), var(--atelier-lilac));
+  color: #2d1b2c;
+  box-shadow: 0 4px 14px rgba(237, 134, 201, .18);
+}
+.main-content > .filter-row .filter-chip:focus-visible {
+  outline: 2px solid var(--atelier-rose);
+  outline-offset: 2px;
+}
+
+.main-content > .section-heading { margin: 16px 2px 11px; }
+.main-content > .section-heading h2 { font-size: 1.03rem; letter-spacing: -.015em; }
+.main-content > .section-heading span { color: #c8b6cb; }
+
+/* Photo-first catalogue: two columns on iPhone, three on wider viewports. */
+.main-content > .item-grid { gap: 12px; }
+.item-grid > .item-card {
+  background: var(--atelier-surface);
+  border-color: var(--atelier-outline);
+  border-radius: 19px;
+  box-shadow: 0 8px 22px rgba(5, 3, 8, .21);
+  cursor: pointer;
+}
+.item-grid > .item-card:focus-visible {
+  outline: 2px solid var(--atelier-rose);
+  outline-offset: 3px;
+}
+.item-grid > .item-card .item-media {
+  aspect-ratio: 4 / 5;
+  background: #19141f;
+}
+/* Garments must remain fully visible rather than being cropped. */
+.item-grid > .item-card .item-media img {
+  object-fit: contain;
+  object-position: center;
+}
+.item-grid > .item-card .heart-button {
+  top: 8px;
+  right: 8px;
+  width: 44px;
+  height: 44px;
+  border-color: rgba(255,255,255,.16);
+  background: rgba(22, 17, 27, .81);
+  color: #f6eaf4;
+}
+.item-grid > .item-card .heart-button.is-favorite { color: #ff9dce; }
+.item-grid > .item-card .heart-button:focus-visible {
+  outline: 2px solid #ffc1e0;
+  outline-offset: 2px;
+}
+.item-grid > .item-card .item-info { padding: 12px 12px 13px; }
+.item-grid > .item-card .item-info h3 {
+  color: #fff6fc;
+  font-size: .94rem;
+  line-height: 1.35;
+  letter-spacing: -.01em;
+}
+.item-grid > .item-card .item-info p {
+  color: #c6b8cc;
+  font-size: .78rem;
+  line-height: 1.4;
+}
+.item-grid > .item-card .chips span {
+  border-color: rgba(237, 175, 219, .18);
+  background: rgba(220, 147, 205, .09);
+  color: #eed5e9;
+}
+
+/* Bring the existing + action closer to the approved Stitch direction. */
+.bottom-nav .add-nav span {
+  width: 44px;
+  height: 40px;
+  border-radius: 20px;
+  background: linear-gradient(125deg, #f0a3d5, #c99cef);
+  box-shadow: 0 5px 19px rgba(239, 136, 208, .22);
+}
+.bottom-nav .nav-item.active { color: #f4afd6; }
+.bottom-nav .nav-item:focus-visible {
+  outline: 2px solid #f4afd6;
+  outline-offset: -2px;
+  border-radius: 12px;
+}
+@media (hover: hover) {
+  .item-grid > .item-card:hover { border-color: rgba(245, 175, 218, .38); }
+}
+@media (max-width: 390px) {
+  .main-content > .item-grid { gap: 10px; }
+  .item-grid > .item-card .item-info { padding: 10px; }
+  .item-grid > .item-card .item-info h3 { font-size: .88rem; }
+  .main-content > .filter-row .filter-chip { padding-inline: 12px; }
+}
