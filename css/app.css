@@ -129,3 +129,349 @@ legend { font-size:.82rem; font-weight:700; margin-bottom:9px; }
 .toast.show { opacity:1; transform:translate(-50%,0); }
 @media (min-width:620px) { .item-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } .main-content { padding-inline:22px; } }
 @media (prefers-reduced-motion:no-preference) { .item-card,.filter-chip,.nav-item,.primary-button { transition:transform .16s ease, background .16s ease, border-color .16s ease; } .item-card:active,.primary-button:active { transform:scale(.985); } }
+
+/*
+ * Obsidian Atelier — wardrobe collection visual pass 02.
+ * Exact Stitch layout cues, real user photos and approved branding.
+ * Presentation-only: no fake actions or cloud/wear state.
+ * Scoped to the wardrobe/favorites; no external CSS or font dependencies.
+ */
+.app-shell:has(.item-grid) {
+  --atelier-bg: #0b0a0f;
+  --atelier-panel: #17131e;
+  --atelier-panel-up: #211a2b;
+  --atelier-line: #332b41;
+  --atelier-pink: #ffaedb;
+  --atelier-lilac: #ddb8ff;
+  --atelier-subtle: #bfb2c9;
+  background: var(--atelier-bg);
+  color: #f5effa;
+}
+body:has(.item-grid) {
+  background: var(--atelier-bg);
+}
+.app-shell:has(.item-grid) .topbar {
+  background: rgba(17, 14, 23, .96);
+  border-bottom: 1px solid var(--atelier-line);
+  backdrop-filter: blur(20px);
+  padding-bottom: 14px;
+}
+.app-shell:has(.item-grid) .topbar-brand-lockup {
+  /* Keep the existing approved transparent HEADER art, never replace it. */
+  max-width: min(60vw, 286px);
+}
+.app-shell:has(.item-grid) .main-content {
+  padding-top: 18px;
+  padding-bottom: 32px;
+}
+
+/* Hero and daily CTA visually form a single premium card. */
+.main-content:has(.item-grid) > .hero-card {
+  min-height: 165px;
+  padding: 22px 21px 14px;
+  border: 1px solid var(--atelier-line);
+  border-bottom: 0;
+  border-radius: 25px 25px 0 0;
+  background:
+    radial-gradient(circle at 95% 10%, rgba(157, 65, 194, .2), transparent 41%),
+    linear-gradient(120deg, #1b1724 0%, #140f1b 100%);
+  box-shadow: none;
+  position: relative;
+  gap: 9px;
+}
+.main-content:has(.item-grid) > .hero-card .hero-kicker {
+  color: #efb3d6;
+  font-size: .69rem;
+  font-weight: 800;
+  letter-spacing: .11em;
+  margin-bottom: 9px;
+}
+.main-content:has(.item-grid) > .hero-card .hero-kicker::before {
+  content: "";
+  display: inline-block;
+  vertical-align: 1px;
+  width: 9px;
+  height: 9px;
+  margin-right: 9px;
+  border-radius: 50%;
+  background: #4dd6aa;
+  box-shadow: 0 0 0 4px rgba(77,214,170,.08);
+}
+.main-content:has(.item-grid) > .hero-card h2 {
+  font-size: clamp(1.53rem, 5.1vw, 1.96rem);
+  line-height: 1.16;
+  letter-spacing: -.04em;
+  margin: 0 0 11px;
+  color: #fdf5fc;
+}
+.main-content:has(.item-grid) > .hero-card p:not(.hero-kicker) {
+  color: #c8bdd0;
+  font-size: .9rem;
+  line-height: 1.5;
+  max-width: 390px;
+}
+.main-content:has(.item-grid) > .hero-card .hero-orb {
+  width: 72px;
+  height: 72px;
+  flex-basis: 72px;
+  filter: drop-shadow(0 0 14px rgba(216,84,206,.32));
+}
+
+/* The assistant remains the real app action; not a fake weather display. */
+.main-content:has(.item-grid) > .daily-assistant-launch {
+  display: grid;
+  width: 100%;
+  margin: 0 0 21px;
+  min-height: 65px;
+  padding: 15px 19px;
+  border: 1px solid var(--atelier-line);
+  border-top: 1px solid rgba(255,174,219,.09);
+  border-radius: 0 0 25px 25px;
+  background: linear-gradient(115deg, #1c1522, #211326);
+  color: #f9edf8;
+  box-shadow: 0 12px 24px rgba(5,2,9,.28);
+}
+.main-content:has(.item-grid) > .daily-assistant-launch > span {
+  color: var(--atelier-pink);
+}
+.main-content:has(.item-grid) > .daily-assistant-launch > div strong {
+  font-size: .91rem;
+  color: #f6e6f6;
+}
+.main-content:has(.item-grid) > .daily-assistant-launch > div small {
+  font-size: .76rem;
+  color: #c3b2c8;
+  opacity: 1;
+}
+.main-content:has(.item-grid) > .daily-assistant-launch > b {
+  color: var(--atelier-pink);
+  font-size: 1.5rem;
+}
+
+/* Significant Stitch-like search and filter refresh. */
+.main-content:has(.item-grid) > .search-wrap {
+  position: relative;
+  margin: 2px 0 15px;
+}
+.main-content:has(.item-grid) > .search-wrap::before {
+  content: "⌕";
+  position: absolute;
+  left: 17px;
+  top: 50%;
+  transform: translateY(-55%);
+  font-size: 1.75rem;
+  line-height: 1;
+  font-weight: 400;
+  color: #a89bb5;
+  pointer-events: none;
+}
+.main-content:has(.item-grid) > .search-wrap input {
+  width: 100%;
+  height: 59px;
+  min-height: 59px;
+  padding: 13px 16px 13px 51px;
+  border: 1px solid var(--atelier-line);
+  border-radius: 16px;
+  background: #1e1927;
+  color: #fff8fe;
+  font-size: 16px; /* iOS never auto-zooms */
+  caret-color: var(--atelier-pink);
+  box-shadow: 0 7px 16px rgba(0,0,0,.12);
+}
+.main-content:has(.item-grid) > .search-wrap input::placeholder {
+  color: #aa9eb5;
+  opacity: 1;
+}
+.main-content:has(.item-grid) > .search-wrap input:focus-visible {
+  outline: 2px solid var(--atelier-pink);
+  outline-offset: 2px;
+  border-color: var(--atelier-pink);
+}
+
+.main-content:has(.item-grid) > .filter-row {
+  gap: 10px;
+  padding: 0 0 11px;
+  margin-bottom: 4px;
+}
+.main-content:has(.item-grid) > .filter-row .filter-chip {
+  min-height: 47px;
+  flex: 0 0 auto;
+  padding: 11px 17px;
+  border: 1px solid var(--atelier-line);
+  border-radius: 15px;
+  background: #1d1926;
+  color: #d4c6dc;
+  font-size: .87rem;
+  font-weight: 650;
+  line-height: 1.2;
+}
+.main-content:has(.item-grid) > .filter-row .filter-chip.active {
+  background: var(--atelier-pink);
+  color: #2e1630;
+  border-color: var(--atelier-pink);
+  box-shadow: 0 5px 15px rgba(255,174,219,.19);
+  font-weight: 850;
+}
+.main-content:has(.item-grid) > .filter-row .filter-chip:focus-visible {
+  outline: 2px solid var(--atelier-pink);
+  outline-offset: 2px;
+}
+
+/* More obvious collection heading with an actual filtered count. */
+.main-content:has(.item-grid) > .section-heading {
+  padding-top: 2px;
+  margin: 16px 1px 14px;
+}
+.main-content:has(.item-grid) > .section-heading h2 {
+  font-size: 1.18rem;
+  font-weight: 800;
+  letter-spacing: -.02em;
+}
+.main-content:has(.item-grid) > .section-heading span {
+  min-width: 29px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #251c2f;
+  color: var(--atelier-pink);
+  font-size: .79rem;
+  text-align: center;
+  font-weight: 800;
+}
+
+/* Two-column editorial gallery, including when DevTools resizes the viewport. */
+.main-content:has(.item-grid) > .item-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+}
+.main-content:has(.item-grid) > .item-grid > .item-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--atelier-line);
+  border-radius: 22px;
+  background: #1f1a29;
+  box-shadow: 0 10px 22px rgba(0,0,0,.3);
+  cursor: pointer;
+}
+.main-content:has(.item-grid) > .item-grid > .item-card[hidden] {
+  display: none !important; /* prevent CSS grid from undoing search filter state */
+}
+.main-content:has(.item-grid) > .item-grid > .item-card:focus-visible {
+  outline: 2px solid var(--atelier-pink);
+  outline-offset: 3px;
+}
+.main-content:has(.item-grid) .item-media {
+  aspect-ratio: 4 / 5;
+  background: linear-gradient(135deg,#292332,#131018);
+}
+.main-content:has(.item-grid) .item-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* real original photos; never use mocked Stitch imagery */
+  object-position: center;
+}
+.main-content:has(.item-grid) .heart-button {
+  top: 11px;
+  right: 11px;
+  width: 45px;
+  height: 45px;
+  border: 1px solid rgba(247,220,240,.18);
+  border-radius: 50%;
+  background: rgba(15,12,20,.87);
+  color: #eee0f0;
+  font-size: 1.4rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 5px 16px rgba(0,0,0,.3);
+}
+.main-content:has(.item-grid) .heart-button.is-favorite { color: var(--atelier-pink); }
+.main-content:has(.item-grid) .heart-button:focus-visible {
+  outline: 2px solid var(--atelier-pink);
+  outline-offset: 2px;
+}
+.main-content:has(.item-grid) .item-info {
+  padding: 16px 16px 17px;
+  min-height: 115px;
+}
+.main-content:has(.item-grid) .item-info h3 {
+  margin: 0 0 7px;
+  font-size: 1.05rem;
+  line-height: 1.28;
+  color: #fff5fd;
+  letter-spacing: -.02em;
+}
+.main-content:has(.item-grid) .item-info p {
+  margin-bottom: 10px;
+  color: #bcb0c8;
+  font-size: .84rem;
+}
+.main-content:has(.item-grid) .chips span {
+  border: 1px solid rgba(249,185,223,.17);
+  border-radius: 9px;
+  background: #33233a;
+  color: #f7c9e4;
+  font-size: .75rem;
+  padding: 6px 9px;
+}
+
+.app-shell:has(.item-grid) .bottom-nav {
+  border-top: 1px solid #342b40;
+  background: rgba(18,14,23,.97);
+  padding-top: 10px;
+  padding-bottom: calc(10px + var(--safe-bottom));
+}
+.app-shell:has(.item-grid) .bottom-nav .nav-item.active {
+  color: var(--atelier-pink);
+  font-weight: 800;
+}
+.app-shell:has(.item-grid) .bottom-nav .add-nav span {
+  width: 49px;
+  height: 49px;
+  border-radius: 50%;
+  background: linear-gradient(135deg,#f89dd4,#cf94fa);
+  color: #3a1639;
+  box-shadow: 0 5px 26px rgba(235,130,214,.4);
+  font-size: 1.85rem;
+}
+.app-shell:has(.item-grid) .bottom-nav .nav-item:focus-visible {
+  outline: 2px solid var(--atelier-pink);
+  outline-offset: -2px;
+  border-radius: 11px;
+}
+@media (max-width: 430px) {
+  .app-shell:has(.item-grid) .topbar-brand-lockup {
+    max-width: min(57vw, 245px);
+  }
+  .app-shell:has(.item-grid) .main-content {
+    padding-inline: 16px;
+  }
+  .main-content:has(.item-grid) > .hero-card {
+    padding: 19px 17px 13px;
+  }
+  .main-content:has(.item-grid) > .hero-card h2 {
+    font-size: 1.5rem;
+  }
+  .main-content:has(.item-grid) > .hero-card .hero-orb {
+    flex-basis: 58px;
+    width: 58px;
+    height: 58px;
+  }
+  .main-content:has(.item-grid) > .item-grid {
+    gap: 12px;
+  }
+  .main-content:has(.item-grid) .item-info {
+    padding: 12px 11px 14px;
+  }
+  .main-content:has(.item-grid) .item-info h3 {
+    font-size: .91rem;
+  }
+  .main-content:has(.item-grid) .chips span {
+    font-size: .68rem;
+  }
+}
+@media (prefers-reduced-motion: no-preference) and (hover: hover) {
+  .main-content:has(.item-grid) > .item-grid > .item-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255,174,219,.45);
+  }
+}
